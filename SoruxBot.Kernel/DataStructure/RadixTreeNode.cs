@@ -1,4 +1,4 @@
-﻿namespace Sorux.Bot.Core.Kernel.DataStructure;
+﻿namespace SoruxBot.Kernel.DataStructure;
 internal class RadixTreeNode<T>
 {
 	private bool _isValueNode = false;

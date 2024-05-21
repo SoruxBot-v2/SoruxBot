@@ -1,23 +1,23 @@
-﻿namespace Sorux.Bot.Core.Kernel.DataStructure;
+﻿namespace SoruxBot.Kernel.DataStructure;
 
 public class RadixTree<T>
 {
-	private RadixTreeNode<T> root = new(string.Empty);
+	private readonly RadixTreeNode<T> _root = new(string.Empty);
 
 	public RadixTree() { }
 	public RadixTree<T> Insert(string path, T value)
 	{
-		if (!TryInsertPrivate(root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", "path");
+		if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", "path");
 		return this;
 	}
 	public RadixTree<T> Remove(string path)
 	{
-		RemovePrivate(root, path);
+		RemovePrivate(_root, path);
 		return this;
 	}
 	public T? GetValue(string path)
 	{
-		if(TryGetNodePrivate(root, path, out var node) && node!.IsValueNode)
+		if(TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
 		{
 			return node.Value;
 		}
@@ -26,7 +26,7 @@ public class RadixTree<T>
 	public bool TryGetValue(string path, out T? value)
 	{
 
-		if(TryGetNodePrivate(root, path, out var node) && node!.IsValueNode)
+		if(TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
 		{
 			value = node.Value;
 			return true;
@@ -36,7 +36,7 @@ public class RadixTree<T>
 	}
 	public bool TryReplace(string path, T value)
 	{
-		if (TryGetNodePrivate(root, path, out var node) && node!.IsValueNode)
+		if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
 		{
 			node.Value = value;
 			return true;
@@ -45,13 +45,13 @@ public class RadixTree<T>
 	}
 	public bool ContainsPath(string path)
 	{
-		if (TryGetNodePrivate(root, path, out var node) && node!.IsValueNode) return true;
+		if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode) return true;
 		return false;
 	}
 	public Dictionary<string, T> ToDictionary()
 	{
 		Dictionary<string, T> dict = new();
-		ToDictionaryPrivate(root, dict, string.Empty);
+		ToDictionaryPrivate(_root, dict, string.Empty);
 		return dict;
     }
 
