@@ -1,5 +1,6 @@
 .DS_Store
 .idea/
+.vs/
 SoruxBot.Kernel/bin
 SoruxBot.Kernel/obj
 SoruxBot.SDK/bin
