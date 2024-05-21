@@ -1,26 +1,32 @@
-﻿namespace SoruxBot.Kernel.Bot
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace SoruxBot.Kernel.Bot
 {
     public class BotContext
     {
+        private BotContext() { }
+
         //单例模型
-        private static readonly BotContext instance = new BotContext();
+        public static BotContext Instance { get; } = new BotContext();
 
-        private BotContext()
-        {
-        }
-
-        public static BotContext Instance => instance;
-
-        //IOC 工厂
+        // IOC
         private IServiceCollection? _services;
-
-        private IServiceProvider _serviceProvider;
-
-        public IServiceProvider ServiceProvider => _serviceProvider;
-
-        public void CreateContainer(IServiceCollection serviceCollection)
+        
+        public IServiceProvider ServiceProvider { get; private set; }
+        
+        public IConfiguration Configuration { get; private set; }
+        
+        public BotContext CreateContainer(IServiceCollection serviceCollection)
         {
-            this._services = serviceCollection;
+            _services = serviceCollection;
+            return this;
+        }
+        
+        public BotContext CreateIConfiguration(IConfiguration builder)
+        {
+            Configuration = builder;
+            return this;
         }
 
         public BotContext ConfigureService(Action<IServiceCollection> services)
@@ -29,7 +35,10 @@
             return this;
         }
 
-        public void BuildContainer()
-            => this._serviceProvider = _services!.BuildServiceProvider();
+        public BotContext BuildContainer()
+        {
+            ServiceProvider = _services!.BuildServiceProvider();
+            return this;
+        }
     }
 }
