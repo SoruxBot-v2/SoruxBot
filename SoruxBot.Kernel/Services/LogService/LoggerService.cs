@@ -4,7 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using SoruxBot.SDK.Plugins.Service;
 
-namespace SoruxBot.Kernel.Services
+namespace SoruxBot.Kernel.Services.LogService
 {
     public class LoggerService : ILoggerService
     {
@@ -58,10 +58,10 @@ namespace SoruxBot.Kernel.Services
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
         }
 
-        public void Debug<T>(string source, string msg, T Context)
+        public void Debug<T>(string source, string msg, T context)
         {
-            GetLoggerObj().LogDebug($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context} \n");
+            GetLoggerObj().LogDebug($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
         }
 
         public void Error(string source, string msg)
@@ -70,16 +70,16 @@ namespace SoruxBot.Kernel.Services
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
         }
 
-        public void Error<T>(string source, string msg, T Context)
+        public void Error<T>(string source, string msg, T context)
         {
-            GetLoggerObj().LogError($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context} \n");
+            GetLoggerObj().LogError($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
         }
 
-        public void Error<T>(Exception exception, string source, string msg, T Context)
+        public void Error<T>(Exception exception, string source, string msg, T context)
         {
-            GetLoggerObj().LogError(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context} \n");
+            GetLoggerObj().LogError(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
         }
 
         public void Fatal(string source, string msg)
@@ -88,16 +88,16 @@ namespace SoruxBot.Kernel.Services
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
         }
 
-        public void Fatal<T>(string source, string msg, T Context)
+        public void Fatal<T>(string source, string msg, T context)
         {
-            GetLoggerObj().LogCritical($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context} \n");
+            GetLoggerObj().LogCritical($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
         }
 
-        public void Fatal<T>(Exception exception, string source, string msg, T Context)
+        public void Fatal<T>(Exception exception, string source, string msg, T context)
         {
-            GetLoggerObj().LogCritical(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}\n");
+            GetLoggerObj().LogCritical(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
         }
 
         public void Info(string source, string msg)
@@ -106,10 +106,10 @@ namespace SoruxBot.Kernel.Services
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg}\n");
         }
 
-        public void Info<T>(string source, string msg, T Context)
+        public void Info<T>(string source, string msg, T context)
         {
-            GetLoggerObj().LogInformation($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}\n");
+            GetLoggerObj().LogInformation($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
         }
 
         public void Warn(string source, string msg)
@@ -118,10 +118,10 @@ namespace SoruxBot.Kernel.Services
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg}\n");
         }
 
-        public void Warn<T>(string source, string msg, T Context)
+        public void Warn<T>(string source, string msg, T context)
         {
-            GetLoggerObj().LogWarning($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}");
-            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {Context}\n");
+            GetLoggerObj().LogWarning($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
+            File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
         }
     }
 }

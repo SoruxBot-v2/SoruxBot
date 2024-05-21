@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SoruxBot.Kernel.Services;
+using SoruxBot.Kernel.Services.LogService;
 using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.Bot

@@ -21,4 +21,10 @@ public abstract class SoruxBotPlugin
     /// 得到插件的描述方式
     /// </summary>
     public abstract string GetPluginDescription();
+    /// <summary>
+    /// 插件优先级的确定，如果当插件遇到优先级相同的插件时，那么就会根据插件的优先级来决定优先级顺序。
+    /// 如果为 True，那么插件的优先级会被提高，否则插件的优先级会被降低。
+    /// </summary>
+    /// <returns></returns>
+    public virtual bool IsUpperWhenPrivilege() => false;
 }
