@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.SDK", "SoruxBot.SDK\SoruxBot.SDK.csproj", "{CFA31E8E-3412-4636-A862-656871DE9820}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.Kernel", "SoruxBot.Kernel\SoruxBot.Kernel.csproj", "{A6A4D311-C9A4-454C-9C9A-36271455BA5A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFA31E8E-3412-4636-A862-656871DE9820}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA31E8E-3412-4636-A862-656871DE9820}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA31E8E-3412-4636-A862-656871DE9820}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA31E8E-3412-4636-A862-656871DE9820}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6A4D311-C9A4-454C-9C9A-36271455BA5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6A4D311-C9A4-454C-9C9A-36271455BA5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6A4D311-C9A4-454C-9C9A-36271455BA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6A4D311-C9A4-454C-9C9A-36271455BA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

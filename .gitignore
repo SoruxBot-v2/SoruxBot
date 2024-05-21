@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+SoruxBot.Kernel/bin
+SoruxBot.Kernel/obj
+SoruxBot.SDK/bin
+SoruxBot.SDK/obj
