@@ -23,8 +23,4 @@
       <ProjectReference Include="..\SoruxBot.SDK\SoruxBot.SDK.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\PluginService\" />
-    </ItemGroup>
-
 </Project>
