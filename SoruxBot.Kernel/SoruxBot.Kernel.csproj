@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="FreeSql" Version="3.2.825" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.5" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
@@ -21,10 +25,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SoruxBot.SDK\SoruxBot.SDK.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\PluginService\" />
     </ItemGroup>
 
 </Project>
