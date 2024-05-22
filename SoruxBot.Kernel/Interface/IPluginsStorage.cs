@@ -89,7 +89,7 @@
         public bool IsExists(string name);
 
         /// <summary>
-        /// 设置插件的内部设置信息
+        /// 设置插件的内部设置信息，如果发现 name + key 已有字段，将替换原来的字段
         /// </summary>
         /// <param name="name"></param>
         /// <param name="key"></param>
@@ -101,7 +101,7 @@
         /// </summary>
         /// <param name="name"></param>
         /// <param name="key"></param>
-        public string SetPluginInformation(string name, string key);
+        public string GetPluginInformation(string name, string key);
 
         /// <summary>
         /// 尝试获取插件的内部设置信息，如果插件名称错误，那么返回 False

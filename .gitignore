@@ -5,3 +5,5 @@ SoruxBot.Kernel/bin
 SoruxBot.Kernel/obj
 SoruxBot.SDK/bin
 SoruxBot.SDK/obj
+SoruxBot.Wrapper/bin
+SoruxBot.Wrapper/obj

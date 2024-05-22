@@ -2,21 +2,21 @@
 {
     public interface ILoggerService
     {
-        void Info(string source, string msg);
-        void Warn(string source, string msg);
-        void Error(string source, string msg);
-        void Fatal(string source, string msg);
-        void Debug(string source, string msg);
+        ILoggerService Info(string source, string msg);
+        ILoggerService Warn(string source, string msg);
+        ILoggerService Error(string source, string msg);
+        ILoggerService Fatal(string source, string msg);
+        ILoggerService Debug(string source, string msg);
 
-        void Info<T>(string source, string msg, T context);
+        ILoggerService Info<T>(string source, string msg, T context);
 
-        void Warn<T>(string source, string msg, T context);
+        ILoggerService Warn<T>(string source, string msg, T context);
 
-        void Error<T>(string source, string msg, T context);
-        void Fatal<T>(string source, string msg, T context);
-        void Debug<T>(string source, string msg, T context);
+        ILoggerService Error<T>(string source, string msg, T context);
+        ILoggerService Fatal<T>(string source, string msg, T context);
+        ILoggerService Debug<T>(string source, string msg, T context);
 
-        void Error<T>(Exception exception, string source, string msg, T context);
-        void Fatal<T>(Exception exception, string source, string msg, T context);
+        ILoggerService Error<T>(Exception exception, string source, string msg, T context);
+        ILoggerService Fatal<T>(Exception exception, string source, string msg, T context);
     }
 }

@@ -8,7 +8,8 @@ public class PluginsListenerDescriptor(
     string targetPlatformType,
     string targetAction,
     Func<MessageContext, bool> conditionCheck,
-    bool isIntercept = true,
+    bool isInterceptToFilters = true,
+    bool isInterceptToChannel = true,
     Func<MessageContext, PluginFlag>? successfulFunc = null,
     Func<MessageContext, PluginFlag>? failureFunc = null)
 {
@@ -35,7 +36,12 @@ public class PluginsListenerDescriptor(
     /// <summary>
     /// 是否禁止消息继续传递，表示禁止其他监听器继续监听消息
     /// </summary>
-    public bool IsIntercept { get; init; } = isIntercept;
+    public bool IsInterceptToFilters { get; init; } = isInterceptToFilters;
+    
+    /// <summary>
+    /// 是否禁止消息继续传递，表示禁止让捕获到到 Context 进入到消息路由管道中
+    /// </summary>
+    public bool IsInterceptToChannel { get; init; } = isInterceptToChannel;
 
     /// <summary>
     /// 如果成功捕获到了，那么调用这个函数

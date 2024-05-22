@@ -56,12 +56,12 @@ public class MessageContext(
     /// 请仅在无法通过参数注入的情况下使用本命令。
     /// 参数的 Key 为特性注入时提供的参数 Key
     /// </summary>
-    public Dictionary<string, string?>? CommandParas { get; set; } = new Dictionary<string, string?>();
+    public Dictionary<string, object?> CommandParas { get; set; } = new ();
 
     /// <summary>
     /// 表示消息携带的针对于平台的属性
     /// </summary>
-    public Dictionary<string, string> UnderProperty { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string> UnderProperty { get; set; } = new ();
 
     /// <summary>
     /// 表示消息产生的时间戳
