@@ -51,7 +51,6 @@ namespace SoruxBot.Kernel.Bot
         {
             //Bot Configuration主要负责配置连接器的组装等操作
             string cwd = Environment.CurrentDirectory;
-            config.AddYamlFile("config.yaml", optional: false, reloadOnChange: true);
             
             config.AddInMemoryCollection(new[]
             {
@@ -71,7 +70,6 @@ namespace SoruxBot.Kernel.Bot
         private static void ApplyDefaultServices(IConfiguration configuration, IServiceCollection services)
         {
             // 添加实例
-            
         }
     }
 }

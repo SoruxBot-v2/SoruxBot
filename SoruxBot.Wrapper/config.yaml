@@ -1,3 +1,2 @@
-server:
-    host: "localhost"
-    port: 8080
+storage:
+    root: '.' # 表示插件的存储根目录
