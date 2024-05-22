@@ -1,14 +1,12 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+ï»¿namespace SoruxBot.SDK.QQ.Entity;
 
 public class MultiMsgEntity
 {
-    private static readonly XmlSerializer Serializer = new(typeof(MultiMessage));
-
     public uint? GroupUin { get; set; }
 
     public List<MessageChain> Chains { get; }
 
     public string ToPreviewString() => $"[MultiMsgEntity] {Chains.Count} chains";
 
-    public string ToPreviewText() => "[ÁÄÌì¼ÇÂ¼]";
+    public string ToPreviewText() => "[èŠå¤©è®°å½•]";
 }

@@ -1,6 +1,4 @@
-using SoruxBot.SDK.Model.Message;
-
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+﻿namespace SoruxBot.SDK.QQ.Entity;
 
 public class ForwardEntity
 {

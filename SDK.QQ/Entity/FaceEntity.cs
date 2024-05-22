@@ -1,4 +1,4 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+﻿namespace SoruxBot.SDK.QQ.Entity;
 
 public class FaceEntity
 {

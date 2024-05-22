@@ -1,4 +1,4 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+ï»¿namespace SoruxBot.SDK.QQ.Entity;
 
 public class ImageEntity
 {
@@ -39,8 +39,8 @@ public class ImageEntity
     public string ToPreviewText() => string.IsNullOrEmpty(Summary)
         ? SubType switch
         {
-            1 => "[¶¯»­±íÇé]",
-            _ => "[Í¼Æ¬]",
+            1 => "[åŠ¨ç”»è¡¨æƒ…]",
+            _ => "[å›¾ç‰‡]",
         }
         : Summary;
 }

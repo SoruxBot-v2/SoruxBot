@@ -1,10 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.SDK", "SoruxBot.SDK\SoruxBot.SDK.csproj", "{CFA31E8E-3412-4636-A862-656871DE9820}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoruxBot.SDK", "SoruxBot.SDK\SoruxBot.SDK.csproj", "{CFA31E8E-3412-4636-A862-656871DE9820}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.Kernel", "SoruxBot.Kernel\SoruxBot.Kernel.csproj", "{A6A4D311-C9A4-454C-9C9A-36271455BA5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoruxBot.Kernel", "SoruxBot.Kernel\SoruxBot.Kernel.csproj", "{A6A4D311-C9A4-454C-9C9A-36271455BA5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.Wrapper", "SoruxBot.Wrapper\SoruxBot.Wrapper.csproj", "{93D518CF-DA47-492F-A6B1-0CF205537462}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoruxBot.Wrapper", "SoruxBot.Wrapper\SoruxBot.Wrapper.csproj", "{93D518CF-DA47-492F-A6B1-0CF205537462}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDK.QQ", "SDK.QQ\SDK.QQ.csproj", "{BA91FA6A-8EE6-4A28-88B6-36CC6C38C185}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +29,15 @@ Global
 		{93D518CF-DA47-492F-A6B1-0CF205537462}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93D518CF-DA47-492F-A6B1-0CF205537462}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93D518CF-DA47-492F-A6B1-0CF205537462}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA91FA6A-8EE6-4A28-88B6-36CC6C38C185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA91FA6A-8EE6-4A28-88B6-36CC6C38C185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA91FA6A-8EE6-4A28-88B6-36CC6C38C185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA91FA6A-8EE6-4A28-88B6-36CC6C38C185}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EECFA82F-8075-460B-BA35-9260EFB5C142}
 	EndGlobalSection
 EndGlobal

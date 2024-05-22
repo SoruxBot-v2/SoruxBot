@@ -1,4 +1,4 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+ï»¿namespace SoruxBot.SDK.QQ.Entity;
 
 public class RecordEntity 
 {
@@ -28,5 +28,5 @@ public class RecordEntity
 
     public string ToPreviewString() => $"[{nameof(RecordEntity)}: {AudioUrl}]";
 
-    public string ToPreviewText() => "[ÓïÒô]";
+    public string ToPreviewText() => "[è¯­éŸ³]";
 }

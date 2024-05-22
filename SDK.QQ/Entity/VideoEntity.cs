@@ -1,4 +1,4 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+﻿namespace SoruxBot.SDK.QQ.Entity;
 
 public class VideoEntity
 {
@@ -30,5 +30,5 @@ public class VideoEntity
 
     public string ToPreviewString() => $"[Video {Size.X}x{Size.Y}]: {VideoSize} {VideoUrl}";
 
-    public string ToPreviewText() => "[��Ƶ]";
+    public string ToPreviewText() => "[视频]";
 }

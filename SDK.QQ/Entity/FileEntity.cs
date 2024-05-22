@@ -1,4 +1,4 @@
-namespace SoruxBot.SDK.QQ.SDK.Entity;
+﻿namespace SoruxBot.SDK.QQ.Entity;
 
 public class FileEntity
 {
@@ -50,5 +50,5 @@ public class FileEntity
 
     public string ToPreviewString() => $"[File] {FileName} ({FileSize}): {FileUrl ?? "failed to receive file url"}";
 
-    public string ToPreviewText() => $"[�ļ�] {FileName}";
+    public string ToPreviewText() => $"[文件] {FileName}";
 }
