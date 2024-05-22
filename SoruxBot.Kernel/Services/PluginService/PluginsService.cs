@@ -34,15 +34,15 @@ namespace SoruxBot.Kernel.Services.PluginService
             //注册基础服务
             services.AddSingleton<PluginsService>();
             services.AddSingleton<PluginsRegister>();
-            services.AddSingleton<IPluginsStorage, PluginsLocalStorage>();
+            //services.AddSingleton<IPluginsStorage, PluginsLocalStorage>();
             
             //注册基础服务    
             services.AddSingleton<PluginsDispatcher>();
             services.AddSingleton<PluginsCommandLexer>();
             
             //添加API服务
-            services.AddSingleton<IBasicAPI, BasicApi>();
-            services.AddSingleton<ILongMessageCommunicate, LongMessageCommunicate>();
+            //services.AddSingleton<IBasicAPI, BasicApi>();
+            //services.AddSingleton<ILongMessageCommunicate, LongMessageCommunicate>();
             
             //添加长对话服务
             services.AddSingleton<PluginsListener>();
