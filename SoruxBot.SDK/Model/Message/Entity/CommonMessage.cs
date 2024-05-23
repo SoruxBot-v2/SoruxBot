@@ -3,21 +3,20 @@ namespace SoruxBot.SDK.Model.Message.Entity;
 /// <summary>
 /// 通用消息实体
 /// </summary>
-public class CommonMessage(string type, string content)
+public class CommonMessage(string type, Dictionary<string, object> content)
 {
     /// <summary>
     /// 消息类型
-    /// text, picture, mention
+    /// 约束：text 类型为纯文字消息
     /// </summary>
-    public string Type { get; init; } = type;
+    public string Type { get; } = type;
 
     /// <summary>
     /// 消息内容
-    /// text: 文本内容
-    /// picture: 图片 URL
-    /// mention: 被提及的用户 ID
+    /// 使用 Dictionary 来存储消息内容。
+    /// 约束：content 属性用于存储文字内容
     /// </summary>
-    public string Content { get; init; } = content;
+    public Dictionary<string, object> Content { get; } = content;
     
     /// <summary>
     /// 预览消息

@@ -1,0 +1,89 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "SoruxBot.SDK/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/SoruxBot.SDK.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SoruxBot.SDK.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SoruxBot.SDK/1.0.0": {
+      "type": "project",
+      "path": "../SoruxBot.SDK/SoruxBot.SDK.csproj",
+      "msbuildProject": "../SoruxBot.SDK/SoruxBot.SDK.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "SoruxBot.SDK >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "/Users/epicmo/.nuget/packages/": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK.QQ/SoruxBot.SDK.QQ.csproj",
+      "projectName": "SoruxBot.SDK.QQ",
+      "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK.QQ/SoruxBot.SDK.QQ.csproj",
+      "packagesPath": "/Users/epicmo/.nuget/packages/",
+      "outputPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK.QQ/obj/",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "/Users/epicmo/.nuget/NuGet/NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
+              "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

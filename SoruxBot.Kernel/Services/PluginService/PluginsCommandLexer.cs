@@ -76,7 +76,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     }
                     else if (sp.ParameterType == typeof(bool))
                     {
-                        if (bool.TryParse(msgs[parasCount].Content, out bool result))
+                        if (bool.TryParse(msgs[parasCount].Content["content"].ToString(), out bool result))
                         {
                             objects.Add(result);
                         }
@@ -88,7 +88,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     }
                     else if (sp.ParameterType == typeof(int))
                     {
-                        if (int.TryParse(msgs[parasCount].Content, out int result))
+                        if (int.TryParse(msgs[parasCount].Content["content"].ToString(), out int result))
                         {
                             objects.Add(result);
                         }

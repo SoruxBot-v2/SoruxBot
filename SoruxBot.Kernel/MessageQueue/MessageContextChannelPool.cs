@@ -47,13 +47,8 @@ public static class MessageContextChannelPool
         }
         
         // 清空Reader
-        while (ChannelVector[value].Reader.TryRead(out _))
-        {
-        }
+        while (ChannelVector[value].Reader.TryRead(out _)) { }
 
         return true;
-
-
-
     }
 }
