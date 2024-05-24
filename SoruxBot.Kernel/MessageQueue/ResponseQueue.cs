@@ -34,6 +34,12 @@ public class ResponseQueueImpl(
         return res;
     }
 
+    public void SetNextResponse(MessageContext context, Action<string> messageCallback)
+    {
+        // TODO: Implement this method
+        throw new NotImplementedException();
+    }
+
     public bool TryGetNextResponse(Func<MessageContext, string> func)
     {
         MessageContext? context = null;
