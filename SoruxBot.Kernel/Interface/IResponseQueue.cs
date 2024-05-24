@@ -1,4 +1,6 @@
-﻿using SoruxBot.SDK.Model.Message;
+﻿using System;
+using System.Threading.Tasks;
+using SoruxBot.SDK.Model.Message;
 
 namespace SoruxBot.Kernel.Interface;
 

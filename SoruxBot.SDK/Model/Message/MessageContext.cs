@@ -1,4 +1,7 @@
-﻿namespace SoruxBot.SDK.Model.Message;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SoruxBot.SDK.Model.Message;
 
 /// <summary>
 /// MessageContext 类 --- 负责传递对应的消息细节
