@@ -16,6 +16,7 @@ public class MessageContext(
     MessageChain? messageChain,
     DateTime messageTime)
 {
+    public string ContextId { get; init; } = Guid.NewGuid().ToString();
     /// <summary>
     /// 触发该消息的机器人账号
     /// </summary>

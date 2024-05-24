@@ -21,8 +21,8 @@ public class ResponseQueueImpl(
 
     public async Task<string> SetNextResponse(MessageContext context)
     {
-        // TODO 这里应该是这次回话的全局唯一ID
-        var bindId = context.TiedId;
+        // 这里是这次回话的全局唯一ID
+        var bindId = context.ContextId;
         _bindIds[bindId] = true;
 
         await _msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
