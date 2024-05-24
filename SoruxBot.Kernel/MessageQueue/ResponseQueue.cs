@@ -11,11 +11,11 @@ public class ResponseQueueImpl(
     IChannelPool<MessageContext> msgChannelPool,
     IChannelPool<string> syncChannelPool) : IResponseQueue
 {
-    private readonly Dictionary<string, bool> _bindIds = new();
-    
+    private readonly ConcurrentDictionary<string, bool> _bindIds = new();
+
     // 传递要发送的消息
     private readonly IChannelPool<MessageContext> _msgChannelPool = msgChannelPool;
-    
+
     // 实现方法同步
     private readonly IChannelPool<string> _syncChannel = syncChannelPool;
 
@@ -27,10 +27,10 @@ public class ResponseQueueImpl(
 
         await _msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
         var res = await _syncChannel.GetBindChannel(bindId).Reader.ReadAsync();
-        
+
         // 归还同步channel
         _syncChannel.ReturnChannel(bindId);
-        
+
         return res;
     }
 
@@ -42,10 +42,10 @@ public class ResponseQueueImpl(
             foreach (var (key, _) in _bindIds)
             {
                 if (!_msgChannelPool.GetBindChannel(key).Reader.TryRead(out context)) continue;
-                
+
                 // 归还消息channel
                 _msgChannelPool.ReturnChannel(key);
-                _bindIds.Remove(key);
+                _bindIds.Remove(key, out _);
             }
         }
 
