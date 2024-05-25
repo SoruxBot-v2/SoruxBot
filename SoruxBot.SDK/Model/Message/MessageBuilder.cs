@@ -11,11 +11,11 @@ public class MessageBuilder(MessageChain messageChain)
     
     public MessageBuilder AddTextMessage(string content)
     {
-        messageChain.Messages.Add(new TextMessage("text", content));
+        messageChain.Messages.Add(new TextMessage(content));
         return this;
     }
     
-    public MessageBuilder AddCommonMessage(string type, string content)
+    public MessageBuilder AddCommonMessage(string type, Dictionary<string, object> content)
     {
         messageChain.Messages.Add(new CommonMessage(type, content));
         return this;

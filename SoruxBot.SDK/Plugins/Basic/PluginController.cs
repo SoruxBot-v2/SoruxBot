@@ -1,3 +1,5 @@
+using SoruxBot.SDK.Attribute;
+
 namespace SoruxBot.SDK.Plugins.Basic;
 
 /// <summary>

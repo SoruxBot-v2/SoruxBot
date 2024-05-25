@@ -14,4 +14,8 @@ public enum PluginFlag
     /// 消息忽略，表示消息被忽略处理了
     /// </summary>
     MsgIgnored = 2,
+    /// <summary>
+    /// 消息未经过处理
+    /// </summary>
+    MsgUnprocessed = 3
 }

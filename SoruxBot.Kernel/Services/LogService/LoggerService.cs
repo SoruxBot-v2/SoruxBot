@@ -52,76 +52,88 @@ namespace SoruxBot.Kernel.Services.LogService
             return _map.GetOrAdd(logType, sp => _loggerFactory.CreateLogger(sp));
         }
 
-        public void Debug(string source, string msg)
+        public ILoggerService Debug(string source, string msg)
         {
             GetLoggerObj().LogDebug($"[{DateTime.Now:HH:mm:ss}][{source}] {msg}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
+            return this;
         }
 
-        public void Debug<T>(string source, string msg, T context)
+        public ILoggerService Debug<T>(string source, string msg, T context)
         {
             GetLoggerObj().LogDebug($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
+            return this;
         }
 
-        public void Error(string source, string msg)
+        public ILoggerService Error(string source, string msg)
         {
             GetLoggerObj().LogError($"[{DateTime.Now:HH:mm:ss}][{source}] {msg}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
+            return this;
         }
 
-        public void Error<T>(string source, string msg, T context)
+        public ILoggerService Error<T>(string source, string msg, T context)
         {
             GetLoggerObj().LogError($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
+            return this;
         }
 
-        public void Error<T>(Exception exception, string source, string msg, T context)
+        public ILoggerService Error<T>(Exception exception, string source, string msg, T context)
         {
             GetLoggerObj().LogError(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
+            return this;
         }
 
-        public void Fatal(string source, string msg)
+        public ILoggerService Fatal(string source, string msg)
         {
             GetLoggerObj().LogCritical($"[{DateTime.Now:HH:mm:ss}][{source}] {msg}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} \n");
+            return this;
         }
 
-        public void Fatal<T>(string source, string msg, T context)
+        public ILoggerService Fatal<T>(string source, string msg, T context)
         {
             GetLoggerObj().LogCritical($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context} \n");
+            return this;
         }
 
-        public void Fatal<T>(Exception exception, string source, string msg, T context)
+        public ILoggerService Fatal<T>(Exception exception, string source, string msg, T context)
         {
             GetLoggerObj().LogCritical(exception, $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
+            return this;
         }
 
-        public void Info(string source, string msg)
+        public ILoggerService Info(string source, string msg)
         {
             GetLoggerObj().LogInformation($"[{DateTime.Now:HH:mm:ss}][{source}] {msg}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg}\n");
+            return this;
         }
 
-        public void Info<T>(string source, string msg, T context)
+        public ILoggerService Info<T>(string source, string msg, T context)
         {
             GetLoggerObj().LogInformation($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
+            return this;
         }
 
-        public void Warn(string source, string msg)
+        public ILoggerService Warn(string source, string msg)
         {
             GetLoggerObj().LogWarning($"[{DateTime.Now:HH:mm:ss}][{source}] {msg}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg}\n");
+            return this;
         }
 
-        public void Warn<T>(string source, string msg, T context)
+        public ILoggerService Warn<T>(string source, string msg, T context)
         {
             GetLoggerObj().LogWarning($"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}");
             File.AppendAllText(GetCurrentLogFile(), $"[{DateTime.Now:HH:mm:ss}][{source}] {msg} {context}\n");
+            return this;
         }
     }
 }

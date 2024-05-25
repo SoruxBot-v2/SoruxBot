@@ -1,4 +1,5 @@
 using SoruxBot.SDK.Model.Message.Entity;
+using SoruxBot.SDK.Plugins.Model;
 
 namespace SoruxBot.SDK.Model.Message;
 

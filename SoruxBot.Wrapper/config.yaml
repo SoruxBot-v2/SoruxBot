@@ -1,2 +1,4 @@
 storage:
-    root: '.' # 表示插件的存储根目录
+  root: '.' # 表示插件的存储根目录
+chat:
+  global_prefix: '#' # 全局前缀
