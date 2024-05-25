@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.Kernel.Services.StorageService;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -34,10 +35,10 @@ namespace SoruxBot.Kernel.Services.PluginService
             //注册基础服务
             services.AddSingleton<PluginsService>();
             services.AddSingleton<PluginsRegister>();
-            //services.AddSingleton<IPluginsStorage, PluginsLocalStorage>();
-            
-            //注册基础服务    
-            services.AddSingleton<PluginsDispatcher>();
+			services.AddSingleton<IPluginsStorage, PluginsDataStorage>();
+
+			//注册基础服务    
+			services.AddSingleton<PluginsDispatcher>();
             services.AddSingleton<PluginsCommandLexer>();
             
             //添加API服务
