@@ -1,4 +1,9 @@
 storage:
   root: '.' # 表示插件的存储根目录
+database:
+  engine: 'sqlite' # 存储引擎
+  local_file: 'binary' # 插件二进制文件存储路径
+  host: 'test.db' # 数据库地址，如果是 SQLite 则是文件路径
+  version: '3' # 数据库版本
 chat:
   global_prefix: '#' # 全局前缀

@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Model.Message;
 
@@ -17,27 +14,47 @@ public class ResponseQueueImpl(
 
     // 实现方法同步
 
-    public async Task<string> SetNextResponse(MessageContext context)
+    public Task<string> SetNextResponseAsync(MessageContext context)
     {
+        return new Task<Task<string>>(async () =>
+        {
+            // 这里是发送给指定用户实体的id
+            var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
+            _bindIds[bindId] = true;
+
+
+            await msgChannelPool.CreateBindChannel(bindId).Writer.WriteAsync(context);
+            var res = await syncChannelPool.CreateBindChannel(bindId).Reader.ReadAsync();
+
+            // 归还同步channel
+            syncChannelPool.ReturnChannel(bindId);
+
+            return res;
+        }).Unwrap();
+    }
+
+
+    public IResponsePromise SetNextResponse(MessageContext context)
+    {
+        var promise = new ResponsePromise();
+
         // 这里是发送给指定用户实体的id
         var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
         _bindIds[bindId] = true;
 
+        new Task<Task>(async () =>
+        {
+            await msgChannelPool.CreateBindChannel(bindId).Writer.WriteAsync(context);
+            var res = await syncChannelPool.CreateBindChannel(bindId).Reader.ReadAsync();
 
-        await msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
-        var res = await syncChannelPool.GetBindChannel(bindId).Reader.ReadAsync();
+            promise.Callbacks.ForEach(callback => callback(res));
+            // 归还同步channel
+            syncChannelPool.ReturnChannel(bindId);
+        }).Start();
 
-        // 归还同步channel
-        syncChannelPool.ReturnChannel(bindId);
-
-        return res;
+        return promise;
     }
 
-    public void SetNextResponse(MessageContext context, Action<string> messageCallback)
-    {
-        // TODO: Implement this method
-        throw new NotImplementedException();
-    }
 
     public bool TryGetNextResponse(Func<MessageContext, string> func)
     {
@@ -47,8 +64,8 @@ public class ResponseQueueImpl(
         {
             lock (msgChannelPool)
             {
-                if (!msgChannelPool.GetBindChannel(key).Reader.TryRead(out context)) continue;
-
+                if (!msgChannelPool.TryGetBindChannel(key, out var channel) ||
+                    !channel!.Reader.TryRead(out context)) continue;
                 // 归还消息channel
                 msgChannelPool.ReturnChannel(key);
                 _bindIds.Remove(key, out _);
@@ -56,10 +73,9 @@ public class ResponseQueueImpl(
         }
 
 
-        // 如果没有有消息的channel，或者写入失败，返回false
+        // 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
         return context != null &&
-               syncChannelPool
-                   .GetBindChannel(context.TiedId)
-                   .Writer.TryWrite(func(context));
+               syncChannelPool.TryGetBindChannel(context.TiedId, out var syncChannel) &&
+               syncChannel!.Writer.TryWrite(func(context));
     }
 }

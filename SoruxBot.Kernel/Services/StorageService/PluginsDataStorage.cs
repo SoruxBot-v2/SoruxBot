@@ -12,18 +12,19 @@ namespace SoruxBot.Kernel.Services.StorageService
 		private readonly IConfiguration _configuration;
 		private readonly PluginsDataContext _context;
 		private readonly string _localFileDir;
+		
 		public PluginsDataStorage(IConfiguration config, ILoggerService loggerService, BotContext botContext)
 		{
 			_configuration = config;
 			_loggerService = loggerService;
 			_botContext = botContext;
 			_context = ConstructPluginsDataContext();
-			_localFileDir = config.GetRequiredSection("BaseSettings")["LocalFileDir"]!;
+			_localFileDir = config.GetRequiredSection("database")["local_file"]!;
 		}
 		private PluginsDataContext ConstructPluginsDataContext()
 		{
 			DbContextOptionsBuilder<PluginsDataContext> optionsBuilder = new();
-			string dbName = _configuration.GetRequiredSection("BaseSettings")["DataBaseName"]!;
+			string dbName = _configuration.GetRequiredSection("database")["engine"]!;
 			switch (dbName.ToLower())
 			{
 				case "sqlite":
@@ -47,8 +48,8 @@ namespace SoruxBot.Kernel.Services.StorageService
 			switch(dbName)
 			{
 				case "sqlite":
-					dbSection = _configuration.GetRequiredSection("SQLiteSettings");
-					connectionString = $"Data Source={dbSection.GetValue("DatabaseFile", ":memory:")};Version={dbSection.GetValue("Version", 3)};";
+					dbSection = _configuration.GetRequiredSection("database");
+					connectionString = $"Data Source={dbSection.GetValue("host", ":memory:")};Version={dbSection.GetValue("version", 3)};";
 					var optionsSection = dbSection.GetSection("Options");
 					if(optionsSection.Exists())
 					{

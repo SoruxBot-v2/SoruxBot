@@ -22,6 +22,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 
     /// <summary>
     /// 进入Filter队列，并且判断是否需要继续执行 Dispatcher
+    /// 如果返回 false 那么说明不需要继续进入 Message 路由
     /// </summary>
     /// <param name="context"></param>
     /// <param name="newContext"></param>

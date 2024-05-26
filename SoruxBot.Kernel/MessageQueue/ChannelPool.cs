@@ -46,7 +46,7 @@ public class ChannelPool<T> : IChannelPool<T>
         return false;
     }
 
-    public Channel<T> GetBindChannel(string bindId)
+    public Channel<T> CreateBindChannel(string bindId)
     {
         Channel<T>? channel;
         // 直到绑定成功
@@ -57,6 +57,15 @@ public class ChannelPool<T> : IChannelPool<T>
 
         // 这里的 channel 一定不为空
         return channel!;
+    }
+
+    public bool TryGetBindChannel(string bindId, out Channel<T>? channel)
+    {
+        channel = null;
+        if (_idToChannelMap.TryGetValue(bindId, out var value)) return false;
+        channel = _channelVector[value];
+        return true;
+
     }
 
     public bool ReturnChannel(string bindId)

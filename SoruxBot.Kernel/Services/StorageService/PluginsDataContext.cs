@@ -16,8 +16,6 @@ namespace SoruxBot.Kernel.Services.StorageService
 				entity.Property(e => e.Key).IsRequired();
 				entity.Property(e => e.StringValue).IsRequired();
 			});
-			
-
 		}
 	}
 }

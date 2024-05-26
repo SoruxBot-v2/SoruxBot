@@ -1,4 +1,5 @@
 ﻿using SoruxBot.Kernel.Interface;
+using SoruxBot.SDK.Model.Message;
 
 namespace SoruxBot.Kernel.Services.PushService;
 
