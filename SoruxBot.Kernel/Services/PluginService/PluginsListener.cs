@@ -23,7 +23,6 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     /// 如果返回 false 那么说明不需要继续进入 Message 路由
     /// </summary>
     /// <param name="context"></param>
-    /// <param name="newContext"></param>
     /// <returns></returns>
     public bool Filter(MessageContext context)
     {

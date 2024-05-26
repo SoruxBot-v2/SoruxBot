@@ -2,7 +2,7 @@
 
 namespace SoruxBot.Kernel.MessageQueue;
 
-public class ResponsePromise:IResponsePromise
+public class ResponsePromise : IResponsePromise
 {
     // 私有的委托列表
     public List<Action<string>> Callbacks { get; } = [];
