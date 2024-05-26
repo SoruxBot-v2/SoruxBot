@@ -36,7 +36,8 @@ namespace SoruxBot.Kernel.Services.PluginService
             services.AddSingleton<PluginsService>();
             services.AddSingleton<PluginsRegister>();
 			services.AddSingleton<IPluginsStorage, PluginsLocalStorage>();
-
+            services.AddSingleton<IPluginsDataStorage, PluginsDataStorage>();
+            
 			//注册基础服务    
 			services.AddSingleton<PluginsDispatcher>();
             services.AddSingleton<PluginsCommandLexer>();
@@ -45,7 +46,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             //services.AddSingleton<IBasicAPI, BasicApi>();
             //services.AddSingleton<ILongMessageCommunicate, LongMessageCommunicate>();
             
-            //添加长对话服务
+            //添加监听服务
             services.AddSingleton<PluginsListener>();
         }
     }

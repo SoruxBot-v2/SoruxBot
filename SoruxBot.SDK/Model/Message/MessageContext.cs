@@ -8,6 +8,7 @@ namespace SoruxBot.SDK.Model.Message;
 /// </summary>
 public class MessageContext(
     string botAccount,
+    string targetPlatformAction,
     string targetPlatform,
     MessageType messageEventType,
     string triggerId,
@@ -22,6 +23,8 @@ public class MessageContext(
     /// </summary>
     public string BotAccount { get; init; } = botAccount;
 
+    public string TargetPlatformAction { get; init; } = targetPlatformAction;
+    
     /// <summary>
     /// 触发事件的平台
     /// </summary>

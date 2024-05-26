@@ -2,16 +2,10 @@
 
 namespace SoruxBot.Kernel.Services.StorageService
 {
-	internal class PluginsData
+	internal class PluginsData(string pluginMark, string key, string stringValue)
 	{
-		public string PluginMark { get; set; }
-		public string Key { get; set; }
-		public string StringValue { get; set; }
-		public PluginsData(string pluginMark, string key, string stringValue)
-		{
-			PluginMark = pluginMark;
-			Key = key;
-			StringValue = stringValue;
-		}
+		public string PluginMark { get; set; } = pluginMark;
+		public string Key { get; set; } = key;
+		public string StringValue { get; set; } = stringValue;
 	}
 }

@@ -1,5 +1,5 @@
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using SoruxBot.Kernel.Constant;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Kernel.Services.PluginService.Model;
 using SoruxBot.SDK.Model.Message;
@@ -26,25 +26,24 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
     {
         // 这个方法中，调用的类型依次可以被解析为
         // object > MessageChain > string > bool > int
-        
-        List<object?> objects = new();
-        objects.Add(context);
+
+        var objects = new List<object?> { context };
 
         var msgs = context.MessageChain?.Messages;
-        
-        if (descriptor.IsParameterLexerDisable) // 如果不经过 Lexer，那么就直接传递原始消息
+
+        if (descriptor.ActionParameters.Count <= 1) // 如果不经过 Lexer，那么就直接传递原始消息
         {
             if (msgs != null) objects.Add(msgs);
         }
-        else if(msgs != null)
+        else if (msgs != null)
         {
             // 如果参数长度不匹配，那么 pass
             if (descriptor.ActionParameters
-                .Skip(msgs.Count)
-                .Count(sp => !sp.IsOptional) > 0)
+                    .Skip(msgs.Count)
+                    .Count(sp => !sp.IsOptional) > 0)
             {
                 // 表示消息没有被处理
-                loggerService.Warn(Constant.NameValue.KernelPluginServiceLexerLogName,
+                loggerService.Warn(NameValue.KernelPluginServiceLexerLogName,
                     "Lexer error for unmatched parameter number. "
                     + ", PluginsName:" + descriptor.InstanceTypeName
                     + ", ParameterCount:" + descriptor.ActionParameters.Count
@@ -53,30 +52,39 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
             }
 
             var isValid = true;
-            
-            if (descriptor.IsSegmentWrapped)
-            {
-                var parasCount = 0;
-                // 分段处理
-                descriptor.ActionParameters.Skip(1).ToList().ForEach(sp =>
+
+            var parasCount = 1;
+            var paras =
+                msgs.Select(sp => sp.Type switch
+                {
+                    "text" => sp.ToPreviewText().Split(" "),
+                    _      => [sp.ToPreviewText()]
+                }).Skip(1).SelectMany(sp => sp).ToList();
+
+            descriptor.ActionParameters
+                .Skip(1)
+                .ToList()
+                .ForEach(sp =>
                 {
                     if (parasCount > msgs.Count - 1)
                     {
                         objects.Add(null);
                     }
-                    
+
                     // 开始处理剩余参数
-                    if (sp.ParameterType == typeof(CommonMessage))
+                    if (sp.ParameterType == typeof(CommonMessage) || sp.ParameterType == typeof(object))
                     {
-                        objects.Add(msgs[parasCount]);
+                        objects.Add(paras[parasCount]);
                     }
+                    
                     else if (sp.ParameterType == typeof(string))
                     {
-                        objects.Add(msgs[parasCount].Content);
+                        objects.Add(paras[parasCount]);
                     }
+                    
                     else if (sp.ParameterType == typeof(bool))
                     {
-                        if (bool.TryParse(msgs[parasCount].Content["content"].ToString(), out bool result))
+                        if (bool.TryParse(paras[parasCount], out bool result))
                         {
                             objects.Add(result);
                         }
@@ -88,7 +96,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     }
                     else if (sp.ParameterType == typeof(int))
                     {
-                        if (int.TryParse(msgs[parasCount].Content["content"].ToString(), out int result))
+                        if (int.TryParse(paras[parasCount], out int result))
                         {
                             objects.Add(result);
                         }
@@ -100,92 +108,25 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     }
                     else
                     {
-                        objects.Add(msgs[parasCount]);
+                        isValid = false;
+                        return;
                     }
-                    
+
                     parasCount++;
                 });
-            }
-            else
-            {
-                var builder = new StringBuilder();
-                msgs.Where(sp => sp.Type == "text")
-                    .ToList()
-                    .ForEach(sp =>
-                    {
-                        builder.Append(" " + sp.Content);
-                    });
-                
-                var parasCount = 1;
-                var paras = builder.ToString()
-                    .Trim()
-                    .Split(" ")
-                    .Skip(1)
-                    .ToList();
-                
-                descriptor.ActionParameters
-                    .Skip(1)
-                    .ToList()
-                    .ForEach(sp =>
-                        {
-                            if (parasCount > msgs.Count - 1)
-                            {
-                                objects.Add(null);
-                            }
-                    
-                            // 开始处理剩余参数
-                            if (sp.ParameterType == typeof(MessageChain) || sp.ParameterType == typeof(object))
-                            {
-                                objects.Add(paras);
-                            }
-                            else if (sp.ParameterType == typeof(string))
-                            {
-                                objects.Add(paras[parasCount]);
-                            }
-                            else if (sp.ParameterType == typeof(bool))
-                            {
-                                if (bool.TryParse(paras[parasCount], out bool result))
-                                {
-                                    objects.Add(result);
-                                }
-                                else
-                                {
-                                    isValid = false;
-                                    return;
-                                }
-                            }
-                            else if (sp.ParameterType == typeof(int))
-                            {
-                                if (int.TryParse(paras[parasCount], out int result))
-                                {
-                                    objects.Add(result);
-                                }
-                                else
-                                {
-                                    isValid = false;
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                isValid = false;
-                                return;
-                            }
-                    
-                            parasCount++;
-                        });
-            }
-            
+
+
             if (!isValid)
             {
                 // 表示消息没有被处理
-                loggerService.Warn(Constant.NameValue.KernelPluginServiceLexerLogName,
+                loggerService.Warn(NameValue.KernelPluginServiceLexerLogName,
                     "Lexer error for type unmatched during lexer."
                     + ", PluginsName:" + descriptor.InstanceTypeName
                     + ", ActionName:" + descriptor.ActionName);
                 return PluginFlag.MsgUnprocessed;
             }
         }
+
         return (PluginFlag)descriptor.ActionDelegate.DynamicInvoke(objects.ToArray())!;
     }
 }

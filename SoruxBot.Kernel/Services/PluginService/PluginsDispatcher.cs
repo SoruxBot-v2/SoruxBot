@@ -35,8 +35,7 @@ public class PluginsDispatcher(
     //插件按照触发条件可以分为选项式命令触发和事件触发
     //前者针对某个特定 EventType 的某个特定的语句触发某个特定的方法
     //后者针对某个通用的 EventType 进行触发
-    private Dictionary<string, List<PluginsActionDescriptor>> _matchList = new();
-	private RadixTree<List<PluginsActionDescriptor>> routerTree = new();
+	private readonly RadixTree<List<PluginsActionDescriptor>> _routerTree = new();
 
     /// <summary>
     /// 注册指令路由
@@ -55,9 +54,6 @@ public class PluginsDispatcher(
             {
                 loggerService.Debug(Constant.NameValue.KernelPluginServiceDispatcherLogName,
                     "Controller is caught! Type ->" + className.Name);
-                
-                //缓存 Controller
-                
                 // 我们只取第一个 Constructor
                 var constructorInfo = className.GetConstructors()[0];
                 // 获取其构造函数的参数
@@ -118,12 +114,10 @@ public class PluginsDispatcher(
                             ),
                             methodInfo.Name,
                             name,
-                            name + "." + className.Name,
-                            true,
-                            false
+                            name + "." + className.Name
                         );
                     }
-                    else if (!msgEventCommand.IsLexerRequired)
+                    else if (methodInfo.GetParameters().Length == 1) // 如果参数为 1，也就是只接受一个 MessageContext 参数，那么就不需要 Lexer
                     {
                         var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType)) { methodInfo.ReturnType };
                         var delegateType = Expression.GetFuncType(args.ToArray());
@@ -136,9 +130,7 @@ public class PluginsDispatcher(
                                 ),
                             methodInfo.Name,
                             name,
-                            name + "." + className.Name,
-                            true,
-                            msgEventCommand.IsSegmentWrapped
+                            name + "." + className.Name
                             );
                     }
                     else
@@ -151,10 +143,8 @@ public class PluginsDispatcher(
                         int count = 0;
 
                         // 构建委托
-                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType));
-                        Type delegateType;
-                        args.Add(methodInfo.ReturnType);
-                        delegateType = Expression.GetFuncType(args.ToArray());
+                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType)) { methodInfo.ReturnType };
+                        var delegateType = Expression.GetFuncType(args.ToArray());
                         
                         pluginsActionDescriptor = new (
                             methodInfo.CreateDelegate(
@@ -163,9 +153,7 @@ public class PluginsDispatcher(
                                 ),
                             methodInfo.Name,
                             name,
-                            name + "." + className.Name,
-                            false,
-                            msgEventCommand.IsSegmentWrapped
+                            name + "." + className.Name
                         );
                         
                         //添加必然存在的参数 MessageContext
@@ -200,7 +188,6 @@ public class PluginsDispatcher(
                     var msgPlatformConstraint = methodInfo.GetCustomAttribute<PlatformConstraintAttribute>();
 
 					//消息前缀
-#pragma warning disable CS8600 
 					string commandPrefix = msgEventCommand?.CommandPrefix switch
                     {
                         CommandPrefixType.None => String.Empty,
@@ -210,10 +197,10 @@ public class PluginsDispatcher(
                         ),
                         CommandPrefixType.Global => _globalCommandPrefix,
                         _ => String.Empty
-                    };
-#pragma warning restore CS8600
+                    } ?? String.Empty; 
+
 					// 路由注册
-					StringBuilder routePrefix = new(commandTriggerType);
+					var routePrefix = new StringBuilder(commandTriggerType);
 					if (msgPlatformConstraint != null)
 					{
 						routePrefix.Append(";" + msgPlatformConstraint.Platform);
@@ -222,16 +209,17 @@ public class PluginsDispatcher(
 							routePrefix.Append(";" + msgPlatformConstraint.Action);
 						}
 					}
-					if(pluginsActionDescriptor.IsParameterLexerDisable)
+					
+					if(pluginsActionDescriptor.ActionParameters.Count <= 1)
 					{
-						if(routerTree.TryGetValue(routePrefix.ToString(), out var list))
+						if(_routerTree.TryGetValue(routePrefix.ToString(), out var list))
 						{
 							list!.Add(pluginsActionDescriptor);
 						}
 						else
 						{
 							list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-							routerTree.Insert(routePrefix.ToString(), list);
+							_routerTree.Insert(routePrefix.ToString(), list);
 						}
 					}
 					else
@@ -239,14 +227,14 @@ public class PluginsDispatcher(
 						foreach (var s in msgEventCommand!.Command)
 						{
 							string path = routePrefix.Append("/").Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
-							if (routerTree.TryGetValue(path, out var list))
+							if (_routerTree.TryGetValue(path, out var list))
 							{
 								list!.Add(pluginsActionDescriptor);
 							}
 							else
 							{
 								list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-								routerTree.Insert(path, list);
+								_routerTree.Insert(path, list);
 							}
 						}
 					}
@@ -261,14 +249,20 @@ public class PluginsDispatcher(
     /// <returns></returns>
     public List<PluginsActionDescriptor>? GetAction(string route, ref MessageContext messageContext)
     {
+	    // 监听器匹配
+	    if (pluginsListener.Filter(messageContext, out messageContext))
+	    {
+		    return null;
+	    }
+	    
 		// 路由匹配
-		List<PluginsActionDescriptor> list = new();
-		var lists = routerTree.PrefixMatch(route);
+		var list = new List<PluginsActionDescriptor>();
+		var lists = _routerTree.PrefixMatch(route);
 		if (lists == null) return null;
 		foreach (var l in lists!)
 		{
 			list.AddRange(l);
 		}
-		return list.Count() > 0 ? list : null;
+		return list.Count > 0 ? list : null;
 	}
 }

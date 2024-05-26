@@ -9,4 +9,6 @@ public static class NameValue
     public const string KernelPluginServiceLexerLogName = "SoruxBot.Kernel.PluginService.Lexer";
     
     public const string KernelPluginServiceDispatcherLogName = "SoruxBot.Kernel.PluginService.Dispatcher";
+    
+    public const string KernelPluginServiceLocalStorageLogName = "SoruxBot.Kernel.PluginService.LocalStorage";
 }
