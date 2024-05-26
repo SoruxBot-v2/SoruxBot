@@ -1,7 +1,9 @@
 ﻿using SoruxBot.Kernel.Bot;
+using SoruxBot.Kernel.Services.PluginService.DataStructure;
 using SoruxBot.Kernel.Services.PluginService.Model;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
+using System.Text;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
@@ -11,7 +13,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     private BotContext _botContext = botContext;
     private ILoggerService _loggerService = loggerService;
 
-    private readonly List<PluginsListenerDescriptor> _map = new ();
+	private readonly RadixTree<PluginsListenerDescriptor> _matchTree = new();
 
     private bool MatchRoute(PluginsListenerDescriptor descriptor, MessageContext context)
     {
@@ -27,20 +29,41 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     public bool Filter(MessageContext context, out MessageContext newContext)
     {
         newContext = context;
-        foreach (var descriptor in _map)
-        {
-            if (MatchRoute(descriptor, context) && descriptor.ConditionCheck(context))
-            {
-                // TODO 这里应该是构建一个匹配树，然后 Foreach，而不是 Foreach 的时候来判断是否被匹配
-            }
-        }
+		string path = new StringBuilder(context.MessageEventType.ToString())
+			.Append(context.TargetPlatform)
+			.ToString();
+			
+        //_matchTree.PrefixMatch()
 
         return true;
     }
 
     public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor)
-        => _map.Remove(pluginsListenerDescriptor);
+	{
+		string path = new StringBuilder(pluginsListenerDescriptor.MessageType.ToString())
+			.Append(";")
+			.Append(pluginsListenerDescriptor.TargetPlatformType)
+			.Append(";")
+			.Append(pluginsListenerDescriptor.TargetAction)
+			.ToString();
+		_matchTree.Remove(path);
+	}
 
     public void AddListener(PluginsListenerDescriptor pluginsListenerDescriptor)
-        => _map.Add(pluginsListenerDescriptor);
+	{
+		string path = new StringBuilder(pluginsListenerDescriptor.MessageType.ToString())
+			.Append(";")
+			.Append(pluginsListenerDescriptor.TargetPlatformType)
+			.Append(";")
+			.Append(pluginsListenerDescriptor.TargetAction)
+			.ToString();
+		if (_matchTree.ContainsPath(path))
+		{
+			_matchTree.TryReplace(path, pluginsListenerDescriptor);
+		}
+		else
+		{
+			_matchTree.Insert(path, pluginsListenerDescriptor);
+		}
+	}
 }
