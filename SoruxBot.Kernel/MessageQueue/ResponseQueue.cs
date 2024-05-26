@@ -34,11 +34,10 @@ public class ResponseQueueImpl(
         }).Unwrap();
     }
 
-    private readonly ConcurrentDictionary<string, ResponsePromise> _responsePromises = new();
 
     public ResponsePromise SetNextResponse(MessageContext context)
     {
-        var promise = _responsePromises[context.ContextId] = new ResponsePromise();
+        var promise = new ResponsePromise();
 
         // 这里是发送给指定用户实体的id
         var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
