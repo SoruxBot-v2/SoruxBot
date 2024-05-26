@@ -1,5 +1,4 @@
-﻿using SoruxBot.Kernel.Interface;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Bot;
@@ -11,13 +10,15 @@ namespace SoruxBot.Kernel.Services.StorageService
 		private ILoggerService _loggerService;
 		private BotContext _botContext;
 		private readonly IConfiguration _configuration;
-		private PluginsDataContext _context;
-		private string localFileDir;
-		public PluginsDataStorage(IConfiguration config)
+		private readonly PluginsDataContext _context;
+		private readonly string _localFileDir;
+		public PluginsDataStorage(IConfiguration config, ILoggerService loggerService, BotContext botContext)
 		{
 			_configuration = config;
+			_loggerService = loggerService;
+			_botContext = botContext;
 			_context = ConstructPluginsDataContext();
-			localFileDir = config.GetRequiredSection("BaseSettings")["LocalFileDir"]!;
+			_localFileDir = config.GetRequiredSection("BaseSettings")["LocalFileDir"]!;
 		}
 		private PluginsDataContext ConstructPluginsDataContext()
 		{
@@ -43,13 +44,12 @@ namespace SoruxBot.Kernel.Services.StorageService
 		{
 			string connectionString;
 			IConfigurationSection dbSection;
-			IConfigurationSection optionsSection;
 			switch(dbName)
 			{
 				case "sqlite":
 					dbSection = _configuration.GetRequiredSection("SQLiteSettings");
 					connectionString = $"Data Source={dbSection.GetValue("DatabaseFile", ":memory:")};Version={dbSection.GetValue("Version", 3)};";
-					optionsSection = dbSection.GetSection("Options");
+					var optionsSection = dbSection.GetSection("Options");
 					if(optionsSection.Exists())
 					{
 						connectionString += string.Join(";", optionsSection.GetChildren().Select(child => $"{child.Key}={child.Value}")) + ";";
@@ -96,7 +96,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool RemoveStringSettings(string pluginMark, string key)
 		{
-			var itemToDel = _context.Plugins.Where(e => e.PluginMark == pluginMark && e.Key == key).FirstOrDefault();
+			var itemToDel = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if (itemToDel is null)
 			{
 				//日志写入
@@ -124,7 +124,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public string GetStringSettings(string pluginMark, string key)
 		{
-			var entity = _context.Plugins.Where(e => e.PluginMark == pluginMark && e.Key == key).FirstOrDefault();
+			var entity = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if (entity is not null)
 			{
 				return entity.StringValue;
@@ -133,7 +133,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool EditStringSettings(string pluginMark, string key, string value)
 		{
-			var entity = _context.Plugins.Where(e => e.PluginMark == pluginMark && e.Key == key).FirstOrDefault();
+			var entity = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if(entity is null)
 			{
 				// 日志写入
@@ -161,27 +161,27 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool AddBinarySettings(string pluginMark, string key, byte[] value)
 		{
-			string dic = Path.Join(localFileDir, pluginMark);
+			string dic = Path.Join(_localFileDir, pluginMark);
 			if(!Directory.Exists(dic)) Directory.CreateDirectory(dic);
 			File.WriteAllBytes(Path.Join(dic, key + ".bin"), value);
 			return true;
 		}
 		public bool RemoveBinarySettings(string pluginMark, string key)
 		{
-			string path = Path.Join(localFileDir, pluginMark, key + "bin");
+			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
 			if (!Directory.Exists(path)) return false;
 			File.Delete(path);
 			return true;
 		}
 		public byte[]? GetBinarySettings(string pluginMark, string key)
 		{
-			string path = Path.Join(localFileDir, pluginMark, key + "bin");
+			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
 			if (!Directory.Exists(path)) return null;
 			return File.ReadAllBytes(path);
 		}
 		public bool EditBinarySettings(string pluginMark, string key, byte[] value)
 		{
-			string path = Path.Join(localFileDir, pluginMark, key + "bin");
+			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
 			if (!Directory.Exists(path)) return false;
 			File.WriteAllBytes(path, value);
 			return true;
