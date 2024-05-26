@@ -14,10 +14,8 @@ public class ResponseQueueImpl(
     private readonly ConcurrentDictionary<string, bool> _bindIds = new();
 
     // 传递要发送的消息
-    private readonly IChannelPool<MessageContext> _msgChannelPool = msgChannelPool;
 
     // 实现方法同步
-    private readonly IChannelPool<string> _syncChannel = syncChannelPool;
 
     public async Task<string> SetNextResponse(MessageContext context)
     {
@@ -25,11 +23,11 @@ public class ResponseQueueImpl(
         var bindId = context.ContextId;
         _bindIds[bindId] = true;
 
-        await _msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
-        var res = await _syncChannel.GetBindChannel(bindId).Reader.ReadAsync();
+        await msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
+        var res = await syncChannelPool.GetBindChannel(bindId).Reader.ReadAsync();
 
         // 归还同步channel
-        _syncChannel.ReturnChannel(bindId);
+        syncChannelPool.ReturnChannel(bindId);
 
         return res;
     }
@@ -43,21 +41,23 @@ public class ResponseQueueImpl(
     public bool TryGetNextResponse(Func<MessageContext, string> func)
     {
         MessageContext? context = null;
-        lock (_bindIds)
+
+        foreach (var (key, _) in _bindIds)
         {
-            foreach (var (key, _) in _bindIds)
+            lock (msgChannelPool)
             {
-                if (!_msgChannelPool.GetBindChannel(key).Reader.TryRead(out context)) continue;
+                if (!msgChannelPool.GetBindChannel(key).Reader.TryRead(out context)) continue;
 
                 // 归还消息channel
-                _msgChannelPool.ReturnChannel(key);
+                msgChannelPool.ReturnChannel(key);
                 _bindIds.Remove(key, out _);
             }
         }
 
+
         // 如果没有有消息的channel，或者写入失败，返回false
         return context != null &&
-               _syncChannel
+               syncChannelPool
                    .GetBindChannel(context.TiedId)
                    .Writer.TryWrite(func(context));
     }
