@@ -5,6 +5,13 @@ public class RadixTree<T>
     private readonly RadixTreeNode<T> _root = new(string.Empty);
 
     public RadixTree() { }
+	// 前缀匹配，返回所有匹配到的节点值。短路径优先。
+	public IEnumerable<T>? PrefixMatch(string path)
+	{
+		List<T> result = new();
+		PrefixMatchPrivate(_root, path, result);
+		return result.Count() == 0 ? null : result;
+	}
     public RadixTree<T> Insert(string path, T value)
     {
         if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", "path");
@@ -55,7 +62,18 @@ public class RadixTree<T>
         return dict;
     }
 
-
+	private static void PrefixMatchPrivate(RadixTreeNode<T> node, string path, IEnumerable<T> values)
+	{
+		var keyLength = node.Key.Length;
+		// 如果节点与路径前缀匹配，则继续搜索。如果该节点有值，则将该值加入values
+		if (path.Length >= keyLength && path.Substring(0, keyLength) == node.Key)
+		{
+			if (node.IsValueNode) values.Append(node.Value);
+			if (path.Length == keyLength || !node.Children.ContainsKey(path[keyLength])) return;
+			PrefixMatchPrivate(node.Children[path[keyLength]], path.Substring(keyLength), values);
+		}
+		return;
+	}
     private static bool TryInsertPrivate(RadixTreeNode<T> node, string path, T value)
     {
         if (path == string.Empty || path == node.Key && node.IsValueNode) return false;

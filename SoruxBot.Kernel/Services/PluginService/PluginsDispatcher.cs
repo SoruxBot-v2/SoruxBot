@@ -5,11 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Kernel.Services.PluginService.Model;
+using SoruxBot.Kernel.Services.PluginService.DataStructure;
 using SoruxBot.SDK.Attribute;
 using SoruxBot.SDK.Model.Attribute;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Basic;
 using SoruxBot.SDK.Plugins.Service;
+using System.Text;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
@@ -34,6 +36,7 @@ public class PluginsDispatcher(
     //前者针对某个特定 EventType 的某个特定的语句触发某个特定的方法
     //后者针对某个通用的 EventType 进行触发
     private Dictionary<string, List<PluginsActionDescriptor>> _matchList = new();
+	private RadixTree<List<PluginsActionDescriptor>> routerTree = new();
 
     /// <summary>
     /// 注册指令路由
@@ -189,16 +192,16 @@ public class PluginsDispatcher(
                             count++;
                         }
                     }
-                    // TODO 路由注册
-                    
+
                     // 触发消息类型
                     string commandTriggerType = msgEventAttribute.MessageType.ToString();
                     
                     //判断是否持有平台特定的特性
                     var msgPlatformConstraint = methodInfo.GetCustomAttribute<PlatformConstraintAttribute>();
-                    
-                    //消息前缀
-                    string commandPrefix = msgEventCommand?.CommandPrefix switch
+
+					//消息前缀
+#pragma warning disable CS8600 
+					string commandPrefix = msgEventCommand?.CommandPrefix switch
                     {
                         CommandPrefixType.None => String.Empty,
                         CommandPrefixType.Single => pluginsStorage.GetPluginInformation(
@@ -208,7 +211,46 @@ public class PluginsDispatcher(
                         CommandPrefixType.Global => _globalCommandPrefix,
                         _ => String.Empty
                     };
-                }
+#pragma warning restore CS8600
+					// 路由注册
+					StringBuilder routePrefix = new(commandTriggerType);
+					if (msgPlatformConstraint != null)
+					{
+						routePrefix.Append(";" + msgPlatformConstraint.Platform);
+						if(msgPlatformConstraint.Action != string.Empty)
+						{
+							routePrefix.Append(";" + msgPlatformConstraint.Action);
+						}
+					}
+					if(pluginsActionDescriptor.IsParameterLexerDisable)
+					{
+						if(routerTree.TryGetValue(routePrefix.ToString(), out var list))
+						{
+							list!.Add(pluginsActionDescriptor);
+						}
+						else
+						{
+							list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
+							routerTree.Insert(routePrefix.ToString(), list);
+						}
+					}
+					else
+					{
+						foreach (var s in msgEventCommand!.Command)
+						{
+							string path = routePrefix.Append("/").Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
+							if (routerTree.TryGetValue(path, out var list))
+							{
+								list!.Add(pluginsActionDescriptor);
+							}
+							else
+							{
+								list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
+								routerTree.Insert(path, list);
+							}
+						}
+					}
+				}
             }
         }
     }
@@ -219,7 +261,14 @@ public class PluginsDispatcher(
     /// <returns></returns>
     public List<PluginsActionDescriptor>? GetAction(string route, ref MessageContext messageContext)
     {
-        // TODO 实现路由匹配
-        throw new NotImplementedException();
-    }
+		// 路由匹配
+		List<PluginsActionDescriptor> list = new();
+		var lists = routerTree.PrefixMatch(route);
+		if (lists == null) return null;
+		foreach (var l in lists!)
+		{
+			list.AddRange(l);
+		}
+		return list.Count() > 0 ? list : null;
+	}
 }
