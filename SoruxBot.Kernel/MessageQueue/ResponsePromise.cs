@@ -1,6 +1,8 @@
-﻿namespace SoruxBot.SDK.Model.Utils;
+﻿using SoruxBot.Kernel.Interface;
 
-public class ResponsePromise
+namespace SoruxBot.Kernel.MessageQueue;
+
+public class ResponsePromise:IResponsePromise
 {
     // 私有的委托列表
     public List<Action<string>> Callbacks { get; } = [];

@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Model.Message;
-using SoruxBot.SDK.Model.Utils;
 
 namespace SoruxBot.Kernel.MessageQueue;
 
@@ -35,7 +34,7 @@ public class ResponseQueueImpl(
     }
 
 
-    public ResponsePromise SetNextResponse(MessageContext context)
+    public IResponsePromise SetNextResponse(MessageContext context)
     {
         var promise = new ResponsePromise();
 
