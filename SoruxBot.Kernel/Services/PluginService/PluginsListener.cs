@@ -25,9 +25,8 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     /// <param name="context"></param>
     /// <param name="newContext"></param>
     /// <returns></returns>
-    public bool Filter(MessageContext context, out MessageContext newContext)
+    public bool Filter(MessageContext context)
     {
-        newContext = context;
         foreach (var descriptor in _map)
         {
             if (MatchRoute(descriptor, context) && descriptor.ConditionCheck(context))

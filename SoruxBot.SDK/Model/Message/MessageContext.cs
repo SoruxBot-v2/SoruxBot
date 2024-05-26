@@ -22,8 +22,6 @@ public class MessageContext(
     /// 触发该消息的机器人账号
     /// </summary>
     public string BotAccount { get; init; } = botAccount;
-
-    public string TargetPlatformAction { get; init; } = targetPlatformAction;
     
     /// <summary>
     /// 触发事件的平台
