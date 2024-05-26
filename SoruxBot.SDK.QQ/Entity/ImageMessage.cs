@@ -8,7 +8,7 @@ public class ImageMessage : CommonMessage
     
     public ImageMessage(string filePath) : base("image", new ()
     {
-        {"_imageStream", new FileStream(filePath, FileMode.Open, FileAccess.Read)}
+        {"ImageStream", new FileStream(filePath, FileMode.Open, FileAccess.Read)}
     })
     {
         ImageStream = (Stream)Content["_imageStream"];

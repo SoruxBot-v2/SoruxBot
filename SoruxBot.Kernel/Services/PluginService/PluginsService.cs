@@ -35,7 +35,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             //注册基础服务
             services.AddSingleton<PluginsService>();
             services.AddSingleton<PluginsRegister>();
-			services.AddSingleton<IPluginsStorage, PluginsDataStorage>();
+			services.AddSingleton<IPluginsDataStorage, PluginsDataStorage>();
 
 			//注册基础服务    
 			services.AddSingleton<PluginsDispatcher>();

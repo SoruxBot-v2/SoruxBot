@@ -8,6 +8,7 @@ public class MentionMessage(string? name, uint target = 0) : CommonMessage("ment
     { "Uid", "" },
     { "Name", name ?? String.Empty}
 })
+
 {
     public uint Uin { get; set; } = target;
 
