@@ -79,7 +79,7 @@
         /// </summary>
         /// <param name="privilege"></param>
         /// <returns></returns>
-        public string? GetPluginByPrivilege(int privilege);
+        public IEnumerable<string>? GetPluginByPrivilege(int privilege);
         
         /// <summary>
         /// 判断插件是否存在
@@ -101,7 +101,7 @@
         /// </summary>
         /// <param name="name"></param>
         /// <param name="key"></param>
-        public string GetPluginInformation(string name, string key);
+        public string? GetPluginInformation(string name, string key);
 
         /// <summary>
         /// 尝试获取插件的内部设置信息，如果插件名称错误，那么返回 False
@@ -134,5 +134,10 @@
         /// <param name="instance"></param>
         /// <returns></returns>
         public bool TryGetPluginInstance(string name, out object instance);
+		/// <summary>
+		/// 获取按照优先级排序的插件名称
+		/// </summary>
+		/// <returns></returns>
+		public List<string> GetPluginsOrderedByPrivilegeAsc();
     }
 }

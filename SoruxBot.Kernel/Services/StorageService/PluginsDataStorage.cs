@@ -2,11 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.Kernel.Bot;
 
 namespace SoruxBot.Kernel.Services.StorageService
 {
 	public class PluginsDataStorage : IPluginsDataStorage
 	{
+		private ILoggerService _loggerService;
+		private BotContext _botContext;
 		private readonly IConfiguration _configuration;
 		private PluginsDataContext _context;
 		private string localFileDir;
