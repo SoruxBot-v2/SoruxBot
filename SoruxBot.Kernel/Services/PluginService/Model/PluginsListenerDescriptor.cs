@@ -8,6 +8,7 @@ public class PluginsListenerDescriptor(
     string targetPlatformType,
     string targetAction,
     Func<MessageContext, bool> conditionCheck,
+    DateTime timeOut,
     bool isInterceptToFilters = true,
     bool isInterceptToChannel = true,
     Func<MessageContext, PluginFlag>? successfulFunc = null,
@@ -52,4 +53,9 @@ public class PluginsListenerDescriptor(
     /// 如果失败了，那么调用这个函数，此函数是可以被配置的
     /// </summary>
     public Func<MessageContext, PluginFlag>? FailureFunc { get; init; } = failureFunc;
+    
+    /// <summary>
+    /// 如果失败了，那么调用这个函数，此函数是可以被配置的
+    /// </summary>
+    public DateTime TimeOut { get; init; } = timeOut;
 }
