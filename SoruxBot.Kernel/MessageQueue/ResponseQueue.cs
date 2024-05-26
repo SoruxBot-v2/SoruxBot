@@ -19,9 +19,10 @@ public class ResponseQueueImpl(
 
     public async Task<string> SetNextResponse(MessageContext context)
     {
-        // 这里是这次回话的全局唯一ID
-        var bindId = context.ContextId;
+        // 这里是发送给指定用户实体的id
+        var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
         _bindIds[bindId] = true;
+
 
         await msgChannelPool.GetBindChannel(bindId).Writer.WriteAsync(context);
         var res = await syncChannelPool.GetBindChannel(bindId).Reader.ReadAsync();
