@@ -7,7 +7,6 @@ using System.Text;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
-// TODO 构建一颗匹配树
 public class PluginsListener(BotContext botContext, ILoggerService loggerService)
 {
     private BotContext _botContext = botContext;
@@ -23,9 +22,17 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     /// <returns></returns>
     public bool Filter(MessageContext context)
     {
-        newContext = context;
-		
-		var list = _matchTree.PrefixMatch(route);
+		StringBuilder path = new StringBuilder(context.MessageEventType.ToString());
+		if (context.TargetPlatform != string.Empty)
+		{
+			path = path.Append(";").Append(context.TargetPlatform);
+			if (context.TargetPlatformAction != string.Empty)
+			{
+				path = path.Append(";").Append(context.TargetPlatformAction);
+			}
+		}
+		// TODO 并发处理
+		var list = _matchTree.PrefixMatch(path.ToString());
 		if (list == null) return false;
 		foreach (var item in list)
 		{
@@ -57,6 +64,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 				path = path.Append(";").Append(pluginsListenerDescriptor.TargetAction);
 			}
 		}
+		// TODO 并发处理
 		_matchTree.Remove(path.ToString());
 	}
 
@@ -71,6 +79,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 				path = path.Append(";").Append(pluginsListenerDescriptor.TargetAction);
 			}
 		}
+		// TODO 并发处理
 		if (_matchTree.ContainsPath(path.ToString()))
 		{
 			_matchTree.TryReplace(path.ToString(), pluginsListenerDescriptor);

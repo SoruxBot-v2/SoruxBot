@@ -53,4 +53,8 @@ public class PluginsListenerDescriptor(
     /// 如果失败了，那么调用这个函数，此函数是可以被配置的
     /// </summary>
     public Func<MessageContext, PluginFlag>? FailureFunc { get; init; } = failureFunc;
+	/// <summary>
+	/// 设置该Listener过期的时间
+	/// </summary>
+	public DateTime Timeout { get; init; } = timeout;
 }
