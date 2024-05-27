@@ -13,6 +13,6 @@ namespace SoruxBot.Kernel.Interface
         /// 向队列中放入Message
         /// </summary>
         /// <param name="value"></param>
-        public void SetNextMsg(MessageContext value);
+        public void SetNextMsg(MessageContext? value);
     }
 }

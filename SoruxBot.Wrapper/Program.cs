@@ -1,10 +1,18 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Grpc.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Bot;
+using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.WebGrpc;
+using SoruxBot.Wrapper.Service;
 
-var app = CreateDefaultBotBuilder(args).Build();
+var app = CreateDefaultBotBuilder(args)
+                .Build();
+
+// 构建 gRpc 服务
+BuildGrpcServer(app).Start();
 
 const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
@@ -34,3 +42,24 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
             });
         });
 }
+
+static Server BuildGrpcServer(IBot app)
+    => new Server
+    {
+        Services =
+        {
+            Message.BindService(
+                new MessageService(
+                    app.Context.ServiceProvider.GetRequiredService<ILoggerService>(), 
+                    app.Context.ServiceProvider.GetRequiredService<IMessageQueue>(),
+                    app.Context.Configuration.GetSection("chat:token").Value
+                    ))
+        },
+        
+        Ports = { 
+            new ServerPort(
+            app.Context.Configuration.GetSection("chat:host").Value, 
+            int.Parse(app.Context.Configuration.GetSection("chat:port").Value!),
+            ServerCredentials.Insecure) 
+        }
+    };
