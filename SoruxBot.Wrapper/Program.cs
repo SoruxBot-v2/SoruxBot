@@ -20,11 +20,22 @@ logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configur
 var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>();
 {
     pushService.RunInstance(
-        (context) => {},
+        (context) =>
+        {
+            // TODO 转给框架，依次调用Action
+            
+            Console.WriteLine(context.TargetPlatform);
+
+        },
         (context) =>
         {
             // TODO 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
+            
+            Console.WriteLine(context.TargetPlatform);
+            
+            // TODO 转给对应的Provider，拿到MessageResult
+            
             var result = new MessageResult(
                 "0",
                 DateTime.Now
