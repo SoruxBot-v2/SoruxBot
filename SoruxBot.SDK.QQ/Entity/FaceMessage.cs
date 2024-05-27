@@ -2,11 +2,7 @@
 
 namespace SoruxBot.SDK.QQ.Entity;
 
-public class FaceMessage(ushort faceId, bool isLargeFace) : CommonMessage("face", new()
-{
-    {"FaceId", faceId},
-    {"IsLargeFace", isLargeFace}
-})
+public class FaceMessage(ushort faceId, bool isLargeFace) : CommonMessage("face")
 
 {
     public ushort FaceId { get; } = faceId;

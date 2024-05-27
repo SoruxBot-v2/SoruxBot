@@ -1,7 +1,6 @@
 using SoruxBot.SDK.Model.Message;
-using SoruxBot.SDK.Plugins.Service;
 
-namespace SoruxBot.Kernel.Interface;
+namespace SoruxBot.SDK.Plugins.Service;
 
 public interface ICommonApi
 {
