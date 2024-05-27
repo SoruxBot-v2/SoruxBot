@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "SoruxBot.WebGrpc";
+package message;
+
+service Message {
+  rpc MessagePushStack (MessageRequest) returns (google.protobuf.Empty);
+  rpc MessageSend (MessageRequest) returns (MessageResponse);
+}
+
+message MessageRequest {
+  string Token = 1;
+  string payload = 2;
+}
+
+message MessageResponse {
+  string Token = 1;
+  string payload = 2;
+}

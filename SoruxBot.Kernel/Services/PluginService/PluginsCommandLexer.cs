@@ -57,8 +57,11 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
             var paras =
                 msgs.Select(sp => sp.Type switch
                 {
-                    "text" => sp.ToPreviewText().Split(" "),
-                    _      => [sp.ToPreviewText()]
+                    "text" => sp.ToPreviewText()
+                        .Split(" ")
+                        .Select(text => new TextMessage(text) as CommonMessage)
+                        .ToList(),
+                    _      => [sp]
                 }).Skip(1).SelectMany(sp => sp).ToList();
 
             descriptor.ActionParameters
@@ -84,7 +87,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     
                     else if (sp.ParameterType == typeof(bool))
                     {
-                        if (bool.TryParse(paras[parasCount], out bool result))
+                        if (bool.TryParse(paras[parasCount].ToPreviewText(), out bool result))
                         {
                             objects.Add(result);
                         }
@@ -96,7 +99,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     }
                     else if (sp.ParameterType == typeof(int))
                     {
-                        if (int.TryParse(paras[parasCount], out int result))
+                        if (int.TryParse(paras[parasCount].ToPreviewText(), out int result))
                         {
                             objects.Add(result);
                         }

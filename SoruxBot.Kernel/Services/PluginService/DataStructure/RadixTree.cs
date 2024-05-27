@@ -10,11 +10,11 @@ public class RadixTree<T>
 	{
 		List<T> result = new();
 		PrefixMatchPrivate(_root, path, result);
-		return result.Count() == 0 ? null : result;
+		return result.Count == 0 ? null : result;
 	}
     public RadixTree<T> Insert(string path, T value)
     {
-        if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", "path");
+        if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", nameof(path));
         return this;
     }
     public RadixTree<T> Remove(string path)

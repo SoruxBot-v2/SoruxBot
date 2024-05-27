@@ -1,12 +1,13 @@
 using System.Collections.Concurrent;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Model.Message;
+using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.MessageQueue;
 
 public class ResponseQueueImpl(
     IChannelPool<MessageContext> msgChannelPool,
-    IChannelPool<string> syncChannelPool) : IResponseQueue
+    IChannelPool<MessageResult> syncChannelPool) : IResponseQueue
 {
     private readonly ConcurrentDictionary<string, bool> _bindIds = new();
 
@@ -14,9 +15,9 @@ public class ResponseQueueImpl(
 
     // 实现方法同步
 
-    public Task<string> SetNextResponseAsync(MessageContext context)
+    public Task<MessageResult> SetNextResponseAsync(MessageContext context)
     {
-        return new Task<Task<string>>(async () =>
+        return new Task<Task<MessageResult>>(async () =>
         {
             // 这里是发送给指定用户实体的id
             var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
@@ -56,7 +57,7 @@ public class ResponseQueueImpl(
     }
 
 
-    public bool TryGetNextResponse(Func<MessageContext, string> func)
+    public bool TryGetNextResponse(Func<MessageContext, MessageResult> func)
     {
         MessageContext? context = null;
 

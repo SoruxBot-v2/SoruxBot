@@ -1,9 +1,8 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Yaml;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SoruxBot.Kernel.Services;
+using SoruxBot.Kernel.Interface;
+using SoruxBot.Kernel.MessageQueue;
 using SoruxBot.Kernel.Services.LogService;
 using SoruxBot.SDK.Plugins.Service;
 
@@ -23,7 +22,7 @@ namespace SoruxBot.Kernel.Bot
                 .ConfigureServices((config, services) =>
                 {
                     //Bot自身
-                    services.AddSingleton<IBot, SoruxBot.Kernel.Bot.Bot>();
+                    services.AddSingleton<IBot, Bot>();
                     var loggerFactory = LoggerFactory.Create(loggingBuilder =>
                     {
                         loggingBuilder.AddConsole();
@@ -70,6 +69,9 @@ namespace SoruxBot.Kernel.Bot
         private static void ApplyDefaultServices(IConfiguration configuration, IServiceCollection services)
         {
             // 添加实例
+            services.AddSingleton(typeof(IChannelPool<>), typeof(ChannelPool<>));
+            services.AddSingleton<IMessageQueue, MessageQueue.MessageQueue>();
+            services.AddSingleton<IResponseQueue, ResponseQueueImpl>();
         }
     }
 }

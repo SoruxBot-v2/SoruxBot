@@ -1,17 +1,13 @@
-﻿using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-using SoruxBot.SDK.Model.Message;
+﻿using SoruxBot.SDK.Model.Message;
+using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.Interface;
 
 public interface IResponseQueue
 {
-
-    public Task<string> SetNextResponseAsync(MessageContext context);
+    public Task<MessageResult> SetNextResponseAsync(MessageContext context);
 
     public IResponsePromise SetNextResponse(MessageContext context);
 
-
-    public bool TryGetNextResponse(Func<MessageContext, string> func);
+    public bool TryGetNextResponse(Func<MessageContext, MessageResult> func);
 }
