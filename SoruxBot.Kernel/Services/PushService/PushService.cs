@@ -3,31 +3,37 @@ using SoruxBot.SDK.Model.Message;
 
 namespace SoruxBot.Kernel.Services.PushService;
 
-public class PushService(IResponseQueue responseQueue) : IPushService
+public class PushService(IMessageQueue messageQueue, IResponseQueue responseQueue) : IPushService
 {
     private bool _isRunning = true;
 
-    public void RunInstance()
+    public void RunInstance(
+        Action<MessageContext> messageCallback,
+        Func<MessageContext, MessageResult> responseCallback)
     {
-        var task = new Task(() =>
+        var messageTask = new Task(() =>
         {
             while (_isRunning)
             {
-                responseQueue.TryGetNextResponse(context =>
-                {
-                    // TODO 这里利用MessageContext，从Provider得到MessageId
-                    Console.WriteLine(context);
-                    var result = new MessageResult(
-                        "0",
-                        DateTime.Now
-                        );
-                    return result;
-                });
+                var nextMessage = messageQueue.GetNextMessageRequest();
+                if (nextMessage == null) continue;
+                messageCallback(nextMessage);
+
+                Thread.Sleep(0);
+            }
+        });
+        var responseTask = new Task(() =>
+        {
+            while (_isRunning)
+            {
+                responseQueue.TryGetNextResponse(responseCallback);
                 Thread.Sleep(0);
             }
         });
 
-        task.Start();
+
+        messageTask.Start();
+        responseTask.Start();
     }
 
     public void StopInstance()
