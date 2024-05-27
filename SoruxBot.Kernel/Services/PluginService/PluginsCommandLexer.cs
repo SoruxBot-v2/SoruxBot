@@ -31,11 +31,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
 
         var msgs = context.MessageChain?.Messages;
 
-        if (descriptor.ActionParameters.Count <= 1) // 如果不经过 Lexer，那么就直接传递原始消息
-        {
-            if (msgs != null) objects.Add(msgs);
-        }
-        else if (msgs != null)
+        if (msgs != null && descriptor.ActionParameters.Count > 1)
         {
             // 如果参数长度不匹配，那么 pass
             if (descriptor.ActionParameters
