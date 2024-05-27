@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Interface;
+using SoruxBot.Kernel.Services.PluginService;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.PushService;
 using SoruxBot.SDK.Model.Message;
@@ -12,6 +13,7 @@ using SoruxBot.Wrapper.Service;
 
 var app = CreateDefaultBotBuilder(args)
                 .Build();
+
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
 
@@ -19,30 +21,35 @@ const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
 
 logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configuration.GetSection("SDKVersion").Value}")
-      .Info(loggerName, $"Running path: {app.Context.Configuration.GetSection("CurrentPath").Value}")
-      .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
-      .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
+    .Info(loggerName, $"Running path: {app.Context.Configuration.GetSection("CurrentPath").Value}")
+    .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
+    .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
 
 
 var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>();
 {
+    var pluginsDispatcher = 
+        app.Context.ServiceProvider.GetRequiredService<PluginsDispatcher>();
+    var pluginsCommandLexer =
+        app.Context.ServiceProvider.GetRequiredService<PluginsCommandLexer>();
+
     pushService.RunInstance(
-        (context) =>
+        context =>
         {
             // TODO 转给框架，依次调用Action
-            
+            pluginsDispatcher.GetAction(ref context)?.ForEach(
+                sp => { pluginsCommandLexer.PluginAction(context, sp); });
             Console.WriteLine(context.TargetPlatform);
-
         },
-        (context) =>
+        context =>
         {
             // TODO 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
-            
+
             Console.WriteLine(context.TargetPlatform);
-            
+
             // TODO 转给对应的Provider，拿到MessageResult
-            
+
             var result = new MessageResult(
                 "0",
                 DateTime.Now
@@ -81,16 +88,17 @@ static Server BuildGrpcServer(IBot app)
         {
             Message.BindService(
                 new MessageService(
-                    app.Context.ServiceProvider.GetRequiredService<ILoggerService>(), 
+                    app.Context.ServiceProvider.GetRequiredService<ILoggerService>(),
                     app.Context.ServiceProvider.GetRequiredService<IMessageQueue>(),
                     app.Context.Configuration.GetSection("chat:token").Value
-                    ))
+                ))
         },
-        
-        Ports = { 
+
+        Ports =
+        {
             new ServerPort(
-            app.Context.Configuration.GetSection("chat:host").Value, 
-            int.Parse(app.Context.Configuration.GetSection("chat:port").Value!),
-            ServerCredentials.Insecure) 
+                app.Context.Configuration.GetSection("chat:host").Value,
+                int.Parse(app.Context.Configuration.GetSection("chat:port").Value!),
+                ServerCredentials.Insecure)
         }
     };

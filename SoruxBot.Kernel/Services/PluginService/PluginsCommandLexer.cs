@@ -30,8 +30,8 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
         var objects = new List<object?> { context };
 
         var msgs = context.MessageChain?.Messages;
-
-        if (msgs != null && descriptor.ActionParameters.Count > 1)
+        
+        if (msgs is not null && descriptor.ActionParameters.Count >= 2)
         {
             // 如果参数长度不匹配，那么 pass
             if (descriptor.ActionParameters

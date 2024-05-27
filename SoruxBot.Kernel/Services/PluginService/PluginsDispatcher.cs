@@ -37,7 +37,7 @@ public class PluginsDispatcher(
     //插件按照触发条件可以分为选项式命令触发和事件触发
     //前者针对某个特定 EventType 的某个特定的语句触发某个特定的方法
     //后者针对某个通用的 EventType 进行触发
-	private readonly RadixTree<List<PluginsActionDescriptor>> _routerTree = new();
+    private readonly RadixTree<List<PluginsActionDescriptor>> _routerTree = new();
 
     /// <summary>
     /// 注册指令路由
@@ -48,7 +48,7 @@ public class PluginsDispatcher(
     {
         var assembly = Assembly.LoadFile(filepath);
         var types = assembly.GetExportedTypes();
-        
+
         // 遍历类
         foreach (var className in types)
         {
@@ -62,7 +62,7 @@ public class PluginsDispatcher(
                 var parameterInfos = constructorInfo.GetParameters();
                 // 构造参数匹配表
                 var objects = new List<object>();
-                
+
                 var serviceProvider = botContext.ServiceProvider;
                 foreach (var parameterInfo in parameterInfos)
                 {
@@ -80,7 +80,7 @@ public class PluginsDispatcher(
                         objects.Add(serviceProvider.GetRequiredService(parameterInfo.ParameterType));
                     }
                 }
-                
+
                 // 构造插件，并存储插件 Controller 实例
                 pluginsStorage.SetPluginInstance(name + "." + className.Name,
                     Activator.CreateInstance(className, objects.ToArray())!);
@@ -97,21 +97,22 @@ public class PluginsDispatcher(
 
                     // msg command
                     var msgEventCommand = methodInfo.GetCustomAttribute<CommandAttribute>();
-                    
+
                     PluginsActionDescriptor pluginsActionDescriptor;
-                    
+
                     //生成 Controller 的委托
                     ParameterInfo[] parameters = methodInfo.GetParameters();
 
                     if (msgEventCommand is null)
                     {
-                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType)) { methodInfo.ReturnType };
+                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType))
+                            { methodInfo.ReturnType };
                         var delegateType = Expression.GetFuncType(args.ToArray());
 
                         // 如果不存在 Command 那么就不参与 Lexer
-                        pluginsActionDescriptor = new (
+                        pluginsActionDescriptor = new(
                             methodInfo.CreateDelegate(
-                                delegateType, 
+                                delegateType,
                                 pluginsStorage.GetPluginInstance(name + "." + className.Name)
                             ),
                             methodInfo.Name,
@@ -121,63 +122,65 @@ public class PluginsDispatcher(
                     }
                     else if (methodInfo.GetParameters().Length == 1) // 如果参数为 1，也就是只接受一个 MessageContext 参数，那么就不需要 Lexer
                     {
-                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType)) { methodInfo.ReturnType };
+                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType))
+                            { methodInfo.ReturnType };
                         var delegateType = Expression.GetFuncType(args.ToArray());
 
                         // 如果不需要的话，那么就直接将参数传递给第一个参数，并且不进行 Lexer 绑定
-                        pluginsActionDescriptor = new (
+                        pluginsActionDescriptor = new(
                             methodInfo.CreateDelegate(
-                                delegateType, 
+                                delegateType,
                                 pluginsStorage.GetPluginInstance(name + "." + className.Name)
-                                ),
+                            ),
                             methodInfo.Name,
                             name,
                             name + "." + className.Name
-                            );
+                        );
                     }
                     else
                     {
                         // 因为我们认为的多命令对应一个 Action 指的是触发条件可以多个
                         // 而触发条件实际上就是 Command 第一个头不一样
                         // 因此 Para 只需要计算一遍即可
-                        
+
                         string[] paras = msgEventCommand.Command[0].Split(" ").Skip(1).ToArray();
                         int count = 0;
 
                         // 构建委托
-                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType)) { methodInfo.ReturnType };
+                        var args = new List<Type>(methodInfo.GetParameters().Select(sp => sp.ParameterType))
+                            { methodInfo.ReturnType };
                         var delegateType = Expression.GetFuncType(args.ToArray());
-                        
-                        pluginsActionDescriptor = new (
+
+                        pluginsActionDescriptor = new(
                             methodInfo.CreateDelegate(
                                 delegateType,
                                 pluginsStorage.GetPluginInstance(name + "." + className.Name)
-                                ),
+                            ),
                             methodInfo.Name,
                             name,
                             name + "." + className.Name
                         );
-                        
+
                         //添加必然存在的参数 MessageContext
                         var messageContextPara = new PluginActionParameter(
                             false,
                             typeof(MessageContext),
                             "context"
-                            );
-                        
+                        );
+
                         pluginsActionDescriptor.ActionParameters.Add(messageContextPara);
 
                         foreach (var parameterInfo in parameters.Skip(1))
                         {
                             //默认插件作者提供的命令列表的参数顺序和 Action 的函数顺序一致，否者绑定失败需要作者自己从 Context 获取
-                            
+
                             // [var] 表示必选参数， <var> 表示可选参数
                             var pluginsActionParameter = new PluginActionParameter(
                                 paras[count].Substring(0, 1).Equals("["),
                                 parameterInfo.ParameterType,
                                 paras[count].Substring(1, paras[count].Length - 2)
-                                );
-                            
+                            );
+
                             pluginsActionDescriptor.ActionParameters.Add(pluginsActionParameter);
                             count++;
                         }
@@ -185,12 +188,12 @@ public class PluginsDispatcher(
 
                     // 触发消息类型
                     string commandTriggerType = msgEventAttribute.MessageType.ToString();
-                    
+
                     //判断是否持有平台特定的特性
                     var msgPlatformConstraint = methodInfo.GetCustomAttribute<PlatformConstraintAttribute>();
 
-					//消息前缀
-					string commandPrefix = msgEventCommand?.CommandPrefix switch
+                    //消息前缀
+                    string commandPrefix = msgEventCommand?.CommandPrefix switch
                     {
                         CommandPrefixType.None => String.Empty,
                         CommandPrefixType.Single => pluginsStorage.GetPluginInformation(
@@ -199,7 +202,7 @@ public class PluginsDispatcher(
                         ),
                         CommandPrefixType.Global => _globalCommandPrefix,
                         _ => String.Empty
-                    } ?? String.Empty; 
+                    } ?? String.Empty;
 
 					// 路由注册
 					var routePrefix = new StringBuilder(commandTriggerType);
