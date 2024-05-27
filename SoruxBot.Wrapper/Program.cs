@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.Kernel.Services.PushService;
+using SoruxBot.SDK.Model.Message;
 using SoruxBot.WebGrpc;
 using SoruxBot.Wrapper.Service;
 
@@ -22,6 +24,36 @@ logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configur
       .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
       .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
 
+
+var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>();
+{
+    pushService.RunInstance(
+        (context) =>
+        {
+            // TODO 转给框架，依次调用Action
+            
+            Console.WriteLine(context.TargetPlatform);
+
+        },
+        (context) =>
+        {
+            // TODO 这里利用MessageContext，从Provider得到MessageId
+            Console.WriteLine(context);
+            
+            Console.WriteLine(context.TargetPlatform);
+            
+            // TODO 转给对应的Provider，拿到MessageResult
+            
+            var result = new MessageResult(
+                "0",
+                DateTime.Now
+            );
+            return result;
+        });
+}
+
+
+logger.Info(loggerName, "SoruxBot has been initialized.");
 
 static IBotBuilder CreateDefaultBotBuilder(string[] args)
 {
