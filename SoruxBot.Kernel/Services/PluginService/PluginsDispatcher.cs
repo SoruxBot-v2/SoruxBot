@@ -12,6 +12,8 @@ using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Basic;
 using SoruxBot.SDK.Plugins.Service;
 using System.Text;
+using SoruxBot.SDK.Model.Message.Entity;
+using System.Collections.Generic;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
@@ -210,7 +212,7 @@ public class PluginsDispatcher(
 						}
 					}
 					
-					if(pluginsActionDescriptor.ActionParameters.Count <= 1)
+					if(commandPrefix == string.Empty && (msgEventCommand?.Command.Length ?? 0) == 0)
 					{
 						if(_routerTree.TryGetValue(routePrefix.ToString(), out var list))
 						{
@@ -226,7 +228,7 @@ public class PluginsDispatcher(
 					{
 						foreach (var s in msgEventCommand!.Command)
 						{
-							string path = routePrefix.Append("/").Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
+							string path = routePrefix.Append('/').Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
 							if (_routerTree.TryGetValue(path, out var list))
 							{
 								list!.Add(pluginsActionDescriptor);
@@ -247,18 +249,35 @@ public class PluginsDispatcher(
     /// 得到路由被注册后的委托方法
     /// </summary>
     /// <returns></returns>
-    public List<PluginsActionDescriptor>? GetAction(string route, ref MessageContext messageContext)
+    public List<PluginsActionDescriptor>? GetAction(ref MessageContext messageContext)
     {
 	    // 监听器匹配
 	    if (!pluginsListener.Filter(messageContext))
 	    {
 		    return null;
 	    }
-	    
-		// 路由匹配
+		// 路由路径生成
+	    StringBuilder route = new StringBuilder(messageContext.MessageEventType.ToString());
+		if(messageContext.TargetPlatform !=string.Empty)
+		{
+			route.Append(';').Append(messageContext.TargetPlatform);
+			if(messageContext.TargetPlatformAction != string.Empty)
+			{
+				route.Append(';').Append(messageContext.TargetPlatformAction);
+			}
+		}
+		// 消息路由
 		var list = new List<PluginsActionDescriptor>();
+		var msg = messageContext.MessageChain!.Messages[0];
+		string textRoute = string.Empty;
+		if (msg.Type == "text")
+		{
+			var textMsg = (TextMessage)msg;
+			textRoute = "/" + textMsg.Content;
+		}
+		// 路由匹配
 		// TODO 并发处理
-		var lists = _routerTree.PrefixMatch(route);
+		var lists = _routerTree.PrefixMatch(route.ToString() + textRoute);
 		if (lists == null) return null;
 		foreach (var l in lists!)
 		{
