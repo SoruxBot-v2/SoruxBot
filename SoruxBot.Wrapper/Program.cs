@@ -23,7 +23,6 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
         .ConfigureBotConfiguration(config =>
         {
             // 添加 config.yaml 文件
-            
             config.AddYamlFile("config.yaml", optional: false, reloadOnChange: true);
         })
         .ConfigureBotConfiguration(config =>
@@ -31,7 +30,6 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
             config.AddInMemoryCollection(new[]
             {
                 //本设置的 Debug 针对于框架内部，一般情况下不需要开启本项，即使是生产环境的调试，如果是开发框架，建议打开
-                
                 new KeyValuePair<string, string?>("LoggerDebug", "true")
             });
         });

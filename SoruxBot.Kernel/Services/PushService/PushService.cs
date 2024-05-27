@@ -17,9 +17,11 @@ public class PushService(IResponseQueue responseQueue) : IPushService
                 {
                     // TODO 这里利用MessageContext，从Provider得到MessageId
                     Console.WriteLine(context);
-                    const string messageId = "MessageId";
-                    Console.WriteLine(messageId);
-                    return messageId;
+                    var result = new MessageResult(
+                        "0",
+                        DateTime.Now
+                        );
+                    return result;
                 });
                 Thread.Sleep(0);
             }
