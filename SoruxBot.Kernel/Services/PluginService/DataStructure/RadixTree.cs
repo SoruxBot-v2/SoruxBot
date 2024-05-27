@@ -1,69 +1,113 @@
-﻿namespace SoruxBot.Kernel.Services.PluginService.DataStructure;
-
+﻿using System.Threading;
+namespace SoruxBot.Kernel.Services.PluginService.DataStructure;
 public class RadixTree<T>
 {
     private readonly RadixTreeNode<T> _root = new(string.Empty);
+	private ReaderWriterLockSlim _treeLock = new ReaderWriterLockSlim();
 
     public RadixTree() { }
 	// 前缀匹配，返回所有匹配到的节点值。短路径优先。
 	public IEnumerable<T>? PrefixMatch(string path)
 	{
 		List<T> result = new();
-		PrefixMatchPrivate(_root, path, result);
+		_treeLock.EnterReadLock();
+		try
+		{
+			PrefixMatchPrivate(_root, path, result);
+		}
+		finally 
+		{
+			_treeLock.ExitReadLock(); 
+		}
 		return result.Count == 0 ? null : result;
 	}
     public RadixTree<T> Insert(string path, T value)
     {
-        if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", nameof(path));
+		_treeLock.EnterWriteLock();
+		try
+		{
+			if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", nameof(path));
+		}
+		finally { _treeLock.ExitWriteLock(); }
         return this;
     }
     public RadixTree<T> Remove(string path)
     {
-        RemovePrivate(_root, path);
+		_treeLock.EnterWriteLock();
+		try
+		{
+			RemovePrivate(_root, path);
+		}
+		finally { _treeLock.ExitWriteLock(); }
         return this;
     }
 	public RadixTree<T> RemoveByValue(T value)
 	{
 		// TODO
+
 		return this;
 	}
     public T? GetValue(string path)
     {
-        if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
-        {
-            return node.Value;
-        }
-        throw new ArgumentException($"Incorrect path: {path}", "path");
+		_treeLock.EnterReadLock();
+		try
+		{
+			if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
+			{
+				return node.Value;
+			}
+			throw new ArgumentException($"Incorrect path: {path}", "path");
+		}
+		finally { _treeLock.ExitReadLock(); }
     }
     public bool TryGetValue(string path, out T? value)
     {
-
-        if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
-        {
-            value = node.Value;
-            return true;
-        }
-        value = default;
-        return false;
+		_treeLock.EnterReadLock();
+		try
+		{
+			if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
+			{
+				value = node.Value;
+				return true;
+			}
+			value = default;
+			return false;
+		}
+		finally { _treeLock.ExitReadLock(); }
     }
     public bool TryReplace(string path, T value)
     {
-        if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
-        {
-            node.Value = value;
-            return true;
-        }
-        return false;
+		_treeLock.EnterWriteLock();
+		try
+		{
+			if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
+			{
+				node.Value = value;
+				return true;
+			}
+			return false;
+		}
+		finally { _treeLock.ExitWriteLock(); }
     }
     public bool ContainsPath(string path)
     {
-        if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode) return true;
-        return false;
+		_treeLock.EnterReadLock();
+		try
+		{
+			if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode) return true;
+			return false;
+		}
+		finally { _treeLock.ExitReadLock(); }
     }
     public Dictionary<string, T> ToDictionary()
     {
         Dictionary<string, T> dict = new();
-        ToDictionaryPrivate(_root, dict, string.Empty);
+		_treeLock.EnterReadLock();
+		try
+		{
+			ToDictionaryPrivate(_root, dict, string.Empty);
+		}
+		finally { _treeLock.ExitWriteLock(); }
         return dict;
     }
 
@@ -156,9 +200,39 @@ public class RadixTree<T>
         {
             node.Children.Remove(path[keyLength]);
         }
-        if (node.Children.Count == 0) return true;
+		// 如果只有一个子节点并且该节点不存储值，那么将该节点并入子节点
+		if (node.Children.Count == 1 && !node.IsValueNode)
+		{
+			node.Key += node.Children.Values.First().Key;
+			node.Children = node.Children.Values.First().Children;
+		}
+		// 如果没有子节点，且当前节点也没有值，那么没有必要保留这个节点，将其标记为已删除
+		else if (node.Children.Count == 0 && !node.IsValueNode) return true;
         return false;
     }
+	private static bool RemoveByValuePrivate(RadixTreeNode<T> node, T value)
+	{
+		if(node.IsValueNode && value!.Equals(node.Value))
+		{
+			node.DeleteValue();
+		}
+		foreach (var child in node.Children)
+		{
+			if(RemoveByValuePrivate(child.Value, value))
+			{
+				node.Children.Remove(child.Key);
+			}
+		}
+		// 如果只有一个子节点并且该节点不存储值，那么将该节点并入子节点
+		if(node.Children.Count == 1 && !node.IsValueNode)
+		{
+			node.Key += node.Children.Values.First().Key;
+			node.Children = node.Children.Values.First().Children;
+		}
+		// 如果没有子节点，且当前节点也没有值，那么没有必要保留这个节点，将其标记为已删除
+		if (node.Children.Count == 0 && !node.IsValueNode) return true;
+		return false;
+	}
     private static void ToDictionaryPrivate(RadixTreeNode<T> node, Dictionary<string, T> dict, string pathPrefix)
     {
         if (node.IsValueNode) dict.Add(pathPrefix + node.Key, node.Value!);
