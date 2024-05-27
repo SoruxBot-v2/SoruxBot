@@ -17,7 +17,7 @@ public class MessageBuilder(MessageChain messageChain)
     
     public MessageBuilder CommonMessage(string type, Dictionary<string, object> content)
     {
-        messageChain.Messages.Add(new CommonMessage(type, content));
+        messageChain.Messages.Add(new CommonMessage(type));
         return this;
     }
     

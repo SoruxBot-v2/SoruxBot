@@ -12,7 +12,7 @@ using SoruxBot.WebGrpc;
 using SoruxBot.Wrapper.Service;
 
 var app = CreateDefaultBotBuilder(args)
-    .Build();
+                .Build();
 
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
