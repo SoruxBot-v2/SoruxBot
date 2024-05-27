@@ -250,7 +250,7 @@ public class PluginsDispatcher(
     public List<PluginsActionDescriptor>? GetAction(string route, ref MessageContext messageContext)
     {
 	    // 监听器匹配
-	    if (pluginsListener.Filter(messageContext, out messageContext))
+	    if (!pluginsListener.Filter(messageContext))
 	    {
 		    return null;
 	    }

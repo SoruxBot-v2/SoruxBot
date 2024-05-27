@@ -22,6 +22,11 @@ public class RadixTree<T>
         RemovePrivate(_root, path);
         return this;
     }
+	public RadixTree<T> RemoveByValue(T value)
+	{
+		// TODO
+		return this;
+	}
     public T? GetValue(string path)
     {
         if (TryGetNodePrivate(_root, path, out var node) && node!.IsValueNode)
@@ -62,13 +67,13 @@ public class RadixTree<T>
         return dict;
     }
 
-	private static void PrefixMatchPrivate(RadixTreeNode<T> node, string path, IEnumerable<T> values)
+	private static void PrefixMatchPrivate(RadixTreeNode<T> node, string path, List<T> values)
 	{
 		var keyLength = node.Key.Length;
 		// 如果节点与路径前缀匹配，则继续搜索。如果该节点有值，则将该值加入values
 		if (path.Length >= keyLength && path.Substring(0, keyLength) == node.Key)
 		{
-			if (node.IsValueNode) values.Append(node.Value);
+			if (node.IsValueNode) values.Add(node.Value!);
 			if (path.Length == keyLength || !node.Children.ContainsKey(path[keyLength])) return;
 			PrefixMatchPrivate(node.Children[path[keyLength]], path.Substring(keyLength), values);
 		}
@@ -120,7 +125,7 @@ public class RadixTree<T>
         }
         return true;
     }
-    private static bool TryGetNodePrivate(RadixTreeNode<T> node, string path, out RadixTreeNode<T> destNode)
+    private static bool TryGetNodePrivate(RadixTreeNode<T> node, string path, out RadixTreeNode<T>? destNode)
     {
         var keyLength = node.Key.Length;
         if (node.Key == path)
