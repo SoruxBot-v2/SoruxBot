@@ -2,11 +2,7 @@
 
 namespace SoruxBot.SDK.QQ.Entity;
 
-public class PokeMessage (int type) : CommonMessage("poke", new ()
-{
-    {"Type", type}
-})
-
+public class PokeMessage (int type) : CommonMessage("poke")
 {
     public int PokeType { get; } = type;   
 

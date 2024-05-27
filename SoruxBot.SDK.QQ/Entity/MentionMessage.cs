@@ -2,12 +2,7 @@
 
 namespace SoruxBot.SDK.QQ.Entity;
 
-public class MentionMessage(string? name, uint target = 0) : CommonMessage("mention", new()
-{
-    { "Uin", target },
-    { "Uid", "" },
-    { "Name", name ?? String.Empty}
-})
+public class MentionMessage(string? name, uint target = 0) : CommonMessage("mention")
 
 {
     public uint Uin { get; set; } = target;
