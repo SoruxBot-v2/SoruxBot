@@ -17,7 +17,7 @@ chat:
   port: 8080 # Wrapper 运行的 gRpc 端口
   token: "" # Wrapper 鉴权 Token
 provider:
-  - type: "qq" # 平台特定类型
+  - type: "QQ" # 平台特定类型
     name: "阿木" # 机器人名称
     account: "854015635" # 机器人账号
     host: "localhost:8999" # 机器人 Provider 地址

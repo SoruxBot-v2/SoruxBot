@@ -271,6 +271,14 @@ public class PluginsDispatcher(
 	    {
 		    return null;
 	    }
+		var list = new List<PluginsActionDescriptor>();
+		var msg = messageContext.MessageChain!.Messages[0];
+		string textRoute = string.Empty;
+		if (msg.Type == "text")
+		{
+			var textMsg = (TextMessage)msg;
+			textRoute = "/" + textMsg.Content.Split(' ')[0];
+		}
 		// 路由路径生成
 	    StringBuilder route = new StringBuilder(messageContext.MessageEventType.ToString());
 		if(messageContext.TargetPlatform !=string.Empty)
@@ -282,14 +290,6 @@ public class PluginsDispatcher(
 			}
 		}
 		// 消息路由
-		var list = new List<PluginsActionDescriptor>();
-		var msg = messageContext.MessageChain!.Messages[0];
-		string textRoute = string.Empty;
-		if (msg.Type == "text")
-		{
-			var textMsg = (TextMessage)msg;
-			textRoute = "/" + textMsg.Content;
-		}
 		// 路由匹配
 		// TODO 并发处理
 		var lists = _routerTree.PrefixMatch(route.ToString() + textRoute);

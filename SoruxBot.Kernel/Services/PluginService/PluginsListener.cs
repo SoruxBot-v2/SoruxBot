@@ -33,7 +33,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 		}
 		// TODO 并发处理
 		var list = _matchTree.PrefixMatch(path.ToString());
-		if (list == null) return false;
+		if (list == null) return true;
 		foreach (var item in list)
 		{
 			if(item.ConditionCheck(context))

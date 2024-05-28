@@ -37,7 +37,8 @@ public class ResponseQueueImpl(
 
     public IResponsePromise SetNextResponse(MessageContext context)
     {
-        var promise = new ResponsePromise();
+
+		var promise = new ResponsePromise();
 
         // 这里是发送给指定用户实体的id
         var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
@@ -45,7 +46,13 @@ public class ResponseQueueImpl(
 
         new Task<Task>(async () =>
         {
-            await msgChannelPool.CreateBindChannel(bindId).Writer.WriteAsync(context);
+	        Console.WriteLine("要发了~~~");
+			if(!msgChannelPool.CreateBindChannel(bindId).Writer.TryWrite(context))
+			{
+				Console.WriteLine("Error");
+			}
+
+			
             var res = await syncChannelPool.CreateBindChannel(bindId).Reader.ReadAsync();
 
             promise.Callbacks.ForEach(callback => callback(res));
@@ -59,24 +66,63 @@ public class ResponseQueueImpl(
 
     public bool TryGetNextResponse(Func<MessageContext, MessageResult> func)
     {
-        MessageContext? context = null;
-
-        foreach (var (key, _) in _bindIds)
-        {
-            lock (msgChannelPool)
-            {
-                if (!msgChannelPool.TryGetBindChannel(key, out var channel) ||
-                    !channel!.Reader.TryRead(out context)) continue;
-                // 归还消息channel
-                msgChannelPool.ReturnChannel(key);
-                _bindIds.Remove(key, out _);
-            }
-        }
 
 
-        // 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
-        return context != null &&
-               syncChannelPool.TryGetBindChannel(context.TiedId, out var syncChannel) &&
-               syncChannel!.Writer.TryWrite(func(context));
+	    if (msgChannelPool.TryGetBindChannel("a", out var t))
+	    {
+		    if (t.Reader.TryRead(out var ctx))
+		    {
+			    func(ctx);
+			    Console.WriteLine(ctx);
+		    }
+
+		    return true;
+	    }
+
+	    return false;
+		    
+			MessageContext? context = null;
+
+			foreach (var (key, _) in _bindIds)
+			{
+				Console.WriteLine("TryGetBindChannel");
+
+				if (!msgChannelPool.TryGetBindChannel(key, out var channel))
+				{
+					continue;
+				}
+
+				if (!channel!.Reader.TryRead(out context))
+				{
+					Console.WriteLine("aaa");
+				}
+				else
+				{
+					Console.WriteLine(context);
+				}
+				// 归还消息channel
+				msgChannelPool.ReturnChannel(key);
+				_bindIds.Remove(key, out _);
+				break;
+			}
+
+
+			// 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
+			if (context == null)
+			{
+				return false;
+			}
+
+			Console.WriteLine("进来了");
+
+			if (!syncChannelPool.TryGetBindChannel(
+					   context.TargetPlatform + context.TriggerPlatformId + context.TriggerId,
+					   out var syncChannel))
+			{
+				Console.WriteLine("出错了");
+			}
+
+			return syncChannel!.Writer.TryWrite(func(context));
+		
     }
 }

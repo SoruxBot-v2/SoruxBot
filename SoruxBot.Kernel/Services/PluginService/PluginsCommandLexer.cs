@@ -49,7 +49,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
 
             var isValid = true;
 
-            var parasCount = 1;
+            var parasCount = 0;
             var paras =
                 msgs.Select(sp => sp.Type switch
                 {
@@ -58,28 +58,28 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                         .Select(text => new TextMessage(text) as CommonMessage)
                         .ToList(),
                     _      => [sp]
-                }).Skip(1).SelectMany(sp => sp).ToList();
+                }).SelectMany(sp => sp).Skip(1).ToList();
 
             descriptor.ActionParameters
                 .Skip(1)
                 .ToList()
                 .ForEach(sp =>
                 {
-                    if (parasCount > msgs.Count - 1)
+                    if (parasCount > msgs.Count)
                     {
                         objects.Add(null);
                     }
 
                     // 开始处理剩余参数
-                    if (sp.ParameterType == typeof(CommonMessage) || sp.ParameterType == typeof(object))
+                    if (sp.ParameterType.BaseType == typeof(CommonMessage) || sp.ParameterType == typeof(object))
                     {
                         objects.Add(paras[parasCount]);
                     }
                     
                     else if (sp.ParameterType == typeof(string))
                     {
-                        objects.Add(paras[parasCount]);
-                    }
+						objects.Add(paras[parasCount].ToPreviewText());
+					}
                     
                     else if (sp.ParameterType == typeof(bool))
                     {

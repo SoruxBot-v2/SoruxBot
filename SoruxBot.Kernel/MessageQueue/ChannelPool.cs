@@ -10,6 +10,9 @@ public class ChannelPool<T> : IChannelPool<T>
 {
     private readonly int _channelSize;
     private readonly Dictionary<string, int> _idToChannelMap;
+    
+    // TODO: 这里的Channel是全局的，需要改成每个ChannelPool一个
+    private Channel<T> _channel = Channel.CreateUnbounded<T>();
 
     // 内置Channel数组
     private readonly List<Channel<T>> _channelVector;
@@ -26,11 +29,15 @@ public class ChannelPool<T> : IChannelPool<T>
 
     private bool TryBindAvailableChannel(string bindId, out Channel<T>? channel)
     {
+
+        // TODO: 这里的Channel是全局的，需要改成每个ChannelPool一个
+        channel = _channel;
+        return true;
+        
+        
         channel = null;
         for (var i = 0; i < _channelSize; i++)
         {
-            lock (_idToChannelMap)
-            {
                 // 如果 id 已经绑定了，失败
                 if (_idToChannelMap.ContainsKey(bindId)) return false;
 
@@ -41,7 +48,6 @@ public class ChannelPool<T> : IChannelPool<T>
                 _idToChannelMap[bindId] = i;
                 channel = _channelVector[i];
                 return true;
-            }
         }
 
         return false;
@@ -49,6 +55,10 @@ public class ChannelPool<T> : IChannelPool<T>
 
     public Channel<T> CreateBindChannel(string bindId)
     {
+
+        // TODO: 这里的Channel是全局的，需要改成每个ChannelPool一个
+        return _channel;
+        
         Channel<T>? channel;
         // 直到绑定成功
         while (!TryBindAvailableChannel(bindId, out channel))
@@ -62,15 +72,21 @@ public class ChannelPool<T> : IChannelPool<T>
 
     public bool TryGetBindChannel(string bindId, out Channel<T>? channel)
     {
-        channel = null;
-        if (_idToChannelMap.TryGetValue(bindId, out var value)) return false;
-        channel = _channelVector[value];
+
+        // TODO: 这里的Channel是全局的，需要改成每个ChannelPool一个
+        channel = _channel;
         return true;
+        
+		channel = null;
+		if (!_idToChannelMap.TryGetValue(bindId, out var value)) return false;
+		channel = _channelVector[value];
+		return true;
 
     }
 
     public bool ReturnChannel(string bindId)
     {
+		return true;
         if (!_idToChannelMap.Remove(bindId, out var value))
         {
             return false;
@@ -79,6 +95,7 @@ public class ChannelPool<T> : IChannelPool<T>
         // 清空Reader
         while (_channelVector[value].Reader.TryRead(out _))
         {
+			Console.WriteLine("111111"); 
         }
 
         return true;
