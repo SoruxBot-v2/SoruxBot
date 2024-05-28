@@ -26,7 +26,7 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 // 构建 gRpc 客户端池
-var grpcClients = new ConcurrentDictionary<string, Message.MessageClient>();
+var grpcClients = new ConcurrentDictionary<string, Tuple<string, Message.MessageClient>>();
 
 // 获取yaml中的数组
 configuration.GetSection("provider").GetChildren().ToList().ForEach(
@@ -36,7 +36,10 @@ configuration.GetSection("provider").GetChildren().ToList().ForEach(
             $"http://{x.GetSection("host").Value}");
 
         grpcClients[$"{x.GetSection("type").Value?.ToLower()}@{x.GetSection("account").Value}"]
-            = new Message.MessageClient(grpcChannel);
+            = new Tuple<string, Message.MessageClient>(
+                $"{x.GetSection("token").Value}",
+                new Message.MessageClient(grpcChannel)
+            );
     });
 
 // 注册插件类库
@@ -75,13 +78,14 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
         {
             // 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
-            var response = 
-                grpcClients[context.TargetPlatform.ToLower()+"@"+context.BotAccount]
-                    .MessageSend(new MessageRequest
-            {
-                Payload = JsonConvert.SerializeObject(context, jsonSettings),
-                Token = "xxx"
-            });
+            var tuple = grpcClients[context.TargetPlatform.ToLower() + "@" + context.BotAccount];
+            var response = tuple.Item2
+                .MessageSend(new MessageRequest
+                {
+                    Payload = JsonConvert.SerializeObject(context, jsonSettings),
+                    // TODO 这里需要从配置文件中读取
+                    Token = tuple.Item1
+                });
 
             // 拿到MessageResult
             var result = JsonConvert
