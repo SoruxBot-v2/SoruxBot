@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "SoruxBot.OpenPlugins.Demo/1.0.0": {
+        "dependencies": {
+          "SoruxBot.SDK": "1.0.0"
+        },
+        "runtime": {
+          "SoruxBot.OpenPlugins.Demo.dll": {}
+        }
+      },
+      "SoruxBot.SDK/1.0.0": {
+        "runtime": {
+          "SoruxBot.SDK.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SoruxBot.OpenPlugins.Demo/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SoruxBot.SDK/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
