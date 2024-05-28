@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj": {}
+    "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj": {
+    "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj",
+        "projectUniqueName": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj",
         "projectName": "SoruxBot.Provider.QQ",
-        "projectPath": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj",
-        "packagesPath": "C:\\Users\\Haowen\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\obj\\",
+        "projectPath": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\SoruxBot.Provider.QQ.csproj",
+        "packagesPath": "C:\\Users\\forDece\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Haowen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\forDece\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,15 +22,14 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj": {
-                "projectPath": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj"
+              "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj": {
+                "projectPath": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj"
               }
             }
           }
@@ -39,11 +38,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -121,21 +115,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj": {
+    "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj",
+        "projectUniqueName": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj",
         "projectName": "SoruxBot.SDK",
-        "projectPath": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj",
-        "packagesPath": "C:\\Users\\Haowen\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.SDK\\obj\\",
+        "projectPath": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\SoruxBot.SDK.csproj",
+        "packagesPath": "C:\\Users\\forDece\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\forDece\\RiderProjects\\temp\\SoruxBot_v2\\SoruxBot.SDK\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Haowen\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\forDece\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -143,7 +137,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -156,11 +149,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -182,7 +170,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

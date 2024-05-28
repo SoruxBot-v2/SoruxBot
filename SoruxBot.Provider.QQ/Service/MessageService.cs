@@ -40,7 +40,12 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
 
         
         var result = await DispatchMessage(messageContext);
-        response.Payload = JsonConvert.SerializeObject(result, settings);
+		var res = new SoruxBot.SDK.Model.Message.MessageResult(
+				result.Sequence?.ToString() ?? "0",
+				DateTime.Now
+			);
+
+        response.Payload = JsonConvert.SerializeObject(res, settings);
         return await Task.FromResult(response);
     }
 
