@@ -24,13 +24,9 @@ public class ResponseQueueImpl(
             var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
 
             await msgChannelPool.RentChannel(bindId).Writer.WriteAsync(context);
-            Console.WriteLine("发完了上一个消息");
             if (!_bindIds[bindId])
             {
                 _bindIds[bindId] = true;
-            }else
-            {
-                Console.WriteLine("Error");
             }
             var res = await syncChannelPool.RentChannel(bindId).Reader.ReadAsync();
 
@@ -51,20 +47,16 @@ public class ResponseQueueImpl(
 
         new Task<Task>(async () =>
         {
-            Console.WriteLine("要发了~~~");
+
             await msgChannelPool.RentChannel(bindId).Writer.WriteAsync(context);
 
-            Console.WriteLine("发完了上一个消息");
+
             if (!_bindIds.TryGetValue(bindId, out var value))
             {
                 _bindIds.TryAdd(bindId, true);
 
             }
-            else
-            {
-                Console.WriteLine("Error");
 
-            }
 
             var res = await syncChannelPool.RentChannel(bindId).Reader.ReadAsync();
 
@@ -86,7 +78,7 @@ public class ResponseQueueImpl(
             if (!msgChannelPool.TryGetBindChannel(t, out var channel)) continue;
             if (!channel!.Reader.TryRead(out context)) continue;
             // 归还消息channel
-            Console.WriteLine(context.TriggerId);
+            // Console.WriteLine(context.TriggerId);
 
             msgChannelPool.ReturnChannel(t);
             _bindIds.Remove(t, out _);
@@ -99,14 +91,10 @@ public class ResponseQueueImpl(
             return false;
         }
 
-        Console.WriteLine("进来了");
 
-        if (!syncChannelPool.TryGetBindChannel(
-                context.TargetPlatform + context.TriggerPlatformId + context.TriggerId,
-                out var syncChannel))
-        {
-            Console.WriteLine("出错了");
-        }
+        syncChannelPool.TryGetBindChannel(
+            context.TargetPlatform + context.TriggerPlatformId + context.TriggerId,
+            out var syncChannel);
 
         return syncChannel!.Writer.TryWrite(func(context));
     }

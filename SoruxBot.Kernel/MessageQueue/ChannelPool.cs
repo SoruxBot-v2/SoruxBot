@@ -109,7 +109,7 @@ public class ChannelPool<T> : IChannelPool<T>
                 // 清空Reader
                 while (_channelVector[i].channel.Reader.TryRead(out _))
                 {
-                    Console.WriteLine("111111");
+                    // 正常情况不会进入
                 }
 
                 return true;
