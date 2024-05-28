@@ -39,6 +39,10 @@ public class PluginsDispatcher(
     //后者针对某个通用的 EventType 进行触发
     private readonly RadixTree<List<PluginsActionDescriptor>> _routerTree = new();
 
+    public IServiceCollection Services { get; } = new ServiceCollection();
+
+    public ServiceProvider? ServiceProvider { get; set; }
+    
     /// <summary>
     /// 注册指令路由
     /// </summary>
@@ -74,11 +78,16 @@ public class PluginsDispatcher(
                     {
                         objects.Add(loggerService);
                     }
-                    else
+                    
+                    var ctxObj = serviceProvider.GetService(parameterInfo.ParameterType);
+                    if (ctxObj is not null) 
                     {
-                        // 这些服务需要被 BotBuilder 装在前 Build
-                        objects.Add(serviceProvider.GetRequiredService(parameterInfo.ParameterType));
+                        objects.Add(ctxObj);
+                        continue;
                     }
+                    
+                    // 如果是 Null，那么一定得能从插件依赖中找到
+                    objects.Add(ServiceProvider!.GetRequiredService(parameterInfo.ParameterType));
                 }
 
                 // 构造插件，并存储插件 Controller 实例

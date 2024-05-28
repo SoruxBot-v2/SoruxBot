@@ -17,6 +17,14 @@ var app = CreateDefaultBotBuilder(args)
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
 
+// 注册插件类库
+app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterLibs();
+
+// 注册插件服务
+app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterPlugins();
+
+// 注册路由
+
 const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
 
@@ -78,6 +86,11 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
                 //本设置的 Debug 针对于框架内部，一般情况下不需要开启本项，即使是生产环境的调试，如果是开发框架，建议打开
                 new KeyValuePair<string, string?>("LoggerDebug", "true")
             });
+        })
+        .ConfigureServices((config, service) =>
+        {
+            // 注册插件服务
+            PluginsService.ConfigurePluginsServices(service);
         });
 }
 
