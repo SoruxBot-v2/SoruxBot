@@ -23,8 +23,6 @@ app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterLibs();
 // 注册插件服务
 app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterPlugins();
 
-// 注册路由
-
 const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
 

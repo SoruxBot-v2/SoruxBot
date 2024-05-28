@@ -20,13 +20,18 @@ namespace SoruxBot.Kernel.Services.PluginService
             var pluginsConfig = Path.Join(pluginsDir, "config");
             PluginsRegister pluginsRegister = context.ServiceProvider.GetRequiredService<PluginsRegister>();
 
-            // 注册插件，注册后直接完成了优先级调度，路由工作
-            new DirectoryInfo(pluginsBin)
-                .GetFiles()
-                .ToList()
-                .ForEach(plugin => pluginsRegister.Register(plugin.Name, plugin.FullName,
+			var plugins = new DirectoryInfo(pluginsBin).GetFiles().ToList();
+            // 注册插件
+            plugins.ForEach(plugin => pluginsRegister.Register(plugin.Name, plugin.FullName,
                     Path.Join(pluginsConfig, plugin.Name.Replace(".dll", ".json"))));
-        }
+			// 注册路由，完成优先级调度
+			var pluginsStorage = context.ServiceProvider.GetRequiredService<IPluginsStorage>();
+			foreach(var pluginName in pluginsStorage.GetPluginsOrderedByPrivilegeAsc())
+			{
+				var pluginInfo = plugins.First(p => p.Name == pluginName);
+				pluginsRegister.RegisterRoute(pluginInfo.Name, pluginInfo.FullName);
+			}
+		}
         
         /// <summary>
         /// 注册所有的类库
