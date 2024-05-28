@@ -5,7 +5,6 @@ namespace SoruxBot.Kernel.Services.StorageService
 {
 	internal class PluginsDataContext : DbContext
 	{
-		public DbSet<PluginsData> Plugins { get; set; }
 		public PluginsDataContext(DbContextOptions<PluginsDataContext> options) : base(options) { }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

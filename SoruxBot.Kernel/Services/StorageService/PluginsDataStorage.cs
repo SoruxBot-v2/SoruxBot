@@ -97,7 +97,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool RemoveStringSettings(string pluginMark, string key)
 		{
-			var itemToDel = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+			var itemToDel = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if (itemToDel is null)
 			{
 				//日志写入
@@ -125,7 +125,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public string GetStringSettings(string pluginMark, string key)
 		{
-			var entity = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+			var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if (entity is not null)
 			{
 				return entity.StringValue;
@@ -134,7 +134,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool EditStringSettings(string pluginMark, string key, string value)
 		{
-			var entity = _context.Plugins.FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+			var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
 			if(entity is null)
 			{
 				// 日志写入
