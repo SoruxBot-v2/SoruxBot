@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Kernel.MessageQueue;
 using SoruxBot.Kernel.Services.LogService;
+using SoruxBot.Kernel.Services.PluginService.ApiService;
 using SoruxBot.Kernel.Services.PushService;
 using SoruxBot.SDK.Plugins.Service;
 
@@ -74,6 +75,9 @@ namespace SoruxBot.Kernel.Bot
             services.AddSingleton<IMessageQueue, MessageQueue.MessageQueue>();
             services.AddSingleton<IResponseQueue, ResponseQueueImpl>();
             services.AddSingleton<IPushService, PushService>();
+            
+            // 添加 Api
+            services.AddSingleton<ICommonApi, ApiService>();
         }
     }
 }

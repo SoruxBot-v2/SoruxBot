@@ -62,7 +62,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             var pluginsStorage = context.ServiceProvider.GetRequiredService<IPluginsStorage>();
 
             pluginsStorage.AddPlugin(
-                soruxBotPlugin.GetPluginName(),
+                name,
                 soruxBotPlugin.GetPluginAuthorName(),
                 name,
                 soruxBotPlugin.GetPluginVersion(),

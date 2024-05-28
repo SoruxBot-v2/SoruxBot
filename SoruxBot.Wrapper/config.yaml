@@ -18,12 +18,7 @@ chat:
   token: "" # Wrapper 鉴权 Token
 provider:
   - type: "qq" # 平台特定类型
-    name: "白猫" # 机器人名称
-    account: "3369835843" # 机器人账号
+    name: "阿木" # 机器人名称
+    account: "854015635" # 机器人账号
     host: "localhost:8999" # 机器人 Provider 地址
-    token: "" # 鉴权参数，默认为空，空表示不鉴权，如果需要鉴权请填写本字段并且保证与 Provider 配置一致
-  - type: "wx" # 平台特定类型
-    name: "微信小猫机器人" # 机器人名称
-    account: "wxid_xxx" # 机器人账号
-    host: "localhost:9000" # 机器人 Provider 地址
     token: "" # 鉴权参数，默认为空，空表示不鉴权，如果需要鉴权请填写本字段并且保证与 Provider 配置一致

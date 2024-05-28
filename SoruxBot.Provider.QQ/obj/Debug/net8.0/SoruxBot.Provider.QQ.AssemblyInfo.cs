@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aeda2bd7b0963bc2a82222c1f469d72de00de102")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+258662e3c70e29805d325a40c7e59fdaaafd6f63")]
 [assembly: System.Reflection.AssemblyProductAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

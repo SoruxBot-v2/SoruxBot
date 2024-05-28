@@ -73,10 +73,13 @@ public class PluginsDispatcher(
                     if (parameterInfo.ParameterType == typeof(BotContext))
                     {
                         objects.Add(botContext);
+                        continue;
                     }
-                    else if (parameterInfo.ParameterType == typeof(ILoggerService))
+	                
+                    if (parameterInfo.ParameterType == typeof(ILoggerService))
                     {
                         objects.Add(loggerService);
+                        continue;
                     }
                     
                     var ctxObj = serviceProvider.GetService(parameterInfo.ParameterType);

@@ -1,8 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
-
-option csharp_namespace = "SoruxBot.WebGrpc";
+option csharp_namespace = "SoruxBot.Provider.WebGrpc";
 package message;
 
 service Message {
@@ -16,6 +15,5 @@ message MessageRequest {
 }
 
 message MessageResponse {
-  string Token = 1;
-  string payload = 2;
+  string payload = 1;
 }

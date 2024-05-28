@@ -182,9 +182,18 @@ namespace SoruxBot.Kernel.Services.StorageService
 														   name + " in the pluginsStorageDataSet.");
 				return false;
 			}
-			var row = DataSet.Tables[name]!.AsEnumerable().First(p => (string)p["key"] == key);
-			row["value"] = value;
-			
+			var row = DataSet.Tables[name]!.AsEnumerable().FirstOrDefault(p => (string)p["key"] == key);
+			// 添加这个row 
+			if(row is null)
+			{
+				row = DataSet.Tables[name]!.NewRow();
+				row["key"] = key;
+				row["value"] = value;
+			}
+			else
+			{
+				row["value"] = value;
+			}
 			DataSet.Tables[name]!.AcceptChanges();
 			return true;
 		}
@@ -208,7 +217,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 				return false;
 			}
 			var row = DataSet.Tables[name]!.AsEnumerable().FirstOrDefault(p => (string)p["key"] == key);
-			if(row is null)
+			if (row is null)
 			{
 				return false;
 			}

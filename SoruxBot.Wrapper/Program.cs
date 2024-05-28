@@ -9,10 +9,10 @@ using SoruxBot.Kernel.Services.PluginService;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.PushService;
 using SoruxBot.SDK.Model.Message;
-using SoruxBot.WebGrpc;
 using SoruxBot.Wrapper.Service;
 using Grpc.Net.Client;
 using Newtonsoft.Json;
+using SoruxBot.Provider.WebGrpc;
 
 var app = CreateDefaultBotBuilder(args)
     .Build();
@@ -66,7 +66,6 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
     pushService.RunInstance(
         context =>
         {
-            // TODO 转给框架，依次调用Action
             pluginsDispatcher.GetAction(ref context)?.ForEach(
                 sp => { pluginsCommandLexer.PluginAction(context, sp); });
             Console.WriteLine(context.TargetPlatform);
@@ -95,6 +94,8 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
 
 logger.Info(loggerName, "SoruxBot has been initialized.");
 
+await Task.Delay(-1);
+
 static IBotBuilder CreateDefaultBotBuilder(string[] args)
 {
     BotBuilder botBuilder = new();
@@ -113,7 +114,7 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
                 new KeyValuePair<string, string?>("LoggerDebug", "true")
             });
         })
-        .ConfigureServices((config, service) =>
+        .ConfigureServices((_, service) =>
         {
             // 注册插件服务
             PluginsService.ConfigurePluginsServices(service);
