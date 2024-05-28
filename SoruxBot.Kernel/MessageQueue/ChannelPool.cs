@@ -27,7 +27,7 @@ public class ChannelPool<T> : IChannelPool<T>
     private bool TryBindAvailableChannel(string bindId, out Channel<T>? channel)
     {
         channel = null;
-        for (var i = 0; i < _channelSize; i++)
+        for (var i = 1; i < _channelSize; i++)
         {
             lock (_idToChannelMap)
             {
@@ -63,7 +63,7 @@ public class ChannelPool<T> : IChannelPool<T>
     public bool TryGetBindChannel(string bindId, out Channel<T>? channel)
     {
         channel = null;
-        if (_idToChannelMap.TryGetValue(bindId, out var value)) return false;
+        if (!_idToChannelMap.TryGetValue(bindId, out var value)) return false;
         channel = _channelVector[value];
         return true;
 

@@ -32,10 +32,10 @@
   ],
   "logs": [
     {
-      "code": "Undefined",
+      "code": "NU1900",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "读取缓存文件 C:\\Users\\Haowen\\Documents\\Learning\\Homework\\sm4\\CSharp\\SoruxBot_v2\\SoruxBot.Provider.QQ\\obj\\project.nuget.cache 时遇到问题: Invalid property identifier character: <. Path 'version', line 3, position 0."
+      "message": "获取包漏洞数据时出错: 无法加载源 https://api.nuget.org/v3/index.json 的服务索引。"
     }
   ]
 }

@@ -74,9 +74,12 @@ public class ResponseQueueImpl(
         }
 
 
-        // 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
-        return context != null &&
-               syncChannelPool.TryGetBindChannel(context.TiedId, out var syncChannel) &&
+		// 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
+
+		return context != null &&
+               syncChannelPool.TryGetBindChannel(
+				   context.TargetPlatform + context.TriggerPlatformId + context.TriggerId, 
+				   out var syncChannel) &&
                syncChannel!.Writer.TryWrite(func(context));
     }
 }

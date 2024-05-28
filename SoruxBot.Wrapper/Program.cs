@@ -34,7 +34,7 @@ configuration.GetSection("provider").GetChildren().ToList().ForEach(
         var grpcChannel = GrpcChannel.ForAddress(
             $"http://{x.GetSection("host").Value}");
 
-        grpcClients[$"{x.GetSection("type").Value}@{x.GetSection("account")}"]
+        grpcClients[$"{x.GetSection("type").Value?.ToLower()}@{x.GetSection("account").Value}"]
             = new Message.MessageClient(grpcChannel);
     });
 
@@ -75,11 +75,11 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
             // 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
             var response = 
-                grpcClients[context.TargetPlatform+"@"+context.BotAccount]
+                grpcClients[context.TargetPlatform.ToLower()+"@"+context.BotAccount]
                     .MessageSend(new MessageRequest
             {
                 Payload = JsonConvert.SerializeObject(context, jsonSettings),
-                Token = configuration.GetSection("client:token").Value
+                Token = "xxx"
             });
 
             // 拿到MessageResult

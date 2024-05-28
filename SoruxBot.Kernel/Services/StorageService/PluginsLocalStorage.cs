@@ -189,6 +189,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 				row = DataSet.Tables[name]!.NewRow();
 				row["key"] = key;
 				row["value"] = value;
+				DataSet.Tables[name]!.Rows.Add(row);
 			}
 			else
 			{
