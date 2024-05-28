@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b891dc69314d94a6a990aa2169bce5e85c02095e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0f2e826683790fa3c112b152f6890f50a892258")]
 [assembly: System.Reflection.AssemblyProductAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SoruxBot.Provider.QQ")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
