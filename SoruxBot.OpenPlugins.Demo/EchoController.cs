@@ -13,6 +13,7 @@ public class EchoController(ILoggerService loggerService, ICommonApi bot) : Plug
 
     [MessageEvent(MessageType.PrivateMessage)]
     [Command(CommandPrefixType.Single, "echo [content]")]
+    [PlatformConstraint("QQ", "FriendMessage")]
     public PluginFlag EchoPlugin(MessageContext ctx, string content)
     {
         var chain = MessageBuilder
