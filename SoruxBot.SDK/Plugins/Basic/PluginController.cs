@@ -31,8 +31,5 @@ public class PluginController
     /// 数据链路：OnPluginInitialization => OnPluginEnable => OnPluginDisable
     /// </summary>
     /// <returns></returns>
-    public virtual void OnPluginInitialization()
-    {
-        
-    }
+    public virtual void OnPluginInitialization() { }
 }

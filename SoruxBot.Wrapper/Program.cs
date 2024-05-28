@@ -26,7 +26,7 @@ var configuration = new ConfigurationBuilder()
     .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
     .Build();
 
-// 2. 构建 gRpc 客户端池
+// 构建 gRpc 客户端池
 var grpcClients = new ConcurrentDictionary<string, Message.MessageClient>();
 // 获取yaml中的数组
 configuration.GetSection("provider").GetChildren().ToList().ForEach(
@@ -39,6 +39,11 @@ configuration.GetSection("provider").GetChildren().ToList().ForEach(
             = new Message.MessageClient(grpcChannel);
     });
 
+// 注册插件类库
+app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterLibs();
+
+// 注册插件服务
+app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterPlugins();
 
 const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
@@ -108,6 +113,11 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
                 //本设置的 Debug 针对于框架内部，一般情况下不需要开启本项，即使是生产环境的调试，如果是开发框架，建议打开
                 new KeyValuePair<string, string?>("LoggerDebug", "true")
             });
+        })
+        .ConfigureServices((config, service) =>
+        {
+            // 注册插件服务
+            PluginsService.ConfigurePluginsServices(service);
         });
 }
 

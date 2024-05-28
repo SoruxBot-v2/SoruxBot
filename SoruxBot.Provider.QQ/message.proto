@@ -15,5 +15,5 @@ message MessageRequest {
 }
 
 message MessageResponse {
-  string payload = 2;
+  string payload = 1;
 }
