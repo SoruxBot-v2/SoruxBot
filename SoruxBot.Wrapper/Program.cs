@@ -10,12 +10,25 @@ using SoruxBot.Kernel.Services.PushService;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.WebGrpc;
 using SoruxBot.Wrapper.Service;
+using Grpc.Net.Client;
+using Newtonsoft.Json;
 
 var app = CreateDefaultBotBuilder(args)
                 .Build();
 
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
+
+// 构建grpc客户端
+// 构建 Configuration
+var configuration = new ConfigurationBuilder()
+    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
+    .Build();
+using var grpcChannel =
+    GrpcChannel.ForAddress(
+        $"http://{configuration.GetSection("client:host").Value}:{configuration.GetSection("client:port").Value}");
+var grpcClient = new Message.MessageClient(grpcChannel);
+
 
 const string loggerName = "SoruxBot.Wrapper";
 var logger = app.Context.ServiceProvider.GetRequiredService<ILoggerService>();
@@ -24,7 +37,10 @@ logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configur
     .Info(loggerName, $"Running path: {app.Context.Configuration.GetSection("CurrentPath").Value}")
     .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
     .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
-
+var jsonSettings = new JsonSerializerSettings
+{
+    TypeNameHandling = TypeNameHandling.All
+};
 
 var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>();
 {
@@ -43,18 +59,20 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
         },
         context =>
         {
-            // TODO 这里利用MessageContext，从Provider得到MessageId
+            // 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
-
-            Console.WriteLine(context.TargetPlatform);
-
-            // TODO 转给对应的Provider，拿到MessageResult
-
-            var result = new MessageResult(
-                "0",
-                DateTime.Now
-            );
-            return result;
+            var response = grpcClient.MessageSend(new MessageRequest
+            {
+                Payload = JsonConvert.SerializeObject(context, jsonSettings),
+                Token = configuration.GetSection("client:token").Value
+            });
+            
+            // 拿到MessageResult
+            var result = JsonConvert
+                .DeserializeObject<MessageResult>(response.Payload,jsonSettings);
+            
+            // 不会为空
+            return result!;
         });
 }
 
