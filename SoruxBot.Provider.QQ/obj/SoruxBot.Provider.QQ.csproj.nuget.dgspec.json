@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj": {}
+    "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj": {}
   },
   "projects": {
-    "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj": {
+    "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
+        "projectUniqueName": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
         "projectName": "SoruxBot.Provider.QQ",
-        "projectPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
-        "packagesPath": "/Users/chaichaichaidemacbookairmei/.nuget/packages/",
-        "outputPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/obj/",
+        "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
+        "packagesPath": "/Users/epicmo/.nuget/packages/",
+        "outputPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/chaichaichaidemacbookairmei/.nuget/NuGet/NuGet.Config"
+          "/Users/epicmo/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -26,8 +26,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
-                "projectPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj"
+              "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
+                "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj"
               }
             }
           }
@@ -42,6 +42,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Contrib.Grpc.Core.M1": {
+              "target": "Package",
+              "version": "[2.46.7, )"
+            },
             "Google.Protobuf": {
               "target": "Package",
               "version": "[3.27.0, )"
@@ -49,6 +53,10 @@
             "Grpc": {
               "target": "Package",
               "version": "[2.46.6, )"
+            },
+            "Grpc.AspNetCore.Server": {
+              "target": "Package",
+              "version": "[2.63.0, )"
             },
             "Grpc.Net.Client": {
               "target": "Package",
@@ -72,9 +80,21 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Configuration.FileExtensions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.Extensions.Configuration.Yaml": {
               "target": "Package",
               "version": "[2.0.0-preview2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             }
           },
           "imports": [
@@ -93,21 +113,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/chaichaichaidemacbookairmei/.dotnet/sdk/8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
+    "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj",
+        "projectUniqueName": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj",
         "projectName": "SoruxBot.SDK",
-        "projectPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj",
-        "packagesPath": "/Users/chaichaichaidemacbookairmei/.nuget/packages/",
-        "outputPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/obj/",
+        "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj",
+        "packagesPath": "/Users/epicmo/.nuget/packages/",
+        "outputPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/chaichaichaidemacbookairmei/.nuget/NuGet/NuGet.Config"
+          "/Users/epicmo/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -146,7 +166,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/Users/chaichaichaidemacbookairmei/.dotnet/sdk/8.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Text.Json;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Lagrange.Core;
@@ -8,11 +7,13 @@ using Lagrange.Core.Common.Interface;
 using Lagrange.Core.Message.Entity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
+using Newtonsoft.Json;
 using SoruxBot.Provider.QQ;
 using SoruxBot.Provider.QQ.Service;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
+
 
 BotDeviceInfo deviceInfo = new()
 {
@@ -57,6 +58,10 @@ var client = new Message.MessageClient(channel);
 // 注册回调事件
 
 const string platformType = "QQ";
+var jsonSettings = new JsonSerializerSettings
+{
+    TypeNameHandling = TypeNameHandling.All
+};
 
 // 当好友消息发送的时候
 bot.Invoker.OnFriendMessageReceived += (context, @event) =>
@@ -87,7 +92,7 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 
     client.MessagePushStack(new MessageRequest()
     {
-        Payload = JsonSerializer.Serialize(msg),
+        Payload = JsonConvert.SerializeObject(msg, jsonSettings),
         Token = configuration.GetSection("client:token").Value
     });
 };

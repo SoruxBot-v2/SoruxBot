@@ -27,3 +27,11 @@
 /Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/obj/Debug/net8.0/SoruxBot.Provider.QQ.pdb
 /Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/obj/Debug/net8.0/SoruxBot.Provider.QQ.genruntimeconfig.cache
 /Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/obj/Debug/net8.0/ref/SoruxBot.Provider.QQ.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/Grpc.Net.Client.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Yaml.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/Newtonsoft.Json.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/YamlDotNet.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/SoruxBot.SDK.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/SoruxBot.SDK.pdb
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/Grpc.AspNetCore.Server.dll
+/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/bin/Debug/net8.0/runtimes/osx-arm64/native/libgrpc_csharp_ext.arm64.dylib

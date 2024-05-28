@@ -21,7 +21,6 @@ var app = CreateDefaultBotBuilder(args)
 BuildGrpcServer(app).Start();
 
 // 构建 grpc 客户端
-// 1. 构建 Configuration
 var configuration = new ConfigurationBuilder()
     .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
     .Build();

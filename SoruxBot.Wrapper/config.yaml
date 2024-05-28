@@ -1,5 +1,7 @@
 storage:
   root: '.' # 表示插件的存储根目录
+channel:
+  size: 20
 database:
   engine: 'sqlite' # 存储引擎
   local_file: 'binary' # 插件二进制文件存储路径

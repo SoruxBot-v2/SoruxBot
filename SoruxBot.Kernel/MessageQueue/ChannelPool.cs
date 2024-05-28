@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
 using System.Threading.Channels;
+using Microsoft.Extensions.Configuration;
 using SoruxBot.Kernel.Interface;
 
 namespace SoruxBot.Kernel.MessageQueue;
@@ -11,12 +12,12 @@ public class ChannelPool<T> : IChannelPool<T>
     private readonly Dictionary<string, int> _idToChannelMap;
 
     // 内置Channel数组
-    private readonly Vector<Channel<T>> _channelVector;
+    private readonly List<Channel<T>> _channelVector;
 
-    public ChannelPool(int size)
+    public ChannelPool(IConfiguration configuration)
     {
-        _channelSize = size;
-        _channelVector = new Vector<Channel<T>>(Enumerable.Repeat(
+        _channelSize = configuration.GetRequiredSection("channel").GetValue<int>("size");
+        _channelVector = new List<Channel<T>>(Enumerable.Repeat(
                 Channel.CreateUnbounded<T>(), _channelSize)
             .ToArray());
         _idToChannelMap = new Dictionary<string, int>();
