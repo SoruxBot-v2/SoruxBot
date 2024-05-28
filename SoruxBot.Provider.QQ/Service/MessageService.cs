@@ -13,7 +13,7 @@ namespace SoruxBot.Provider.QQ.Service;
 
 public class MessageService(string? token, BotContext bot) : Message.MessageBase
 {
-    public override Task<MessageResponse> MessageSend(MessageRequest request, ServerCallContext context)
+    public override async Task<MessageResponse> MessageSend(MessageRequest request, ServerCallContext context)
     {
         var response = new MessageResponse();
         
@@ -21,7 +21,7 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         {
             // 表示无回应
             response.Payload = string.Empty;
-            return Task.FromResult(response);
+            return await Task.FromResult(response);
         }
         
         // 这个进行路由处理
@@ -35,13 +35,13 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         {
             // 表示无回应
             response.Payload = string.Empty;
-            return Task.FromResult(response);
+            return await Task.FromResult(response);
         }
 
         
-        var result = DispatchMessage(messageContext);
+        var result = await DispatchMessage(messageContext);
         response.Payload = JsonConvert.SerializeObject(result, settings);
-        return Task.FromResult(response);
+        return await Task.FromResult(response);
     }
 
     private async Task<MessageResult> DispatchMessage(MessageContext ctx)
