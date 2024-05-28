@@ -71,13 +71,21 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
         context =>
         {
             pluginsDispatcher.GetAction(ref context)?.ForEach(
-                sp => { pluginsCommandLexer.PluginAction(context, sp); });
-            // Console.WriteLine(context.TargetPlatform);
+                sp =>
+                {
+                    try
+                    {
+                        pluginsCommandLexer.PluginAction(context, sp);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.Error(loggerName, $"Plugin Error catch, with exception: {e.Message} and context {context}");
+                    }
+                });
         },
         context =>
         {
             // 这里利用MessageContext，从Provider得到MessageId
-            Console.WriteLine(context);
             var tuple = grpcClients[context.TargetPlatform.ToLower() + "@" + context.BotAccount];
             var response = tuple.Item2
                 .MessageSend(new MessageRequest

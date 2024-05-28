@@ -51,6 +51,7 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
 
     private async Task<MessageResult> DispatchMessage(MessageContext ctx)
     {
+        // TODO 补全所有的 Action
         switch (ctx.TargetPlatformAction)
         {
             case "FriendMessage":
@@ -64,7 +65,7 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
             }
             case "GroupMessage":
             {
-                // 处理好友消息
+                // 处理群聊消息
                 var msg = Lagrange.Core.Message.MessageBuilder
                     .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
                 msg = ConvertMessageBuilder(msg, ctx);
@@ -79,6 +80,7 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
     private Lagrange.Core.Message.MessageBuilder 
         ConvertMessageBuilder(Lagrange.Core.Message.MessageBuilder builder, MessageContext ctx)
     {
+        // TODO 转换和适配为 Provider 认可的消息链
         foreach (var msg in ctx.MessageChain!.Messages)
         {
             if (msg is TextMessage textMessage)

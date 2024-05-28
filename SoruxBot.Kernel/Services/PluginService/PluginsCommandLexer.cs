@@ -34,19 +34,6 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
         if (msgs is not null && descriptor.ActionParameters.Count >= 2)
         {
             // 如果参数长度不匹配，那么 pass
-            if (descriptor.ActionParameters
-                    .Skip(msgs.Count)
-                    .Count(sp => !sp.IsOptional) > 0)
-            {
-                // 表示消息没有被处理
-                loggerService.Warn(NameValue.KernelPluginServiceLexerLogName,
-                    "Lexer error for unmatched parameter number. "
-                    + ", PluginsName:" + descriptor.InstanceTypeName
-                    + ", ParameterCount:" + descriptor.ActionParameters.Count
-                    + ", MessageCount:" + msgs.Count);
-                return PluginFlag.MsgUnprocessed;
-            }
-
             var isValid = true;
 
             var parasCount = 0;
@@ -60,28 +47,47 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                     _      => [sp]
                 }).SelectMany(sp => sp).Skip(1).ToList();
 
+            if (descriptor.ActionParameters
+                    .Skip(msgs.Count)
+                    .Count(sp => !sp.IsOptional) > paras.Count)
+            {
+                // 表示消息没有被处理
+                loggerService.Warn(NameValue.KernelPluginServiceLexerLogName,
+                    "Lexer error for unmatched parameter number. "
+                    + ", PluginsName:" + descriptor.InstanceTypeName
+                    + ", ParameterCount:" + descriptor.ActionParameters.Count
+                    + ", MessageCount:" + msgs.Count);
+                return PluginFlag.MsgUnprocessed;
+            }
+            
             descriptor.ActionParameters
                 .Skip(1)
                 .ToList()
                 .ForEach(sp =>
                 {
-                    if (parasCount > msgs.Count)
+                    if (parasCount > paras.Count - 1)
                     {
                         objects.Add(null);
+                        parasCount++;
+                        return;
                     }
 
                     // 开始处理剩余参数
                     if (sp.ParameterType.BaseType == typeof(CommonMessage) || sp.ParameterType == typeof(object))
                     {
                         objects.Add(paras[parasCount]);
+                        parasCount++;
+                        return;
                     }
                     
-                    else if (sp.ParameterType == typeof(string))
+                    if (sp.ParameterType == typeof(string))
                     {
 						objects.Add(paras[parasCount].ToPreviewText());
+                        parasCount++;
+                        return;
 					}
                     
-                    else if (sp.ParameterType == typeof(bool))
+                    if (sp.ParameterType == typeof(bool))
                     {
                         if (bool.TryParse(paras[parasCount].ToPreviewText(), out bool result))
                         {
@@ -90,10 +96,12 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                         else
                         {
                             isValid = false;
-                            return;
                         }
+                        parasCount++;
+                        return;
                     }
-                    else if (sp.ParameterType == typeof(int))
+                    
+                    if (sp.ParameterType == typeof(int))
                     {
                         if (int.TryParse(paras[parasCount].ToPreviewText(), out int result))
                         {
@@ -102,16 +110,13 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                         else
                         {
                             isValid = false;
-                            return;
                         }
-                    }
-                    else
-                    {
-                        isValid = false;
+                        parasCount++;
                         return;
                     }
-
+                    
                     parasCount++;
+                    isValid = false;
                 });
 
 

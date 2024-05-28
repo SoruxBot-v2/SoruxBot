@@ -37,7 +37,7 @@ public class PluginsDispatcher(
     //插件按照触发条件可以分为选项式命令触发和事件触发
     //前者针对某个特定 EventType 的某个特定的语句触发某个特定的方法
     //后者针对某个通用的 EventType 进行触发
-    private readonly RadixTree<List<PluginsActionDescriptor>> _routerTree = new();
+    private readonly RadixTree<RadixTree<List<PluginsActionDescriptor>>> _prefixRouterTree = new();
 
     public IServiceCollection Services { get; } = new ServiceCollection();
 
@@ -229,29 +229,34 @@ public class PluginsDispatcher(
 					
 					if(commandPrefix == string.Empty && (msgEventCommand?.Command.Length ?? 0) == 0)
 					{
-						if(_routerTree.TryGetValue(routePrefix.ToString(), out var list))
+						_prefixRouterTree.TryInsert(routePrefix.ToString(), new RadixTree<List<PluginsActionDescriptor>>());
+						var textRouter = _prefixRouterTree.GetValue(routePrefix.ToString())!;
+						if (textRouter.TryGetValue(string.Empty, out var list))
 						{
 							list!.Add(pluginsActionDescriptor);
 						}
 						else
 						{
 							list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-							_routerTree.Insert(routePrefix.ToString(), list);
+							textRouter.Insert(string.Empty, list);
 						}
+						
 					}
 					else
 					{
+						_prefixRouterTree.TryInsert(routePrefix.ToString(), new RadixTree<List<PluginsActionDescriptor>>());
+						var textRouter = _prefixRouterTree.GetValue(routePrefix.ToString())!;
 						foreach (var s in msgEventCommand!.Command)
 						{
-							string path = routePrefix.Append('/').Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
-							if (_routerTree.TryGetValue(path, out var list))
+							string path = new StringBuilder().Append('/').Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
+							if (textRouter.TryGetValue(path, out var list))
 							{
 								list!.Add(pluginsActionDescriptor);
 							}
 							else
 							{
 								list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-								_routerTree.Insert(path, list);
+								textRouter.Insert(path, list);
 							}
 						}
 					}
@@ -272,9 +277,9 @@ public class PluginsDispatcher(
 		    return null;
 	    }
 		var list = new List<PluginsActionDescriptor>();
-		var msg = messageContext.MessageChain!.Messages[0];
 		string textRoute = string.Empty;
-		if (msg.Type == "text")
+		var msg = messageContext.MessageChain!.Messages.FirstOrDefault();
+		if (msg is not null && msg.Type == "text")
 		{
 			var textMsg = (TextMessage)msg;
 			textRoute = "/" + textMsg.Content.Split(' ')[0];
@@ -291,12 +296,16 @@ public class PluginsDispatcher(
 		}
 		// 消息路由
 		// 路由匹配
-		// TODO 并发处理
-		var lists = _routerTree.PrefixMatch(route + textRoute);
-		if (lists == null) return null;
-		foreach (var l in lists!)
+		var prefixLists = _prefixRouterTree.PrefixMatch(route.ToString());
+		if (prefixLists == null) return null;
+		foreach (var textRouteLists in prefixLists)
 		{
-			list.AddRange(l);
+			var lists = textRouteLists.PrefixMatch(textRoute);
+			if (lists == null) continue;
+			foreach(var l in lists)
+			{
+				list.AddRange(l);
+			}
 		}
 		return list.Count > 0 ? list : null;
 	}

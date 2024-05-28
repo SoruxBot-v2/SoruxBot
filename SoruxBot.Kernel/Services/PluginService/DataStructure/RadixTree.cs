@@ -26,11 +26,31 @@ public class RadixTree<T>
 		_treeLock.EnterWriteLock();
 		try
 		{
-			if (!TryInsertPrivate(_root, path, value)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", nameof(path));
+			if (!TryInsertPrivate(_root, path, value, false)) throw new ArgumentException($"Argument path ( {path} ) is invalid: Already exists or begin empty", nameof(path));
 		}
 		finally { _treeLock.ExitWriteLock(); }
         return this;
     }
+	public bool TryInsert(string path, T value)
+	{
+		_treeLock.EnterWriteLock();
+		try
+		{
+			if (!TryInsertPrivate(_root, path, value, false)) return false;
+		}
+		finally { _treeLock.ExitWriteLock(); }
+		return true;
+	}
+	public RadixTree<T> InsertOrSet(string path, T value)
+	{
+		_treeLock.EnterWriteLock();
+		try
+		{
+			TryInsertPrivate(_root, path, value, true);
+		}
+		finally { _treeLock.ExitWriteLock(); }
+		return this;
+	}
     public RadixTree<T> Remove(string path)
     {
 		_treeLock.EnterWriteLock();
@@ -123,10 +143,10 @@ public class RadixTree<T>
 		}
 		return;
 	}
-    private static bool TryInsertPrivate(RadixTreeNode<T> node, string path, T value)
+    private static bool TryInsertPrivate(RadixTreeNode<T> node, string path, T value, bool replace)
     {
-        if (path == string.Empty || path == node.Key && node.IsValueNode) return false;
-        if (path == node.Key)
+        if (path == node.Key && node.IsValueNode && !replace) return false;
+        if (path == node.Key && replace || path == node.Key && !node.IsValueNode)
         {
             node.SetValue(value);
             return true;
@@ -140,7 +160,7 @@ public class RadixTree<T>
         {
             if (node.Children.ContainsKey(path[index]))
             {
-                return TryInsertPrivate(node.Children[path[index]], path.Substring(index), value);
+                return TryInsertPrivate(node.Children[path[index]], path.Substring(index), value, replace);
             }
             else
             {

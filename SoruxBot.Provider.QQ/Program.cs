@@ -35,6 +35,7 @@ BotConfig config = new BotConfig
     CustomSignProvider = new QqSigner(),
 };
 
+// TODO 将 deviceInfo 和 keystore 保存到文件中，以便下次启动时使用。实现快速登录。
 var bot = BotFactory.Create(config, deviceInfo, keystore);
 var botClient = new BotClient(config, bot);
 
@@ -180,5 +181,7 @@ static void ConvertMessageChain(MessageChain chain, Lagrange.Core.Message.Messag
             ));
             continue;
         }
+        
+        //TODO 增加其他消息的消息类转换
     }
 }
