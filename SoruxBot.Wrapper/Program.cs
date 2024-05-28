@@ -69,7 +69,7 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
         {
             pluginsDispatcher.GetAction(ref context)?.ForEach(
                 sp => { pluginsCommandLexer.PluginAction(context, sp); });
-            Console.WriteLine(context.TargetPlatform);
+            // Console.WriteLine(context.TargetPlatform);
         },
         context =>
         {
