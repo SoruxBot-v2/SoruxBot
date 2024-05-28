@@ -16,10 +16,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Contrib.Grpc.Core.M1" Version="2.46.7" />
       <PackageReference Include="Grpc" Version="2.46.6" />
+      <PackageReference Include="Grpc.Net.Client" Version="2.63.0" />
       <PackageReference Include="Grpc.Tools" Version="2.64.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 </Project>

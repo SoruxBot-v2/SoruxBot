@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using System.Collections.Concurrent;
+using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,14 +9,34 @@ using SoruxBot.Kernel.Services.PluginService;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.PushService;
 using SoruxBot.SDK.Model.Message;
-using SoruxBot.WebGrpc;
 using SoruxBot.Wrapper.Service;
+using Grpc.Net.Client;
+using Newtonsoft.Json;
+using SoruxBot.Provider.WebGrpc;
 
 var app = CreateDefaultBotBuilder(args)
-                .Build();
+    .Build();
 
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
+
+// 构建 grpc 客户端
+var configuration = new ConfigurationBuilder()
+    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
+    .Build();
+
+// 构建 gRpc 客户端池
+var grpcClients = new ConcurrentDictionary<string, Message.MessageClient>();
+// 获取yaml中的数组
+configuration.GetSection("provider").GetChildren().ToList().ForEach(
+    x =>
+    {
+        var grpcChannel = GrpcChannel.ForAddress(
+            $"http://{x.GetSection("host").Value}");
+
+        grpcClients[$"{x.GetSection("type").Value}@{x.GetSection("account")}"]
+            = new Message.MessageClient(grpcChannel);
+    });
 
 // 注册插件类库
 app.Context.ServiceProvider.GetRequiredService<PluginsService>().RegisterLibs();
@@ -30,11 +51,14 @@ logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configur
     .Info(loggerName, $"Running path: {app.Context.Configuration.GetSection("CurrentPath").Value}")
     .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
     .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
-
+var jsonSettings = new JsonSerializerSettings
+{
+    TypeNameHandling = TypeNameHandling.All
+};
 
 var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>();
 {
-    var pluginsDispatcher = 
+    var pluginsDispatcher =
         app.Context.ServiceProvider.GetRequiredService<PluginsDispatcher>();
     var pluginsCommandLexer =
         app.Context.ServiceProvider.GetRequiredService<PluginsCommandLexer>();
@@ -42,30 +66,35 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
     pushService.RunInstance(
         context =>
         {
-            // TODO 转给框架，依次调用Action
             pluginsDispatcher.GetAction(ref context)?.ForEach(
                 sp => { pluginsCommandLexer.PluginAction(context, sp); });
             Console.WriteLine(context.TargetPlatform);
         },
         context =>
         {
-            // TODO 这里利用MessageContext，从Provider得到MessageId
+            // 这里利用MessageContext，从Provider得到MessageId
             Console.WriteLine(context);
+            var response = 
+                grpcClients[context.TargetPlatform+"@"+context.BotAccount]
+                    .MessageSend(new MessageRequest
+            {
+                Payload = JsonConvert.SerializeObject(context, jsonSettings),
+                Token = configuration.GetSection("client:token").Value
+            });
 
-            Console.WriteLine(context.TargetPlatform);
+            // 拿到MessageResult
+            var result = JsonConvert
+                .DeserializeObject<MessageResult>(response.Payload, jsonSettings);
 
-            // TODO 转给对应的Provider，拿到MessageResult
-
-            var result = new MessageResult(
-                "0",
-                DateTime.Now
-            );
-            return result;
+            // 不会为空
+            return result!;
         });
 }
 
 
 logger.Info(loggerName, "SoruxBot has been initialized.");
+
+await Task.Delay(-1);
 
 static IBotBuilder CreateDefaultBotBuilder(string[] args)
 {
@@ -85,7 +114,7 @@ static IBotBuilder CreateDefaultBotBuilder(string[] args)
                 new KeyValuePair<string, string?>("LoggerDebug", "true")
             });
         })
-        .ConfigureServices((config, service) =>
+        .ConfigureServices((_, service) =>
         {
             // 注册插件服务
             PluginsService.ConfigurePluginsServices(service);

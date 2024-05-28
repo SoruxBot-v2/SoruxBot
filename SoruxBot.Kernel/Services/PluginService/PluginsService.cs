@@ -42,6 +42,17 @@ namespace SoruxBot.Kernel.Services.PluginService
             var rootDir = context.Configuration.GetSection("storage:root").Value!;
             var pluginsDir = Path.Join(rootDir, "plugins");
             var pluginLibs = Path.Join(pluginsDir, "lib");
+            if (!new DirectoryInfo(pluginsDir).Exists)
+            {
+                // 创建目录
+                new DirectoryInfo(pluginsDir).Create();
+                new DirectoryInfo(pluginLibs).Create();
+                var pluginsBin = Path.Join(pluginsDir, "bin");
+                var pluginsConfig = Path.Join(pluginsDir, "config");
+                new DirectoryInfo(pluginsConfig).Create();
+                new DirectoryInfo(pluginsBin).Create();
+            }
+            
             PluginsRegister pluginsRegister = context.ServiceProvider.GetRequiredService<PluginsRegister>();
 
             // 注册插件类库

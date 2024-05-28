@@ -1,3 +1,0 @@
-obj\Debug\net8.0/Message.cs \
-obj\Debug\net8.0/MessageGrpc.cs: C:/Users/Haowen/.nuget/packages/grpc.tools/2.64.0/build/native/include/google/protobuf/empty.proto\
- message.proto

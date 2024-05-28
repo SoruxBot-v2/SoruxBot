@@ -1,11 +1,12 @@
-using System.Text.Json;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Lagrange.Core;
 using Lagrange.Core.Common.Interface.Api;
+using Newtonsoft.Json;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 using MessageResult = Lagrange.Core.Message.MessageResult;
 
 namespace SoruxBot.Provider.QQ.Service;
@@ -24,16 +25,22 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         }
         
         // 这个进行路由处理
-        var messageContext = JsonSerializer.Deserialize<MessageContext>(request.Payload);
+        JsonSerializerSettings settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
+        
+        var messageContext = JsonConvert.DeserializeObject<MessageContext>(request.Payload, settings);
         if (messageContext is null)
         {
             // 表示无回应
             response.Payload = string.Empty;
             return Task.FromResult(response);
         }
+
         
         var result = DispatchMessage(messageContext);
-        response.Payload = JsonSerializer.Serialize(result);
+        response.Payload = JsonConvert.SerializeObject(result, settings);
         return Task.FromResult(response);
     }
 
