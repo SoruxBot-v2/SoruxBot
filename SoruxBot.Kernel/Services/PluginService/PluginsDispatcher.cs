@@ -292,7 +292,7 @@ public class PluginsDispatcher(
 		// 消息路由
 		// 路由匹配
 		// TODO 并发处理
-		var lists = _routerTree.PrefixMatch(route.ToString() + textRoute);
+		var lists = _routerTree.PrefixMatch(route + textRoute);
 		if (lists == null) return null;
 		foreach (var l in lists!)
 		{

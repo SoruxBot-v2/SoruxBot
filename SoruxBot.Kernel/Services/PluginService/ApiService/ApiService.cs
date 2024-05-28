@@ -10,7 +10,6 @@ public class ApiService(IResponseQueue queue) : ICommonApi
     {
         return queue.SetNextResponseAsync(messageContext);
     }
-    
     public IResponsePromise SendMessage(MessageContext messageContext)
     {
         return queue.SetNextResponse(messageContext);

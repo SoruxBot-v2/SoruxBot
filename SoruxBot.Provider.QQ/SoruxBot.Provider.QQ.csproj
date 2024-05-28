@@ -12,7 +12,6 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="Contrib.Grpc.Core.M1" Version="2.46.7" />
         <PackageReference Include="Google.Protobuf" Version="3.27.0" />
         <PackageReference Include="Grpc" Version="2.46.6" />
         <PackageReference Include="Grpc.AspNetCore.Server" Version="2.63.0" />

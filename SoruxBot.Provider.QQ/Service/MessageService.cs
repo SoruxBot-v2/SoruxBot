@@ -54,12 +54,23 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         switch (ctx.TargetPlatformAction)
         {
             case "FriendMessage":
+            {
                 // 处理好友消息
                 var msg = Lagrange.Core.Message.MessageBuilder
                     .Friend(uint.Parse(ctx.MessageChain!.TargetId));
                 msg = ConvertMessageBuilder(msg, ctx);
                 var result = await bot.SendMessage(msg.Build());
                 return result;
+            }
+            case "GroupMessage":
+            {
+                // 处理好友消息
+                var msg = Lagrange.Core.Message.MessageBuilder
+                    .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
+                msg = ConvertMessageBuilder(msg, ctx);
+                var result = await bot.SendMessage(msg.Build());
+                return result;
+            }
         }
         
         return new MessageResult();

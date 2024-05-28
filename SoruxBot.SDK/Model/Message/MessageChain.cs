@@ -3,7 +3,7 @@ using SoruxBot.SDK.Plugins.Model;
 
 namespace SoruxBot.SDK.Model.Message;
 
-public class MessageChain(string selfId, string targetId, string platformId, string? tiedId, string platformType)
+public class MessageChain(string selfId, string targetId, string? platformId, string? tiedId, string platformType)
 {
     /// <summary>
     /// 消息链
