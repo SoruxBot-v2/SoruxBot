@@ -26,7 +26,7 @@ namespace SoruxBot.Provider.WebGrpc {
           string.Concat(
             "Cg1tZXNzYWdlLnByb3RvEgdtZXNzYWdlGhtnb29nbGUvcHJvdG9idWYvZW1w",
             "dHkucHJvdG8iMAoOTWVzc2FnZVJlcXVlc3QSDQoFVG9rZW4YASABKAkSDwoH",
-            "cGF5bG9hZBgCIAEoCSIiCg9NZXNzYWdlUmVzcG9uc2USDwoHcGF5bG9hZBgC",
+            "cGF5bG9hZBgCIAEoCSIiCg9NZXNzYWdlUmVzcG9uc2USDwoHcGF5bG9hZBgB",
             "IAEoCTKQAQoHTWVzc2FnZRJDChBNZXNzYWdlUHVzaFN0YWNrEhcubWVzc2Fn",
             "ZS5NZXNzYWdlUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRJACgtN",
             "ZXNzYWdlU2VuZBIXLm1lc3NhZ2UuTWVzc2FnZVJlcXVlc3QaGC5tZXNzYWdl",
@@ -316,7 +316,7 @@ namespace SoruxBot.Provider.WebGrpc {
     }
 
     /// <summary>Field number for the "payload" field.</summary>
-    public const int PayloadFieldNumber = 2;
+    public const int PayloadFieldNumber = 1;
     private string payload_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -370,7 +370,7 @@ namespace SoruxBot.Provider.WebGrpc {
       output.WriteRawMessage(this);
     #else
       if (Payload.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteString(Payload);
       }
       if (_unknownFields != null) {
@@ -384,7 +384,7 @@ namespace SoruxBot.Provider.WebGrpc {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
       if (Payload.Length != 0) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteString(Payload);
       }
       if (_unknownFields != null) {
@@ -430,7 +430,7 @@ namespace SoruxBot.Provider.WebGrpc {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 18: {
+          case 10: {
             Payload = input.ReadString();
             break;
           }
@@ -449,7 +449,7 @@ namespace SoruxBot.Provider.WebGrpc {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
-          case 18: {
+          case 10: {
             Payload = input.ReadString();
             break;
           }

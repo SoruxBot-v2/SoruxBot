@@ -5,7 +5,7 @@ internal class RadixTreeNode<T>
     public string Key { get; set; }
     public T? Value { get; set; } = default;
     public Dictionary<char, RadixTreeNode<T>> Children { get; set; } = new();
-    public bool IsValueNode { get { return _isValueNode; } }
+    public bool IsValueNode { get { return _isValueNode; } init { _isValueNode = value; } }
     public RadixTreeNode(string key)
     {
         Key = key;
