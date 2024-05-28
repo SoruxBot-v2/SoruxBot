@@ -97,6 +97,39 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
     });
 };
 
+bot.Invoker.OnGroupMessageReceived += (context, @event) =>
+{
+    Console.WriteLine($"[SoruxBot.Provider.QQ] Group Message Received: {@event.Chain.ToPreviewString()}");
+    var msgChain = new MessageChain(
+        context.BotUin.ToString(),
+        @event.Chain.FriendUin.ToString(),
+        @event.Chain.GroupUin.ToString(), 
+        @event.Chain.GroupUin.ToString(), // 群聊时，这个值等于 TriggerPlatformId
+        platformType
+    );
+
+    // 转换消息链
+    ConvertMessageChain(msgChain, @event.Chain);
+
+    var msg = new MessageContext(
+        context.BotUin.ToString(),
+        "GroupMessage",
+        platformType,
+        MessageType.GroupMessage,
+        @event.Chain.FriendUin.ToString(),
+        @event.Chain.GroupUin?.ToString() ?? "", 
+        @event.Chain.GroupUin?.ToString() ?? "", // 群聊时，这个值等于 TriggerPlatformId
+        msgChain,
+        @event.EventTime
+    );
+
+    client.MessagePushStack(new MessageRequest()
+    {
+        Payload = JsonConvert.SerializeObject(msg, jsonSettings),
+        Token = configuration.GetSection("client:token").Value
+    });
+};
+
 // 登录
 await botClient.LoginAsync();
 
