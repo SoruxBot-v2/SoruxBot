@@ -27,6 +27,7 @@ var configuration = new ConfigurationBuilder()
 
 // 构建 gRpc 客户端池
 var grpcClients = new ConcurrentDictionary<string, Message.MessageClient>();
+
 // 获取yaml中的数组
 configuration.GetSection("provider").GetChildren().ToList().ForEach(
     x =>

@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.SDK.QQ", "SoruxBot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.Provider.QQ", "SoruxBot.Provider.QQ\SoruxBot.Provider.QQ.csproj", "{192717A4-B87A-43DA-8605-8CE5925C9230}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoruxBot.OpenPlugins.Demo", "SoruxBot.OpenPlugins.Demo\SoruxBot.OpenPlugins.Demo.csproj", "{F15A8AB4-A7EE-4607-8EE3-6DED28EBE67D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{192717A4-B87A-43DA-8605-8CE5925C9230}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{192717A4-B87A-43DA-8605-8CE5925C9230}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{192717A4-B87A-43DA-8605-8CE5925C9230}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F15A8AB4-A7EE-4607-8EE3-6DED28EBE67D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F15A8AB4-A7EE-4607-8EE3-6DED28EBE67D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F15A8AB4-A7EE-4607-8EE3-6DED28EBE67D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F15A8AB4-A7EE-4607-8EE3-6DED28EBE67D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

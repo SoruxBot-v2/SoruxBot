@@ -4,6 +4,13 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Title>SoruxBot SDK</Title>
+        <Authors>SoruxBot</Authors>
+        <Description>SoruxBot Common SDK</Description>
+        <Copyright>https://github.com/SoruxBot-v2/SoruxBot</Copyright>
+        <PackageProjectUrl>https://github.com/SoruxBot-v2/SoruxBot</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/SoruxBot-v2/SoruxBot</RepositoryUrl>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
 </Project>

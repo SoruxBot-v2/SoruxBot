@@ -90,16 +90,11 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
         @event.EventTime
     );
 
-    var empty = client.MessagePushStack(new MessageRequest()
+    client.MessagePushStack(new MessageRequest()
     {
         Payload = JsonConvert.SerializeObject(msg, jsonSettings),
         Token = configuration.GetSection("client:token").Value
     });
-
-    if (empty is null)
-    {
-        Console.WriteLine("NULL RESPONSE");
-    }
 };
 
 // 登录

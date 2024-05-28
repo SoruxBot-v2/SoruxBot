@@ -1,8 +1,0 @@
-server:
-  host: 'localhost' # 表示 Provider 运行的 gRpc 地址
-  port: 8999 # 表示 Provider 运行的 gRpc 端口
-  token: 'xxx' # 表示 Token 密钥，用于鉴权
-client:
-    host: 'localhost' # 表示 Wrapper 运行的 gRpc 地址
-    port: 8081 # 表示 Wrapper 运行的 gRpc 端口
-    token: 'xxx' # 表示 Token 密钥，用于鉴权
