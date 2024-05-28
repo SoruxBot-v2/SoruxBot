@@ -2604,19 +2604,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/epicmo/.nuget/packages/": {}
+    "/Users/chaichaichaidemacbookairmei/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
+      "projectUniqueName": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
       "projectName": "SoruxBot.Provider.QQ",
-      "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
-      "packagesPath": "/Users/epicmo/.nuget/packages/",
-      "outputPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.Provider.QQ/obj/",
+      "projectPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/SoruxBot.Provider.QQ.csproj",
+      "packagesPath": "/Users/chaichaichaidemacbookairmei/.nuget/packages/",
+      "outputPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.Provider.QQ/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/epicmo/.nuget/NuGet/NuGet.Config"
+        "/Users/chaichaichaidemacbookairmei/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -2628,8 +2628,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
-              "projectPath": "/Users/epicmo/Project/SoruxBot/SoruxBot-v2/SoruxBot-v2/SoruxBot.SDK/SoruxBot.SDK.csproj"
+            "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj": {
+              "projectPath": "/Users/chaichaichaidemacbookairmei/RiderProjects/SoruxBotV2/SoruxBot.SDK/SoruxBot.SDK.csproj"
             }
           }
         }
@@ -2638,11 +2638,6 @@
         "warnAsError": [
           "NU1605"
         ]
-      },
-      "restoreAuditProperties": {
-        "enableAudit": "true",
-        "auditLevel": "low",
-        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -2700,7 +2695,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/Users/chaichaichaidemacbookairmei/.dotnet/sdk/8.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
