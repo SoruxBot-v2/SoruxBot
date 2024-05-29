@@ -6,96 +6,80 @@ using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.MessageQueue;
 
+
 public class ResponseQueueImpl(
-    IChannelPool<MessageContext> msgChannelPool,
-    IChannelPool<MessageResult> syncChannelPool) : IResponseQueue
+    IChannelPool<MessageContext,MessageResult> msgChannelPool) : IResponseQueue
 {
     private readonly ConcurrentDictionary<string, bool> _bindIds = new();
-
+    
     // 传递要发送的消息
 
     // 实现方法同步
-
+    // private readonly ManualResetEvent _manualReset = new ManualResetEvent(false);
+    
     public Task<MessageResult> SetNextResponseAsync(MessageContext context)
     {
         return new Task<Task<MessageResult>>(async () =>
         {
             // 这里是发送给指定用户实体的id
             var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
+            
+            var channelPair = msgChannelPool.RentChannelPair(bindId).GetChannelPair();
+            await channelPair.Item1.Writer.WriteAsync(context);
+            
+            msgChannelPool.RentChannelPair(bindId).PushWork(_responseCallback!);
 
-            await msgChannelPool.RentChannel(bindId).Writer.WriteAsync(context);
-            if (!_bindIds[bindId])
-            {
-                _bindIds[bindId] = true;
-            }
-            var res = await syncChannelPool.RentChannel(bindId).Reader.ReadAsync();
-
-            // 归还同步channel
-            syncChannelPool.ReturnChannel(bindId);
+            var res = await channelPair.Item2.Reader.ReadAsync();
 
             return res;
         }).Unwrap();
     }
 
-
+    private Func<MessageContext, MessageResult>? _responseCallback;
+    
     public IResponsePromise SetNextResponse(MessageContext context)
     {
+        
+        // 要让插件开发者发送的顺序和到达qq的顺序是一致的，
+        // 就是说拿到MessageId，此次消息才算发送完毕
+        // 如果此方法被多次调用。需要保证后面的调用在上次调用拿到结果之后才执行
+        
         var promise = new ResponsePromise();
-
-        // 这里是发送给指定用户实体的id
-        var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
 
         new Task<Task>(async () =>
         {
-
-            await msgChannelPool.RentChannel(bindId).Writer.WriteAsync(context);
-
-
-            if (!_bindIds.TryGetValue(bindId, out var value))
+            try
             {
-                _bindIds.TryAdd(bindId, true);
+                Console.WriteLine("进来了inin");
+                // 这里是发送给指定用户实体的id，保证这个顺序一致即可
+                // 即能按需发送，又保证一定并发
+                var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
+            
+                var channelPair = msgChannelPool.RentChannelPair(bindId).GetChannelPair();
+                await channelPair.Item1.Writer.WriteAsync(context);
+                Console.WriteLine("要push");
+                msgChannelPool.RentChannelPair(bindId).PushWork(_responseCallback!);
+
+                var res = await channelPair.Item2.Reader.ReadAsync();
+                promise.Callbacks.ForEach(callback => callback(res));
 
             }
-
-
-            var res = await syncChannelPool.RentChannel(bindId).Reader.ReadAsync();
-
-            promise.Callbacks.ForEach(callback => callback(res));
-            // 归还同步channel
-            syncChannelPool.ReturnChannel(bindId);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+           
         }).Start();
+        
 
         return promise;
     }
 
-
-    public bool TryGetNextResponse(Func<MessageContext, MessageResult> func)
+    public void SetResponseCallback(Func<MessageContext, MessageResult> cb)
     {
-        MessageContext? context = null;
-        
-        foreach (var t in _bindIds.Keys)
-        {
-            if (!msgChannelPool.TryGetBindChannel(t, out var channel)) continue;
-            if (!channel!.Reader.TryRead(out context)) continue;
-            // 归还消息channel
-            // Console.WriteLine(context.TriggerId);
-
-            msgChannelPool.ReturnChannel(t);
-            _bindIds.Remove(t, out _);
-            break;
-        }
-
-        // 如果没有有消息的channel，或者没拿到syncChannel，或者写入失败，返回false
-        if (context == null)
-        {
-            return false;
-        }
+        _responseCallback = cb;
 
 
-        syncChannelPool.TryGetBindChannel(
-            context.TargetPlatform + context.TriggerPlatformId + context.TriggerId,
-            out var syncChannel);
-
-        return syncChannel!.Writer.TryWrite(func(context));
     }
 }

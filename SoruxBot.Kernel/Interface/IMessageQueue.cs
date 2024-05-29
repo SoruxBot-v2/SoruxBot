@@ -8,11 +8,11 @@ namespace SoruxBot.Kernel.Interface
         /// 得到队列中的 Message
         /// </summary>
         /// <returns></returns>
-        public MessageContext? GetNextMessageRequest();
+        public Task<MessageContext> GetNextMessageRequest();
         /// <summary>
         /// 向队列中放入Message
         /// </summary>
         /// <param name="value"></param>
-        public void SetNextMsg(MessageContext? value);
+        public void SetNextMsg(MessageContext value);
     }
 }

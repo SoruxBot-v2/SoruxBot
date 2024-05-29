@@ -32,5 +32,9 @@
     <ItemGroup>
       <ProjectReference Include="..\SoruxBot.SDK\SoruxBot.SDK.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <None Include="bin\Debug\net8.0\config.yaml" />
+    </ItemGroup>
 
 </Project>

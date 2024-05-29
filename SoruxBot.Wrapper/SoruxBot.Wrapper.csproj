@@ -24,4 +24,19 @@
       </PackageReference>
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Include="bin\Debug\net8.0\config.yaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="bin\Debug\net8.0\plugins\bin\SoruxBot.Echo.Plugins.dll" />
+      <Content Include="bin\Debug\net8.0\plugins\bin\SoruxBot.OpenPlugins.Demo.dll" />
+      <Content Include="bin\Debug\net8.0\plugins\config\SoruxBot.Echo.Plugins.json" />
+      <Content Include="bin\Debug\net8.0\plugins\config\SoruxBot.OpenPlugins.Demo.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="bin\Debug\net8.0\plugins\lib\" />
+    </ItemGroup>
 </Project>

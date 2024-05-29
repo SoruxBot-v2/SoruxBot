@@ -2,10 +2,7 @@ using System.Threading.Channels;
 
 namespace SoruxBot.Kernel.Interface;
 
-public interface IChannelPool<T>
+public interface IChannelPool<TI, TO>
 {
-    public Channel<T> RentChannel(string bindId);
-    public bool TryGetBindChannel(string bindId,out Channel<T>? channel);
-
-    public bool ReturnChannel(string bindId);
+    public IChannelPairEntity<TI, TO> RentChannelPair(string bindId);
 }
