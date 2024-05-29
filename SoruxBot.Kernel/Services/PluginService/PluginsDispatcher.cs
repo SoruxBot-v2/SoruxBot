@@ -37,7 +37,7 @@ public class PluginsDispatcher(
     //插件按照触发条件可以分为选项式命令触发和事件触发
     //前者针对某个特定 EventType 的某个特定的语句触发某个特定的方法
     //后者针对某个通用的 EventType 进行触发
-    private readonly RadixTree<RadixTree<List<PluginsActionDescriptor>>> _prefixRouterTree = new();
+    private readonly ConcurrentRadixTree<string, ConcurrentRadixTree<string, List<PluginsActionDescriptor>>> _prefixRouterTree = new();
 
     public IServiceCollection Services { get; } = new ServiceCollection();
 
@@ -217,38 +217,38 @@ public class PluginsDispatcher(
                     } ?? String.Empty;
 
 					// 路由注册
-					var routePrefix = new StringBuilder(commandTriggerType);
+					var routePrefix = new List<string> { commandTriggerType};
 					if (msgPlatformConstraint != null)
 					{
-						routePrefix.Append(";" + msgPlatformConstraint.Platform);
+						routePrefix.Add(msgPlatformConstraint.Platform);
 						if(msgPlatformConstraint.Action != string.Empty)
 						{
-							routePrefix.Append(";" + msgPlatformConstraint.Action);
+							routePrefix.Add(msgPlatformConstraint.Action);
 						}
 					}
 					
 					if(commandPrefix == string.Empty && (msgEventCommand?.Command.Length ?? 0) == 0)
 					{
-						_prefixRouterTree.TryInsert(routePrefix.ToString(), new RadixTree<List<PluginsActionDescriptor>>());
-						var textRouter = _prefixRouterTree.GetValue(routePrefix.ToString())!;
-						if (textRouter.TryGetValue(string.Empty, out var list))
+						_prefixRouterTree.TryInsert(routePrefix, new());
+						var textRouter = _prefixRouterTree.GetValue(routePrefix)!;
+						if (textRouter.TryGetValue(Enumerable.Empty<string>(), out var list))
 						{
 							list!.Add(pluginsActionDescriptor);
 						}
 						else
 						{
 							list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-							textRouter.Insert(string.Empty, list);
+							textRouter.Insert(Enumerable.Empty<string>(), list);
 						}
 						
 					}
 					else
 					{
-						_prefixRouterTree.TryInsert(routePrefix.ToString(), new RadixTree<List<PluginsActionDescriptor>>());
-						var textRouter = _prefixRouterTree.GetValue(routePrefix.ToString())!;
+						_prefixRouterTree.TryInsert(routePrefix, new());
+						var textRouter = _prefixRouterTree.GetValue(routePrefix)!;
 						foreach (var s in msgEventCommand!.Command)
 						{
-							string path = new StringBuilder().Append('/').Append(commandPrefix).Append(s.Split(" ")[0]).ToString();
+							var path = new string[] { commandPrefix + s.Split([' ', '\n', '\t', '\r'])[0] };
 							if (textRouter.TryGetValue(path, out var list))
 							{
 								list!.Add(pluginsActionDescriptor);
@@ -265,38 +265,38 @@ public class PluginsDispatcher(
         }
     }
 
-    /// <summary>
-    /// 得到路由被注册后的委托方法
-    /// </summary>
-    /// <returns></returns>
-    public List<PluginsActionDescriptor>? GetAction(ref MessageContext messageContext)
-    {
-	    // 监听器匹配
-	    if (!pluginsListener.Filter(messageContext))
-	    {
-		    return null;
-	    }
+	/// <summary>
+	/// 得到路由被注册后的委托方法
+	/// </summary>
+	/// <returns></returns>
+	public List<PluginsActionDescriptor>? GetAction(ref MessageContext messageContext)
+	{
+		// 监听器匹配
+		if (!pluginsListener.Filter(messageContext))
+		{
+			return null;
+		}
 		var list = new List<PluginsActionDescriptor>();
-		string textRoute = string.Empty;
+		var textRoute = new List<string>();
 		var msg = messageContext.MessageChain!.Messages.FirstOrDefault();
 		if (msg is not null && msg.Type == "text")
 		{
 			var textMsg = (TextMessage)msg;
-			textRoute = "/" + textMsg.Content.Split(' ')[0];
+			textRoute.Add(textMsg.Content.Split([' ', '\n', '\t', '\r'])[0]);
 		}
 		// 路由路径生成
-	    StringBuilder route = new StringBuilder(messageContext.MessageEventType.ToString());
+		var route = new List<string>(){messageContext.MessageEventType.ToString()};
 		if(messageContext.TargetPlatform !=string.Empty)
 		{
-			route.Append(';').Append(messageContext.TargetPlatform);
+			route.Add(messageContext.TargetPlatform);
 			if(messageContext.TargetPlatformAction != string.Empty)
 			{
-				route.Append(';').Append(messageContext.TargetPlatformAction);
+				route.Add(messageContext.TargetPlatformAction);
 			}
 		}
 		// 消息路由
 		// 路由匹配
-		var prefixLists = _prefixRouterTree.PrefixMatch(route.ToString());
+		var prefixLists = _prefixRouterTree.PrefixMatch(route);
 		if (prefixLists == null) return null;
 		foreach (var textRouteLists in prefixLists)
 		{

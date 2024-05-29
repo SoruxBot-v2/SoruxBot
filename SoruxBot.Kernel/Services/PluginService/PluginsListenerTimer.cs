@@ -12,12 +12,12 @@ namespace SoruxBot.Kernel.Services.PluginService
 	{
 		private readonly BotContext _botContext;
 		private readonly ILoggerService _loggerService;
-		private RadixTree<PluginsListenerDescriptor> _matchTree;
+		private ConcurrentRadixTree<string, PluginsListenerDescriptor> _matchTree;
 
 		private PriorityQueue<PluginsListenerDescriptor, DateTime> _listenerQueue = new();
 		private Timer _timer;
 
-		public PluginsListenerTimer(BotContext botContext, ILoggerService loggerService, RadixTree<PluginsListenerDescriptor> matchTree)
+		public PluginsListenerTimer(BotContext botContext, ILoggerService loggerService, ConcurrentRadixTree<string, PluginsListenerDescriptor> matchTree)
 		{
 			_botContext = botContext;
 			_loggerService = loggerService;
@@ -35,15 +35,14 @@ namespace SoruxBot.Kernel.Services.PluginService
 		private static void CheckIfTimeout(object state)
 		{
 			var pqueue = (PriorityQueue<PluginsListenerDescriptor, DateTime>)((List<object>)state)[0];
-			var tree = (RadixTree<PluginsListenerDescriptor>)((List<object>)state)[1];
+			var tree = (ConcurrentRadixTree<string, PluginsListenerDescriptor>)((List<object>)state)[1];
 			while (pqueue.Count > 0)
 			{
 				var listener = pqueue.Peek();
 				if (DateTime.Now > listener.Timeout)
 				{
 					pqueue.Dequeue();
-					// TODO 并发处理
-					tree.RemoveByValue(listener);
+					tree.Remove(listener);
 				}
 				else break;
 			}

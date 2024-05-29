@@ -13,7 +13,7 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     private BotContext _botContext = botContext;
     private ILoggerService _loggerService = loggerService;
 
-	private readonly RadixTree<PluginsListenerDescriptor> _matchTree = new();
+	private readonly ConcurrentRadixTree<string, PluginsListenerDescriptor> _matchTree = new();
 
     /// <summary>
     /// 进入Filter队列，并且判断是否需要继续执行 Dispatcher
@@ -23,17 +23,16 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
     /// <returns></returns>
     public bool Filter(MessageContext context)
     {
-		StringBuilder path = new StringBuilder(context.MessageEventType.ToString());
+		var path = new List<string>() { context.MessageEventType.ToString() };
 		if (context.TargetPlatform != string.Empty)
 		{
-			path = path.Append(";").Append(context.TargetPlatform);
+			path.Add(context.TargetPlatform);
 			if (context.TargetPlatformAction != string.Empty)
 			{
-				path = path.Append(";").Append(context.TargetPlatformAction);
+				path.Add(context.TargetPlatformAction);
 			}
 		}
-		// TODO 并发处理
-		var list = _matchTree.PrefixMatch(path.ToString());
+		var list = _matchTree.PrefixMatch(path);
 		if (list == null) return true;
 		foreach (var item in list)
 		{
@@ -56,38 +55,29 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 
     public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor)
 	{
-		StringBuilder path = new StringBuilder(pluginsListenerDescriptor.MessageType.ToString());
+		var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
 		if(pluginsListenerDescriptor.TargetPlatformType != string.Empty)
 		{
-			path = path.Append(";").Append(pluginsListenerDescriptor.TargetPlatformType);
+			path.Add(pluginsListenerDescriptor.TargetPlatformType);
 			if(pluginsListenerDescriptor.TargetAction !=  string.Empty)
 			{
-				path = path.Append(";").Append(pluginsListenerDescriptor.TargetAction);
+				path.Add(pluginsListenerDescriptor.TargetAction);
 			}
 		}
-		// TODO 并发处理
-		_matchTree.Remove(path.ToString());
+		_matchTree.Remove(path);
 	}
 
     public void AddListener(PluginsListenerDescriptor pluginsListenerDescriptor)
 	{
-		StringBuilder path = new StringBuilder(pluginsListenerDescriptor.MessageType.ToString());
+		var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
 		if (pluginsListenerDescriptor.TargetPlatformType != string.Empty)
 		{
-			path = path.Append(";").Append(pluginsListenerDescriptor.TargetPlatformType);
+			path.Add(pluginsListenerDescriptor.TargetPlatformType);
 			if (pluginsListenerDescriptor.TargetAction != string.Empty)
 			{
-				path = path.Append(";").Append(pluginsListenerDescriptor.TargetAction);
+				path.Add(pluginsListenerDescriptor.TargetAction);
 			}
 		}
-		// TODO 并发处理
-		if (_matchTree.ContainsPath(path.ToString()))
-		{
-			_matchTree.TryReplace(path.ToString(), pluginsListenerDescriptor);
-		}
-		else
-		{
-			_matchTree.Insert(path.ToString(), pluginsListenerDescriptor);
-		}
+		_matchTree.ForceInsert(path, pluginsListenerDescriptor);
 	}
 }
