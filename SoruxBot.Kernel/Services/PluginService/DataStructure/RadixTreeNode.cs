@@ -1,37 +1,33 @@
-﻿namespace SoruxBot.Kernel.Services.PluginService.DataStructure;
-internal class RadixTreeNode<T>
+﻿using System.Collections.ObjectModel;
+
+namespace SoruxBot.Kernel.Services.PluginService.DataStructure;
+internal class RadixTreeNode<TKey, TValue> 
+	where TKey : notnull
 {
     private bool _isValueNode = false;
-    public string Key { get; set; }
-    public T? Value { get; set; } = default;
-    public Dictionary<char, RadixTreeNode<T>> Children { get; set; } = new();
+	public IEnumerable<TKey> Key { get; init; }
+    public TValue? Value { get; init; } = default;
+    public ReadOnlyDictionary<TKey, RadixTreeNode<TKey, TValue>> Children { get; init; } = new(new Dictionary<TKey, RadixTreeNode<TKey, TValue>>());
     public bool IsValueNode { get { return _isValueNode; } init { _isValueNode = value; } }
-    public RadixTreeNode(string key)
+	public RadixTreeNode() 
+	{
+		Key = Enumerable.Empty<TKey>();
+	}
+    public RadixTreeNode(IEnumerable<TKey> key)
     {
         Key = key;
     }
-    public RadixTreeNode(string key, T value)
+    public RadixTreeNode(IEnumerable<TKey> key, TValue value)
     {
         Key = key;
         Value = value;
         _isValueNode = true;
     }
-    public RadixTreeNode(string key, Dictionary<char, RadixTreeNode<T>> children, bool isValueNode, T? value)
+    public RadixTreeNode(IEnumerable<TKey> key, ReadOnlyDictionary<TKey, RadixTreeNode<TKey, TValue>> children, bool isValueNode, TValue? value)
     {
         Key = key;
-        Children = children;
+		Children = children;
         _isValueNode = isValueNode;
         Value = value;
-    }
-
-    public void DeleteValue()
-    {
-        Value = default;
-        _isValueNode = false;
-    }
-    public void SetValue(T value)
-    {
-        Value = value;
-        _isValueNode = true;
     }
 }
