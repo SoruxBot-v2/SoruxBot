@@ -7,33 +7,26 @@ public class PushService(IMessageQueue messageQueue, IResponseQueue responseQueu
 {
     private bool _isRunning = true;
 
+
     public void RunInstance(
         Action<MessageContext> messageCallback,
         Func<MessageContext, MessageResult> responseCallback)
     {
-        var messageTask = new Task(() =>
+        responseQueue.SetResponseCallback(responseCallback);
+
+        var messageTask = new Task<Task>(async () =>
         {
             while (_isRunning)
             {
-                var nextMessage = messageQueue.GetNextMessageRequest();
-                if (nextMessage == null) continue;
+                var nextMessage = await messageQueue.GetNextMessageRequest();
                 messageCallback(nextMessage);
 
-                Thread.Sleep(0);
+                // 让出cpu时间片？
+                // Thread.Sleep(0);
             }
         });
-        var responseTask = new Task(() =>
-        {
-            while (_isRunning)
-            {
-                responseQueue.TryGetNextResponse(responseCallback);
-                Thread.Sleep(0);
-            }
-        });
-
 
         messageTask.Start();
-        responseTask.Start();
     }
 
     public void StopInstance()

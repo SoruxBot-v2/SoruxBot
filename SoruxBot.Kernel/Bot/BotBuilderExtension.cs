@@ -6,6 +6,7 @@ using SoruxBot.Kernel.MessageQueue;
 using SoruxBot.Kernel.Services.LogService;
 using SoruxBot.Kernel.Services.PluginService.ApiService;
 using SoruxBot.Kernel.Services.PushService;
+using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.Bot
@@ -33,7 +34,7 @@ namespace SoruxBot.Kernel.Bot
 
                         services.AddSingleton(loggingBuilder);
                     });
-                    
+
                     services.AddSingleton(loggerFactory);
                     services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
                     services.AddSingleton<ILoggerService, LoggerService>();
@@ -52,7 +53,7 @@ namespace SoruxBot.Kernel.Bot
         {
             //Bot Configuration主要负责配置连接器的组装等操作
             string cwd = Environment.CurrentDirectory;
-            
+
             config.AddInMemoryCollection(new[]
             {
                 new KeyValuePair<string, string?>("CurrentPath", cwd)
@@ -71,11 +72,13 @@ namespace SoruxBot.Kernel.Bot
         private static void ApplyDefaultServices(IConfiguration configuration, IServiceCollection services)
         {
             // 添加实例
-            services.AddSingleton(typeof(IChannelPool<>), typeof(ChannelPool<>));
+            services.AddSingleton(typeof(IChannelPool<MessageContext, MessageResult>),
+                typeof(ChannelPool<MessageContext, MessageResult>));
+            
             services.AddSingleton<IMessageQueue, MessageQueue.MessageQueue>();
             services.AddSingleton<IResponseQueue, ResponseQueueImpl>();
             services.AddSingleton<IPushService, PushService>();
-            
+
             // 添加 Api
             services.AddSingleton<ICommonApi, ApiService>();
         }

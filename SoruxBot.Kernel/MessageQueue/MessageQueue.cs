@@ -7,10 +7,13 @@ namespace SoruxBot.Kernel.MessageQueue;
 public class MessageQueue : IMessageQueue
 {
     private readonly Channel<MessageContext> _channel = Channel.CreateUnbounded<MessageContext>();
+    
+    
 
-    public MessageContext? GetNextMessageRequest()
+    public async Task<MessageContext> GetNextMessageRequest()
     {
-        return _channel.Reader.TryRead(out var res) ? res : null;
+        // return  _channel.Reader.TryRead(out var res) ? res : null;
+     return  await _channel.Reader.ReadAsync();
     }
 
     public void SetNextMsg(MessageContext value)
