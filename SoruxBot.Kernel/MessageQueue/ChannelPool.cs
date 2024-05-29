@@ -31,6 +31,7 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
 
         public void PushWork(Func<TI, TO> work)
         {
+            Console.WriteLine("pushworking");
             _workActions.Enqueue(work);
             _semaphore.Release(1);
         }
@@ -133,6 +134,9 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
                 // 未超时，续签借用时间，返回channel
                 _channelVector[i].SetMeta(bindId, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
+                // 释放调用者锁定的信号量，因为没有占用新的channel
+                _channelSemaphore.Release(1);
+                
                 channelPair = _channelVector[i];
                 return true;
             }
@@ -166,6 +170,7 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
     // 借用 channel
     public IChannelPairEntity<TI,TO> RentChannelPair(string bindId)
     {
+        Console.WriteLine(_channelVector);
         // 直到绑定成功
         _channelSemaphore.Wait();
 
@@ -207,5 +212,6 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
         }
 
         _channelSemaphore.Release(1);
+        Console.WriteLine(_channelSemaphore.CurrentCount);
     }
 }
