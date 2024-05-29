@@ -1,7 +1,6 @@
 ﻿using SoruxBot.SDK.Model.Message;
-using SoruxBot.SDK.Plugins.Model;
 
-namespace SoruxBot.Kernel.Services.PluginService.Model;
+namespace SoruxBot.SDK.Plugins.Model;
 
 public class PluginsListenerDescriptor(
     MessageType messageType,

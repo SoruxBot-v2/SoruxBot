@@ -3,6 +3,7 @@ using System.Threading;
 using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Services.PluginService.DataStructure;
 using SoruxBot.Kernel.Services.PluginService.Model;
+using SoruxBot.SDK.Plugins.Model;
 using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.Kernel.Services.PluginService

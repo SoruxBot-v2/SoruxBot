@@ -4,6 +4,7 @@ using SoruxBot.Kernel.Services.PluginService.Model;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
 using System.Text;
+using SoruxBot.SDK.Plugins.Model;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 

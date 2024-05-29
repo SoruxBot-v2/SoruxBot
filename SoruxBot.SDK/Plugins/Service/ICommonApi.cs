@@ -1,4 +1,5 @@
 using SoruxBot.SDK.Model.Message;
+using SoruxBot.SDK.Plugins.Model;
 
 namespace SoruxBot.SDK.Plugins.Service;
 
@@ -16,4 +17,14 @@ public interface ICommonApi
     /// <param name="messageContext"></param>
     /// <returns></returns>
     public IResponsePromise SendMessage(MessageContext messageContext);
+    /// <summary>
+    /// 注册监听器
+    /// </summary>
+    /// <param name="pluginsListenerDescriptor"></param>
+    public void RegisterListener(PluginsListenerDescriptor pluginsListenerDescriptor);
+    /// <summary>
+    /// 删除监听器
+    /// </summary>
+    /// <param name="pluginsListenerDescriptor"></param>
+    public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor);
 }
