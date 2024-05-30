@@ -169,14 +169,14 @@ namespace SoruxBot.Kernel.Services.StorageService
 		}
 		public bool RemoveBinarySettings(string pluginMark, string key)
 		{
-			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
+			string path = Path.Join(_localFileDir, pluginMark, key + ".bin");
 			if (!Directory.Exists(path)) return false;
 			File.Delete(path);
 			return true;
 		}
 		public byte[]? GetBinarySettings(string pluginMark, string key)
 		{
-			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
+			string path = Path.Join(_localFileDir, pluginMark, key + ".bin");
 			if (!Directory.Exists(path)) return null;
 			return File.ReadAllBytes(path);
 		}
