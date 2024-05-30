@@ -260,7 +260,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			var root = _root;
 			_rootLock.ExitReadLock();
 			var node = GetNodePrivate(root, key);
-			if (node == null)
+			if (node == null || !node.IsValueNode)
 			{
 				value = default;
 				return false;
