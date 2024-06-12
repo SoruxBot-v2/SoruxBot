@@ -62,7 +62,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		public bool TryInsert(IEnumerable<TKey> key, TValue value)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
-			ArgumentNullException.ThrowIfNull(value, nameof(value));\
+			ArgumentNullException.ThrowIfNull(value, nameof(value));
 			try
 			{
 				_writeLock.EnterWriteLock();
