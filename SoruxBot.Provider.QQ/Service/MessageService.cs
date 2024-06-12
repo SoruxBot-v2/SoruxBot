@@ -2,10 +2,12 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Lagrange.Core;
 using Lagrange.Core.Common.Interface.Api;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using Newtonsoft.Json;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
+using SoruxBot.SDK.QQ.Entity;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using MessageResult = Lagrange.Core.Message.MessageResult;
 
@@ -86,6 +88,57 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
             if (msg is TextMessage textMessage)
             {
                 builder.Text(textMessage.Content);
+            }
+
+            else if (msg is FaceMessage faceMessage)
+            {
+                builder.Face(faceMessage.FaceId);
+            }
+
+            else if (msg is MentionMessage mentionMessage)
+            {
+                builder.Mention(mentionMessage.Uin);
+            }
+
+            else if (msg is PokeMessage pokeMessage)
+            {
+                builder.Poke(pokeMessage.PokeType);
+            }
+
+            else if (msg is ImageMessage imageMessage)
+            {
+                if (imageMessage.FilePath != null)
+                {
+                    builder.Image(imageMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(imageMessage.ImageBytes);
+                }
+            }
+
+            else if (msg is RecordMessage recordMessage)
+            {
+                if (recordMessage.FilePath != null)
+                {
+                    builder.Image(recordMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(recordMessage.AudioBytes);
+                }
+            }
+
+            else if (msg is VideoMessage videoMessage)
+            {
+                if (videoMessage.FilePath != null)
+                {
+                    builder.Image(videoMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(videoMessage.VideoBytes);
+                }
             }
         }
 

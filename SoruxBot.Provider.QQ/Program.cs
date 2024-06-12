@@ -13,6 +13,7 @@ using SoruxBot.Provider.QQ.Service;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
+using SoruxBot.SDK.QQ.Entity;
 
 
 BotDeviceInfo deviceInfo = new()
@@ -181,7 +182,47 @@ static void ConvertMessageChain(MessageChain chain, Lagrange.Core.Message.Messag
             ));
             continue;
         }
-        
-        //TODO 增加其他消息的消息类转换
+
+        else if (entity is FaceEntity faceEntity)
+        {
+            chain.Messages.Add(new FaceMessage(
+                faceEntity.FaceId, faceEntity.IsLargeFace));
+            continue;
+        }
+
+        else if (entity is MentionEntity mentionEntity)
+        {
+            chain.Messages.Add(new MentionMessage(
+                mentionEntity.Name, mentionEntity.Uin));
+            continue;
+        }
+
+        else if (entity is PokeEntity pokeEntity)
+        {
+            chain.Messages.Add(new PokeMessage(
+                pokeEntity.Type));
+            continue;
+        }
+
+        else if (entity is ImageEntity imageEntity)
+        {
+            chain.Messages.Add(new ImageMessage(
+                imageEntity.ImageUrl, imageEntity.FilePath, null, imageEntity.PictureSize.X, imageEntity.PictureSize.Y, imageEntity.ImageSize));
+            continue;
+        }
+
+        else if (entity is RecordEntity recordEntity)
+        {
+            chain.Messages.Add(new RecordMessage(
+                recordEntity.AudioUrl, recordEntity.FilePath, null, recordEntity.AudioLength, recordEntity.AudioName, recordEntity.AudioSize));
+            continue;
+        }
+
+        else if (entity is VideoEntity videoEntity)
+        {
+            chain.Messages.Add(new VideoMessage(
+                videoEntity.VideoUrl, videoEntity.FilePath, null, videoEntity.VideoHash, videoEntity.Size.X, videoEntity.Size.Y, videoEntity.VideoSize));
+            continue;
+        }
     }
 }
