@@ -10,6 +10,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 	{
 		private static readonly RadixTreeNode<TKey, TValue> _defaultRoot = new RadixTreeNode<TKey, TValue>();
 		private RadixTreeNode<TKey, TValue> _root = _defaultRoot;
+		private ReaderWriterLockSlim _writeLock = new ReaderWriterLockSlim();
 		private ReaderWriterLockSlim _rootLock = new ReaderWriterLockSlim();
 		public ConcurrentRadixTree() { }
 		public TValue[] PrefixMatch(IEnumerable<TKey> key)
@@ -33,17 +34,23 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if (TryInsertPrivate(root, key, value, out var newRoot, false))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newRoot;
-				_rootLock.ExitWriteLock();
-				return this;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryInsertPrivate(root, key, value, out var newRoot, false))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newRoot;
+					_rootLock.ExitWriteLock();
+					return this;
+				}
+				throw new ArgumentException($"Key {key} already exists.");
 			}
-			throw new ArgumentException($"Key {key} already exists.");
+			finally { _writeLock.ExitWriteLock(); }
+			
 		}
 		/// <summary>
 		/// 添加内容。如果没有路径则创建一个新的路径并添加Value并返回true，否则返回false。
@@ -56,17 +63,22 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if (TryInsertPrivate(root, key, value, out var newRoot, false))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newRoot;
-				_rootLock.ExitWriteLock();
-				return true;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryInsertPrivate(root, key, value, out var newRoot, false))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newRoot;
+					_rootLock.ExitWriteLock();
+					return true;
+				}
+				return false;
 			}
-			return false;
+			finally { _writeLock.ExitWriteLock(); }
 		}
 		/// <summary>
 		/// 添加内容。如果存在原有路径，则覆盖之。
@@ -79,13 +91,21 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			TryInsertPrivate(root, key, value, out var newRoot, true);
-			_rootLock.EnterWriteLock();
-			_root = newRoot;
-			_rootLock.ExitWriteLock();
+			try
+			{
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				TryInsertPrivate(root, key, value, out var newRoot, true);
+				_rootLock.EnterWriteLock();
+				_root = newRoot;
+				_rootLock.ExitWriteLock();
+			}
+			finally
+			{
+				_writeLock.ExitWriteLock();
+			}
 			return this;
 		}
 		/// <summary>
@@ -98,17 +118,22 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		public ConcurrentRadixTree<TKey, TValue> Remove(IEnumerable<TKey> key)
 		{	
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if(TryRemovePrivate(root, key, out _, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode ?? _defaultRoot;
-				_rootLock.ExitWriteLock();
-				return this;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryRemovePrivate(root, key, out _, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode ?? _defaultRoot;
+					_rootLock.ExitWriteLock();
+					return this;
+				}
+				throw new KeyNotFoundException($"Key {key} is not found.");
 			}
-			throw new KeyNotFoundException($"Key {key} is not found.");
+			finally { _writeLock.ExitWriteLock(); }
 		}
 		/// <summary>
 		/// 删除路径，并通过value返回删除的节点值。合并单分支无值节点，递归删除不存储值的子树。
@@ -121,17 +146,22 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		public ConcurrentRadixTree<TKey, TValue> Remove(IEnumerable<TKey> key, out TValue value)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if (TryRemovePrivate(root, key, out value!, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode ?? _defaultRoot;
-				_rootLock.ExitWriteLock();
-				return this;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryRemovePrivate(root, key, out value!, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode ?? _defaultRoot;
+					_rootLock.ExitWriteLock();
+					return this;
+				}
+				throw new KeyNotFoundException($"Key {key} is not found.");
 			}
-			throw new KeyNotFoundException($"Key {key} is not found.");
+			finally { _writeLock.ExitWriteLock(); }
 		}
 		/// <summary>
 		/// 删除具有对应值的节点。合并单分支无值节点，递归删除不存储值的子树。
@@ -142,15 +172,20 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		public ConcurrentRadixTree<TKey, TValue> Remove(TValue value)
 		{
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if(TryRemoveByValuePrivate(root, value, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode ?? _defaultRoot;
-				_rootLock.ExitWriteLock();
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryRemoveByValuePrivate(root, value, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode ?? _defaultRoot;
+					_rootLock.ExitWriteLock();
+				}
 			}
+			finally { _writeLock.ExitWriteLock(); }
 			return this;
 		}
 		/// <summary>
@@ -162,16 +197,21 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		public bool TryRemove(IEnumerable<TKey> key)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if (TryRemovePrivate(root, key, out _, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode ?? _defaultRoot;
-				_rootLock.ExitWriteLock();
-				return true;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TryRemovePrivate(root, key, out _, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode ?? _defaultRoot;
+					_rootLock.ExitWriteLock();
+					return true;
+				}
 			}
+			finally { _writeLock.ExitWriteLock(); }
 			return false;
 		}
 		/// <summary>
@@ -186,17 +226,22 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if(TrySetPrivate(root, key, value, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode;
-				_rootLock.ExitWriteLock();
-				return this;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TrySetPrivate(root, key, value, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode;
+					_rootLock.ExitWriteLock();
+					return this;
+				}
+				throw new KeyNotFoundException($"Key {key} is not found.");
 			}
-			throw new KeyNotFoundException($"Key {key} is not found.");
+			finally { _writeLock.ExitWriteLock(); }
 		}
 		/// <summary>
 		/// 更改有值节点的值。
@@ -209,16 +254,21 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			ArgumentNullException.ThrowIfNull(value, nameof(value));
-			_rootLock.EnterReadLock();
-			var root = _root;
-			_rootLock.ExitReadLock();
-			if (TrySetPrivate(root, key, value, out var newNode))
+			try
 			{
-				_rootLock.EnterWriteLock();
-				_root = newNode;
-				_rootLock.ExitWriteLock();
-				return true;
+				_writeLock.EnterWriteLock();
+				_rootLock.EnterReadLock();
+				var root = _root;
+				_rootLock.ExitReadLock();
+				if (TrySetPrivate(root, key, value, out var newNode))
+				{
+					_rootLock.EnterWriteLock();
+					_root = newNode;
+					_rootLock.ExitWriteLock();
+					return true;
+				}
 			}
+			finally { _writeLock.ExitWriteLock(); };
 			return false;
 		}
 		/// <summary>
@@ -273,9 +323,11 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		/// </summary>
 		public void Clear()
 		{
+			_writeLock.EnterWriteLock();
 			_rootLock.EnterWriteLock();
 			_root = _defaultRoot;
 			_rootLock.ExitWriteLock();
+			_writeLock.ExitWriteLock();
 		}
 		/// <summary>
 		/// 转化为字典
