@@ -41,48 +41,76 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         }
 
         
-        var result = await DispatchMessage(messageContext);
-		var res = new SoruxBot.SDK.Model.Message.MessageResult(
-				result.Sequence?.ToString() ?? "0",
-				DateTime.Now
-			);
+        var res = await DispatchMessage(messageContext);
 
         response.Payload = JsonConvert.SerializeObject(res, settings);
         return await Task.FromResult(response);
     }
 
-    private async Task<MessageResult> DispatchMessage(MessageContext ctx)
+    private async Task<SoruxBot.SDK.Model.Message.MessageResult> DispatchMessage(MessageContext ctx)
     {
         // TODO 补全所有的 Action
         switch (ctx.TargetPlatformAction)
         {
-            case "FriendMessage":
+            case "SendFriendMessage":
             {
                 // 处理好友消息
                 var msg = Lagrange.Core.Message.MessageBuilder
                     .Friend(uint.Parse(ctx.MessageChain!.TargetId));
                 msg = ConvertMessageBuilder(msg, ctx);
                 var result = await bot.SendMessage(msg.Build());
-                return result;
+                return new SoruxBot.SDK.Model.Message.MessageResult(
+                    result.Sequence?.ToString() ?? "0",
+                    DateTime.Now
+                );
             }
-            case "GroupMessage":
+            case "SendGroupMessage":
             {
                 // 处理群聊消息
                 var msg = Lagrange.Core.Message.MessageBuilder
                     .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
                 msg = ConvertMessageBuilder(msg, ctx);
                 var result = await bot.SendMessage(msg.Build());
-                return result;
+                return new SoruxBot.SDK.Model.Message.MessageResult(
+                    result.Sequence?.ToString() ?? "0",
+                    DateTime.Now
+                );
+            }
+            case "KickGroupMember":
+            {
+                var res = new SoruxBot.SDK.Model.Message.MessageResult(
+                    "-1",
+                    DateTime.Now
+                );
+                
+                if (!uint.TryParse(ctx.TriggerPlatformId, out var platformId))
+                {
+                    return res;
+                }
+                
+                if (!uint.TryParse(ctx.TriggerId, out var triggerId))
+                {
+                    return res;
+                }
+                
+                var result = await bot.KickGroupMember(platformId, triggerId, ctx.UnderProperty["RejectAgain"] == "true");
+                res = new SoruxBot.SDK.Model.Message.MessageResult(
+                    "0",
+                    DateTime.Now
+                );
+                res.UnderProperty.Add("KickResult", result.ToString());
+                return res;
             }
         }
         
-        return new MessageResult();
+        return new SoruxBot.SDK.Model.Message.MessageResult(
+            "0",
+            DateTime.Now);
     }
 
     private Lagrange.Core.Message.MessageBuilder 
         ConvertMessageBuilder(Lagrange.Core.Message.MessageBuilder builder, MessageContext ctx)
     {
-        // TODO 转换和适配为 Provider 认可的消息链
         foreach (var msg in ctx.MessageChain!.Messages)
         {
             if (msg is TextMessage textMessage)

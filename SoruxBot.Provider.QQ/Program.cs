@@ -15,6 +15,12 @@ using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
 using SoruxBot.SDK.QQ.Entity;
 
+// 构建 Configuration
+var configuration = new ConfigurationBuilder()
+    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
+    .Build();
+var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable");
+
 
 BotDeviceInfo deviceInfo = new()
 {
@@ -39,12 +45,6 @@ BotConfig config = new BotConfig
 // TODO 将 deviceInfo 和 keystore 保存到文件中，以便下次启动时使用。实现快速登录。
 var bot = BotFactory.Create(config, deviceInfo, keystore);
 var botClient = new BotClient(config, bot);
-
-// 构建 Configuration
-var configuration = new ConfigurationBuilder()
-    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
-    .Build();
-
 
 // 构建 gRpc 服务端
 BuildGrpcServer(configuration, bot).Start();
@@ -125,6 +125,30 @@ bot.Invoker.OnGroupMessageReceived += (context, @event) =>
         @event.EventTime
     );
 
+    client.MessagePushStack(new MessageRequest()
+    {
+        Payload = JsonConvert.SerializeObject(msg, jsonSettings),
+        Token = configuration.GetSection("client:token").Value
+    });
+};
+
+bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
+{
+    Console.WriteLine($"[SoruxBot.Provider.QQ] Group Member Decrease Received: GroupUin: {@event.GroupUin}, Operator: {@event.OperatorUin}, Kick: {@event.MemberUin}");
+    
+    var msg = new MessageContext(
+        context.BotUin.ToString(),
+        "OnGroupMemberDecreaseEvent",
+        platformType,
+        MessageType.Notify,
+        @event.OperatorUin.ToString()!,
+        @event.GroupUin.ToString(), 
+        @event.GroupUin.ToString(),
+        null,
+        @event.EventTime
+    );
+    msg.UnderProperty.Add("MemberUin", @event.MemberUin.ToString());
+    
     client.MessagePushStack(new MessageRequest()
     {
         Payload = JsonConvert.SerializeObject(msg, jsonSettings),

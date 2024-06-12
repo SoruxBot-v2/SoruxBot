@@ -11,7 +11,7 @@ public static class QqExternApi
         var ctx = new MessageContext(
             botAccount,
             "SendFriendMessage",
-            "QQ",
+            Constant.QqPlatformType,
             MessageType.PrivateMessage,
             chain.TargetId,
             chain.TargetId,
@@ -27,7 +27,7 @@ public static class QqExternApi
         var ctx = new MessageContext(
             botAccount,
             "SendFriendMessage",
-            "QQ",
+            Constant.QqPlatformType,
             MessageType.PrivateMessage,
             chain.TargetId,
             chain.TargetId,
@@ -35,6 +35,76 @@ public static class QqExternApi
             chain,
             DateTime.Now
         );
+        return api.SendMessage(ctx);
+    }
+    
+    public static async Task<bool> KickGroupMemberAsync(this ICommonApi api, string botAccount, string targetId, string targetPlatformId, bool isRejectAgain)
+    {
+        var ctx = new MessageContext(
+            botAccount,
+            "KickGroupMember",
+            Constant.QqPlatformType,
+            MessageType.Notify,
+            targetId,
+            targetPlatformId,
+            targetPlatformId,
+            null,
+            DateTime.Now
+        );
+        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        var res = await api.SendMessageAsync(ctx);
+        return res.UnderProperty["KickResult"] == "true";
+    }
+    
+    public static IResponsePromise KickGroupMember(this ICommonApi api, string botAccount, string targetId, string targetPlatformId, bool isRejectAgain)
+    {
+        var ctx = new MessageContext(
+            botAccount,
+            "KickGroupMember",
+            Constant.QqPlatformType,
+            MessageType.Notify,
+            targetId,
+            targetPlatformId,
+            targetPlatformId,
+            null,
+            DateTime.Now
+        );
+        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        return api.SendMessage(ctx);
+    }
+    
+    public static async Task<bool> KickGroupMemberWithCurrentContextAsync(this ICommonApi api, MessageContext context, bool isRejectAgain)
+    {
+        var ctx = new MessageContext(
+            context.BotAccount,
+            "KickGroupMember",
+            Constant.QqPlatformType,
+            MessageType.Notify,
+            context.TriggerId,
+            context.TriggerPlatformId,
+            context.TriggerPlatformId,
+            null,
+            DateTime.Now
+        );
+        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        var res = await api.SendMessageAsync(ctx);
+        return res.UnderProperty["KickResult"] == "true";
+    }
+    
+    public static IResponsePromise KickGroupMemberWithCurrentContext(this ICommonApi api, MessageContext context, bool isRejectAgain)
+    {
+        var ctx = new MessageContext(
+            context.BotAccount,
+            "KickGroupMember",
+            Constant.QqPlatformType,
+            MessageType.Notify,
+            context.TriggerId,
+            context.TriggerPlatformId,
+            context.TriggerPlatformId,
+            null,
+            DateTime.Now
+        );
+        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
         return api.SendMessage(ctx);
     }
 }
