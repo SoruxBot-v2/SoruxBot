@@ -33,24 +33,20 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 			}
 		}
 		var list = _matchTree.PrefixMatch(path);
-		if (list == null) return true;
+		if (list.Length == 0) return true;
+
+		bool isInterceptedToChannel = false;
 		foreach (var item in list)
 		{
-			if(item.ConditionCheck(context))
+			if (item.ConditionCheck(context))
 			{
 				item.SuccessfulFunc(context);
-			}
-			if(item.IsInterceptToFilters)
-			{
-				break;
+				if (item.IsInterceptToChannel) isInterceptedToChannel = true;
+				if (item.IsInterceptToFilters) break;
 			}
 			
 		}
-		if(list.Any(item => item.IsInterceptToChannel))
-		{
-			return false;
-		}
-		return true;
+		return !isInterceptedToChannel;
     }
 
     public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor)

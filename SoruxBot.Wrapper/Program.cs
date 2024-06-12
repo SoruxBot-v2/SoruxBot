@@ -13,6 +13,7 @@ using SoruxBot.Wrapper.Service;
 using Grpc.Net.Client;
 using Newtonsoft.Json;
 using SoruxBot.Provider.WebGrpc;
+using SoruxBot.SDK.Plugins.Model;
 
 var app = CreateDefaultBotBuilder(args)
     .Build();
@@ -70,12 +71,17 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
     pushService.RunInstance(
         context =>
         {
+			bool msgIntercepted = false;
             pluginsDispatcher.GetAction(ref context)?.ForEach(
                 sp =>
                 {
+					if (msgIntercepted) return;
                     try
                     {
-                        pluginsCommandLexer.PluginAction(context, sp);
+                        if(pluginsCommandLexer.PluginAction(context, sp) == PluginFlag.MsgIntercepted)
+						{
+							msgIntercepted = true;
+						}
                     }
                     catch (Exception e)
                     {
