@@ -39,13 +39,13 @@ public class MessageChain(string selfId, string targetId, string? platformId, st
     /// 克隆对象
     /// </summary>
     /// <returns></returns>
-    public MessageChain DeapClone()
+    public MessageChain DeepClone()
     {
         var clonedMessageChain = new MessageChain(SelfId, TargetId, PlatformId, TiedId, PlatformType);
         
         foreach (var message in Messages)
         {
-            clonedMessageChain.Messages.Add(message.DeapClone());
+            clonedMessageChain.Messages.Add(message.DeepClone());
         }
 
         return clonedMessageChain;

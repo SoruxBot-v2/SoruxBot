@@ -21,7 +21,7 @@ public class CommonMessage(string type)
     /// 克隆对象
     /// </summary>
     /// <returns></returns>
-    public virtual CommonMessage DeapClone()
+    public virtual CommonMessage DeepClone()
     {
         return new CommonMessage(type);
     }

@@ -11,7 +11,7 @@
         <PackageProjectUrl>https://github.com/SoruxBot-v2/SoruxBot</PackageProjectUrl>
         <RepositoryUrl>https://github.com/SoruxBot-v2/SoruxBot</RepositoryUrl>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.3</Version>
+        <Version>1.0.4</Version>
     </PropertyGroup>
 
 </Project>

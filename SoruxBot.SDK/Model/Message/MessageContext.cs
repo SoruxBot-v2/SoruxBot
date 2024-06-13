@@ -83,7 +83,7 @@ public class MessageContext(
     /// 深克隆
     /// </summary>
     /// <returns></returns>
-    public MessageContext Clone()
+    public MessageContext DeepClone()
     {
         return new MessageContext(
             BotAccount,
@@ -93,7 +93,7 @@ public class MessageContext(
             TriggerId,
             TriggerPlatformId,
             TiedId,
-            MessageChain?.DeapClone() ?? null,
+            MessageChain?.DeepClone() ?? null,
             MessageTime)
         {
             CommandParas = new (CommandParas),
