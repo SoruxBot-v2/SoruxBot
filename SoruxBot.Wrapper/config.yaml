@@ -14,11 +14,11 @@ database:
 chat:
   global_prefix: '#' # 全局前缀
   host: "localhost" # Wrapper 运行的 gRpc 地址
-  port: 8080 # Wrapper 运行的 gRpc 端口
+  port: 8081 # Wrapper 运行的 gRpc 端口
   token: "" # Wrapper 鉴权 Token
 provider:
   - type: "QQ" # 平台特定类型
     name: "阿木" # 机器人名称
     account: "854015635" # 机器人账号
-    host: "localhost:8999" # 机器人 Provider 地址
+    host: "localhost:8080" # 机器人 Provider 地址
     token: "" # 鉴权参数，默认为空，空表示不鉴权，如果需要鉴权请填写本字段并且保证与 Provider 配置一致
