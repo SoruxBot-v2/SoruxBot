@@ -13,15 +13,23 @@ using SoruxBot.Provider.QQ.Service;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
+using SoruxBot.SDK.QQ.Entity;
 
+// 构建 Configuration
+var configuration = new ConfigurationBuilder()
+    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
+    .Build();
+var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable", false);
+var isReceiveSelfMessage = configuration.GetSection("chat").GetValue<bool>("receive_self_message", true);
+var selfAccount = configuration.GetSection("chat").GetValue<string>("account", "");
 
 BotDeviceInfo deviceInfo = new()
 {
     Guid = Guid.NewGuid(),
     MacAddress = GenRandomBytes(6),
     DeviceName = $"SoruxBot-QQ",
-    SystemKernel = "Windows 10.0.19042",
-    KernelVersion = "10.0.19042.0"
+    SystemKernel = "Ubuntu 20.04.3 LTS",
+    KernelVersion = "5.4.0-81-generic"
 };
 
 BotKeystore keystore = new BotKeystore();
@@ -38,12 +46,6 @@ BotConfig config = new BotConfig
 // TODO 将 deviceInfo 和 keystore 保存到文件中，以便下次启动时使用。实现快速登录。
 var bot = BotFactory.Create(config, deviceInfo, keystore);
 var botClient = new BotClient(config, bot);
-
-// 构建 Configuration
-var configuration = new ConfigurationBuilder()
-    .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
-    .Build();
-
 
 // 构建 gRpc 服务端
 BuildGrpcServer(configuration, bot).Start();
@@ -68,6 +70,14 @@ var jsonSettings = new JsonSerializerSettings
 bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Friend Message Received: {@event.Chain.ToPreviewString()}");
+    // 判断是否是自己发送的消息
+    if (!isReceiveSelfMessage)
+    {
+        if (@event.Chain.FriendUin.ToString() == selfAccount)
+        {
+            return;
+        }
+    }
     var msgChain = new MessageChain(
         context.BotUin.ToString(),
         @event.Chain.FriendUin.ToString(),
@@ -101,6 +111,14 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 bot.Invoker.OnGroupMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Group Message Received: {@event.Chain.ToPreviewString()}");
+    // 判断是否是自己发送的消息
+    if (!isReceiveSelfMessage)
+    {
+        if (@event.Chain.FriendUin.ToString() == selfAccount)
+        {
+            return;
+        }
+    }
     var msgChain = new MessageChain(
         context.BotUin.ToString(),
         @event.Chain.FriendUin.ToString(),
@@ -124,6 +142,30 @@ bot.Invoker.OnGroupMessageReceived += (context, @event) =>
         @event.EventTime
     );
 
+    client.MessagePushStack(new MessageRequest()
+    {
+        Payload = JsonConvert.SerializeObject(msg, jsonSettings),
+        Token = configuration.GetSection("client:token").Value
+    });
+};
+
+bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
+{
+    Console.WriteLine($"[SoruxBot.Provider.QQ] Group Member Decrease Received: GroupUin: {@event.GroupUin}, Operator: {@event.OperatorUin}, Kick: {@event.MemberUin}");
+    
+    var msg = new MessageContext(
+        context.BotUin.ToString(),
+        "OnGroupMemberDecreaseEvent",
+        platformType,
+        MessageType.Notify,
+        @event.OperatorUin.ToString()!,
+        @event.GroupUin.ToString(), 
+        @event.GroupUin.ToString(),
+        null,
+        @event.EventTime
+    );
+    msg.UnderProperty.TryAdd("MemberUin", @event.MemberUin.ToString());
+    
     client.MessagePushStack(new MessageRequest()
     {
         Payload = JsonConvert.SerializeObject(msg, jsonSettings),
@@ -181,7 +223,47 @@ static void ConvertMessageChain(MessageChain chain, Lagrange.Core.Message.Messag
             ));
             continue;
         }
-        
-        //TODO 增加其他消息的消息类转换
+
+        else if (entity is FaceEntity faceEntity)
+        {
+            chain.Messages.Add(new FaceMessage(
+                faceEntity.FaceId, faceEntity.IsLargeFace));
+            continue;
+        }
+
+        else if (entity is MentionEntity mentionEntity)
+        {
+            chain.Messages.Add(new MentionMessage(
+                mentionEntity.Name, mentionEntity.Uin));
+            continue;
+        }
+
+        else if (entity is PokeEntity pokeEntity)
+        {
+            chain.Messages.Add(new PokeMessage(
+                pokeEntity.Type));
+            continue;
+        }
+
+        else if (entity is ImageEntity imageEntity)
+        {
+            chain.Messages.Add(new ImageMessage(
+                imageEntity.ImageUrl, imageEntity.FilePath, null, imageEntity.PictureSize.X, imageEntity.PictureSize.Y, imageEntity.ImageSize));
+            continue;
+        }
+
+        else if (entity is RecordEntity recordEntity)
+        {
+            chain.Messages.Add(new RecordMessage(
+                recordEntity.AudioUrl, recordEntity.FilePath, null, recordEntity.AudioLength, recordEntity.AudioName, recordEntity.AudioSize));
+            continue;
+        }
+
+        else if (entity is VideoEntity videoEntity)
+        {
+            chain.Messages.Add(new VideoMessage(
+                videoEntity.VideoUrl, videoEntity.FilePath, null, videoEntity.VideoHash, videoEntity.Size.X, videoEntity.Size.Y, videoEntity.VideoSize));
+            continue;
+        }
     }
 }

@@ -2,9 +2,12 @@
 
 namespace SoruxBot.SDK.QQ.Entity;
 
-public class PokeMessage (int type) : CommonMessage("poke")
+public class PokeMessage(uint type) : CommonMessage("poke")
 {
-    public int PokeType { get; } = type;   
+    /// <summary>
+    /// 戳一戳的类型
+    /// </summary>
+    public uint PokeType { get; } = type;
 
-    public string ToPreviewString() => $"[{nameof(PokeMessage)}: {PokeType}]";
+    public string ToPreviewString() => Convert.ToString(PokeType);
 }

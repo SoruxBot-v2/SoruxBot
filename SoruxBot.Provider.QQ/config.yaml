@@ -1,8 +1,13 @@
 server:
   host: 'localhost' # 表示 Provider 运行的 gRpc 地址
-  port: 8080 # 表示 Provider 运行的 gRpc 端口
-  token: '' # 表示 Token 密钥，用于鉴权
+  port: 8081 # 表示 Provider 运行的 gRpc 端口
+  token: 'xxx' # 表示 Token 密钥，用于鉴权
 client:
-    host: 'localhost' # 表示 Wrapper 运行的 gRpc 地址
-    port: 8081 # 表示 Wrapper 运行的 gRpc 端口
-    token: '' # 表示 Token 密钥，用于鉴权
+  host: 'localhost' # 表示 Wrapper 运行的 gRpc 地址
+  port: 8080 # 表示 Wrapper 运行的 gRpc 端口
+  token: 'xxx' # 表示 Token 密钥，用于鉴权
+fast_login:
+  enable: false # 表示是否启动快速登录
+chat:
+  receive_self_message: true # 表示是否接收自己发送的消息
+  account: '' # 表示机器人账号，如果需要判断是否是自己发送的消息请填写本字段

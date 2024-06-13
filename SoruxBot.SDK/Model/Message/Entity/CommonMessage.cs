@@ -16,4 +16,13 @@ public class CommonMessage(string type)
     /// </summary>
     /// <returns></returns>
     public virtual string ToPreviewText() => "[暂不支持该消息类型]";
+    
+    /// <summary>
+    /// 克隆对象
+    /// </summary>
+    /// <returns></returns>
+    public virtual CommonMessage DeapClone()
+    {
+        return new CommonMessage(type);
+    }
 }
