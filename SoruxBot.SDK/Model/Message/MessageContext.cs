@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace SoruxBot.SDK.Model.Message;
@@ -36,12 +37,12 @@ public class MessageContext(
     /// <summary>
     /// 消息类型
     /// </summary>
-    public MessageType MessageEventType { get; set; } = messageEventType;
+    public MessageType MessageEventType { get; init; } = messageEventType;
 
     /// <summary>
     /// 消息触发 ID
     /// </summary>
-    public string TriggerId { get; set; } = triggerId;
+    public string TriggerId { get; init; } = triggerId;
 
     /// <summary>
     /// 来源组信息：
@@ -49,32 +50,54 @@ public class MessageContext(
     /// 如果是群聊信息，那么这个值等于群组的账号;
     /// 如果是频道信息，那么这个值等于频道的主账号;
     /// </summary>
-    public string TriggerPlatformId { get; set; } = triggerPlatformId;
+    public string TriggerPlatformId { get; init; } = triggerPlatformId;
 
     /// <summary>
     /// 预留的辅助 Id，具体语境根据 TriggerPlatformId 有具体的定义，例如其为频道的主账号时，那么 TiedId 表示的时频道的子频道账号
     /// </summary>
-    public string TiedId { get; set; } = tiedId;
+    public string TiedId { get; init; } = tiedId;
 
     /// <summary>
     /// 消息实体，使用本对象应该遵循语义为主的处理方式
     /// </summary>
-    public MessageChain? MessageChain { get; set; } = messageChain;
+    public MessageChain? MessageChain { get; init; } = messageChain;
 
     /// <summary>
     /// 原始命令参数列表，本列表会存储任何原始的参数信息（不含有母命名头）。
     /// 请仅在无法通过参数注入的情况下使用本命令。
     /// 参数的 Key 为特性注入时提供的参数 Key
     /// </summary>
-    public Dictionary<string, object?> CommandParas { get; set; } = new ();
+    public ConcurrentDictionary<string, object?> CommandParas { get; init; } = new ();
 
     /// <summary>
     /// 表示消息携带的针对于平台的属性
     /// </summary>
-    public Dictionary<string, string> UnderProperty { get; set; } = new ();
+    public ConcurrentDictionary<string, string> UnderProperty { get; init; } = new ();
 
     /// <summary>
     /// 表示消息产生的时间戳
     /// </summary>
     public DateTime MessageTime { get; init; } = messageTime;
+    
+    /// <summary>
+    /// 深克隆
+    /// </summary>
+    /// <returns></returns>
+    public MessageContext Clone()
+    {
+        return new MessageContext(
+            BotAccount,
+            TargetPlatformAction,
+            TargetPlatform,
+            MessageEventType,
+            TriggerId,
+            TriggerPlatformId,
+            TiedId,
+            MessageChain?.DeapClone() ?? null,
+            MessageTime)
+        {
+            CommandParas = new (CommandParas),
+            UnderProperty = new (UnderProperty)
+        };
+    }
 }

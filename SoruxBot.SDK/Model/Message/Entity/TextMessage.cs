@@ -8,4 +8,13 @@ public class TextMessage(string content) : CommonMessage("text")
     public string Content { get; init; } = content;
 
     public override string ToPreviewText() => Content;
+    
+    /// <summary>
+    /// 克隆对象
+    /// </summary>
+    /// <returns></returns>
+    public override CommonMessage DeapClone()
+    {
+        return new TextMessage(Content);
+    }
 }

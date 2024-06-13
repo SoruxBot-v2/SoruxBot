@@ -51,7 +51,7 @@ public static class QqExternApi
             null,
             DateTime.Now
         );
-        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        ctx.UnderProperty.TryAdd("RejectAgain", isRejectAgain.ToString());
         var res = await api.SendMessageAsync(ctx);
         return res.UnderProperty["KickResult"] == "true";
     }
@@ -69,7 +69,7 @@ public static class QqExternApi
             null,
             DateTime.Now
         );
-        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        ctx.UnderProperty.TryAdd("RejectAgain", isRejectAgain.ToString());
         return api.SendMessage(ctx);
     }
     
@@ -86,7 +86,7 @@ public static class QqExternApi
             null,
             DateTime.Now
         );
-        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        ctx.UnderProperty.TryAdd("RejectAgain", isRejectAgain.ToString());
         var res = await api.SendMessageAsync(ctx);
         return res.UnderProperty["KickResult"] == "true";
     }
@@ -104,7 +104,7 @@ public static class QqExternApi
             null,
             DateTime.Now
         );
-        ctx.UnderProperty.Add("RejectAgain", isRejectAgain.ToString());
+        ctx.UnderProperty.TryAdd("RejectAgain", isRejectAgain.ToString());
         return api.SendMessage(ctx);
     }
 }

@@ -19,16 +19,17 @@ using SoruxBot.SDK.QQ.Entity;
 var configuration = new ConfigurationBuilder()
     .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
     .Build();
-var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable");
-
+var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable", false);
+var isReceiveSelfMessage = configuration.GetSection("chat").GetValue<bool>("receive_self_message", true);
+var selfAccount = configuration.GetSection("chat").GetValue<string>("account", "");
 
 BotDeviceInfo deviceInfo = new()
 {
     Guid = Guid.NewGuid(),
     MacAddress = GenRandomBytes(6),
     DeviceName = $"SoruxBot-QQ",
-    SystemKernel = "Windows 10.0.19042",
-    KernelVersion = "10.0.19042.0"
+    SystemKernel = "Ubuntu 20.04.3 LTS",
+    KernelVersion = "5.4.0-81-generic"
 };
 
 BotKeystore keystore = new BotKeystore();
@@ -69,6 +70,14 @@ var jsonSettings = new JsonSerializerSettings
 bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Friend Message Received: {@event.Chain.ToPreviewString()}");
+    // 判断是否是自己发送的消息
+    if (!isReceiveSelfMessage)
+    {
+        if (@event.Chain.FriendUin.ToString() == selfAccount)
+        {
+            return;
+        }
+    }
     var msgChain = new MessageChain(
         context.BotUin.ToString(),
         @event.Chain.FriendUin.ToString(),
@@ -102,6 +111,14 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 bot.Invoker.OnGroupMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Group Message Received: {@event.Chain.ToPreviewString()}");
+    // 判断是否是自己发送的消息
+    if (!isReceiveSelfMessage)
+    {
+        if (@event.Chain.FriendUin.ToString() == selfAccount)
+        {
+            return;
+        }
+    }
     var msgChain = new MessageChain(
         context.BotUin.ToString(),
         @event.Chain.FriendUin.ToString(),
@@ -147,7 +164,7 @@ bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
         null,
         @event.EventTime
     );
-    msg.UnderProperty.Add("MemberUin", @event.MemberUin.ToString());
+    msg.UnderProperty.TryAdd("MemberUin", @event.MemberUin.ToString());
     
     client.MessagePushStack(new MessageRequest()
     {

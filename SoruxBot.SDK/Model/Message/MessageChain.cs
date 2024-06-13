@@ -8,7 +8,7 @@ public class MessageChain(string selfId, string targetId, string? platformId, st
     /// <summary>
     /// 消息链
     /// </summary>
-    public List<CommonMessage> Messages { get; set; } = new ();
+    public List<CommonMessage> Messages { get; private set; } = new ();
 
     /// <summary>
     /// 来源 ID
@@ -34,4 +34,20 @@ public class MessageChain(string selfId, string targetId, string? platformId, st
     /// 预先定义的平台类型
     /// </summary>
     public string PlatformType { get; init; } = platformType;
+    
+    /// <summary>
+    /// 克隆对象
+    /// </summary>
+    /// <returns></returns>
+    public MessageChain DeapClone()
+    {
+        var clonedMessageChain = new MessageChain(SelfId, TargetId, PlatformId, TiedId, PlatformType);
+        
+        foreach (var message in Messages)
+        {
+            clonedMessageChain.Messages.Add(message.DeapClone());
+        }
+
+        return clonedMessageChain;
+    }
 }
