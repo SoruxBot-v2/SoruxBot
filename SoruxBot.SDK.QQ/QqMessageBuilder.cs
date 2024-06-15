@@ -1,4 +1,5 @@
 ﻿using SoruxBot.SDK.Model.Message;
+using SoruxBot.SDK.Plugins.Service;
 
 namespace SoruxBot.SDK.QQ;
 

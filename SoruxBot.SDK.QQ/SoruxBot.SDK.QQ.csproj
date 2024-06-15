@@ -4,6 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Title>SoruxBot.SDK.QQ</Title>
+    <Description>The QQ SDK for SoruxBot SDK, binding with SoruxBot.Provider.QQ</Description>
+    <PackageProjectUrl>https://github.com/SoruxBot-v2/SoruxBot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoruxBot-v2/SoruxBot</RepositoryUrl>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

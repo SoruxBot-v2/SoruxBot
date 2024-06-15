@@ -23,6 +23,6 @@ public class CommonMessage(string type)
     /// <returns></returns>
     public virtual CommonMessage DeepClone()
     {
-        return new CommonMessage(type);
+        return new CommonMessage(Type);
     }
 }
