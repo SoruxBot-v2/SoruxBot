@@ -16,13 +16,8 @@ public class ApiService(IResponseQueue queue, PluginsListener listener) : ICommo
         return queue.SetNextResponse(messageContext);
     }
 
-    public void RegisterListener(PluginsListenerDescriptor pluginsListenerDescriptor)
+    public Task<MessageContext?> RegisterListenerAsync(PluginsListenerDescriptor pluginsListenerDescriptor, CancellationToken cancellationToken = default)
     {
-        listener.AddListener(pluginsListenerDescriptor);
-    }
-
-    public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor)
-    {
-        listener.RemoveListener(pluginsListenerDescriptor);
+        return listener.RegisterListenerAsync(pluginsListenerDescriptor, cancellationToken);
     }
 }

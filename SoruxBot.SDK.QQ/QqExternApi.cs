@@ -141,41 +141,25 @@ public static class QqExternApi
         return api.SendMessage(ctx);
     }
     
-    public static void QqReadNextGroupMessageAsync(this ICommonApi api, string triggerId, string triggerPlatformId, 
-        Func<MessageContext, PluginFlag> success,
-        Func<MessageContext, PluginFlag> failure,
-        int timeOut = 60)
+    public static Task<MessageContext?> QqReadNextGroupMessageAsync(this ICommonApi api, string triggerId, string triggerPlatformId, CancellationToken cancellationToken = default)
     {
         var listener = new PluginsListenerDescriptor(
             MessageType.GroupMessage,
             Constant.QqPlatformType,
             "SendGroupMessage",
-            ctx => ctx.TriggerId == triggerId && ctx.TriggerPlatformId == triggerPlatformId,
-            DateTime.Now.AddSeconds(timeOut),
-            true,
-            true,
-            success,
-            failure
+            ctx => ctx.TriggerId == triggerId && ctx.TriggerPlatformId == triggerPlatformId
         );
         
-        api.RegisterListener(listener);
+        return api.RegisterListenerAsync(listener, cancellationToken);
     }
     
-    public static void QqReadNextPrivateMessageAsync(this ICommonApi api, string triggerId,
-        Func<MessageContext, PluginFlag> success,
-        Func<MessageContext, PluginFlag> failure,
-        int timeOut = 60)
+    public static Task<MessageContext?> QqReadNextPrivateMessageAsync(this ICommonApi api, string triggerId, CancellationToken cancellationToken = default)
     {
-        api.RegisterListener(new PluginsListenerDescriptor(
+        return api.RegisterListenerAsync(new PluginsListenerDescriptor(
             MessageType.GroupMessage,
             Constant.QqPlatformType,
             "SendFriendMessage",
-            ctx => ctx.TriggerId == triggerId,
-            DateTime.Now.AddSeconds(timeOut),
-            true,
-            true,
-            success,
-            failure
-        ));
+            ctx => ctx.TriggerId == triggerId
+        ), cancellationToken);
     }
 }

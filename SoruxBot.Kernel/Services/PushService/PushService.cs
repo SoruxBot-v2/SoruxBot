@@ -20,9 +20,8 @@ public class PushService(IMessageQueue messageQueue, IResponseQueue responseQueu
             {
                 var nextMessage = await messageQueue.GetNextMessageRequest();
                 messageCallback(nextMessage);
-
-                // 让出cpu时间片？
-                // Thread.Sleep(0);
+                
+                Thread.Sleep(0);
             }
         });
 

@@ -8,7 +8,8 @@ namespace SoruxBot.Kernel.MessageQueue;
 
 
 public class ResponseQueueImpl(
-    IChannelPool<MessageContext,MessageResult> msgChannelPool) : IResponseQueue
+    IChannelPool<MessageContext,MessageResult> msgChannelPool,
+    ILoggerService loggerService) : IResponseQueue
 {
     private readonly ConcurrentDictionary<string, bool> _bindIds = new();
     
@@ -50,24 +51,21 @@ public class ResponseQueueImpl(
         {
             try
             {
-                Console.WriteLine("进来了inin");
                 // 这里是发送给指定用户实体的id，保证这个顺序一致即可
                 // 即能按需发送，又保证一定并发
                 var bindId = context.TargetPlatform + context.TriggerPlatformId + context.TriggerId;
             
                 var channelPair = msgChannelPool.RentChannelPair(bindId).GetChannelPair();
                 await channelPair.Item1.Writer.WriteAsync(context);
-                Console.WriteLine("要push");
+                
                 msgChannelPool.RentChannelPair(bindId).PushWork(_responseCallback!);
 
                 var res = await channelPair.Item2.Reader.ReadAsync();
                 promise.Callbacks.ForEach(callback => callback(res));
-
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                loggerService.Error("SetNextResponse", "Error when SetNextResponse in promise mode.", e);
             }
            
         }).Start();
@@ -79,7 +77,5 @@ public class ResponseQueueImpl(
     public void SetResponseCallback(Func<MessageContext, MessageResult> cb)
     {
         _responseCallback = cb;
-
-
     }
 }

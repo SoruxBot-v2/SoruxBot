@@ -1,20 +1,17 @@
-﻿using SoruxBot.Kernel.Bot;
+﻿using System.Collections.Concurrent;
 using SoruxBot.Kernel.Services.PluginService.DataStructure;
-using SoruxBot.Kernel.Services.PluginService.Model;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
-using System.Text;
 using SoruxBot.SDK.Plugins.Model;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
-public class PluginsListener(BotContext botContext, ILoggerService loggerService)
+public class PluginsListener(ILoggerService loggerService)
 {
-    private BotContext _botContext = botContext;
-    private ILoggerService _loggerService = loggerService;
-
 	private readonly ConcurrentRadixTree<string, PluginsListenerDescriptor> _matchTree = new();
-
+	
+	private readonly ConcurrentDictionary<string, MessageContext?> _contextResult = new ();
+	
     /// <summary>
     /// 进入Filter队列，并且判断是否需要继续执行 Dispatcher
     /// 如果返回 false 那么说明不需要继续进入 Message 路由
@@ -40,31 +37,23 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 		{
 			if (item.ConditionCheck(context))
 			{
-				item.SuccessfulFunc(context);
+				// 通知给 RegisterListenerAsync 捕获到的 MessageContext
+				_contextResult.TryAdd(item.ID, context);
+				
 				if (item.IsInterceptToChannel) isInterceptedToChannel = true;
 				if (item.IsInterceptToFilters) break;
 			}
-			
 		}
 		return !isInterceptedToChannel;
     }
-
-    public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor)
+    
+    public Task<MessageContext?> RegisterListenerAsync(PluginsListenerDescriptor pluginsListenerDescriptor, CancellationToken cancellationToken = default)
 	{
-		var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
-		if(pluginsListenerDescriptor.TargetPlatformType != string.Empty)
-		{
-			path.Add(pluginsListenerDescriptor.TargetPlatformType);
-			if(pluginsListenerDescriptor.TargetAction !=  string.Empty)
-			{
-				path.Add(pluginsListenerDescriptor.TargetAction);
-			}
-		}
-		_matchTree.Remove(path);
-	}
-
-    public void AddListener(PluginsListenerDescriptor pluginsListenerDescriptor)
-	{
+		// 注册到 MessageContext Result
+		_contextResult.TryAdd(pluginsListenerDescriptor.ID, null);
+		
+		// TODO 注册监听树
+		
 		var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
 		if (pluginsListenerDescriptor.TargetPlatformType != string.Empty)
 		{
@@ -75,5 +64,46 @@ public class PluginsListener(BotContext botContext, ILoggerService loggerService
 			}
 		}
 		_matchTree.ForceInsert(path, pluginsListenerDescriptor);
+		
+		// 创建一个取消令牌源，带有默认的 60 秒超时
+		var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+		if (cancellationToken == CancellationToken.None)
+		{
+			cts.CancelAfter(TimeSpan.FromSeconds(60));
+		}
+		
+		// 注册到树中后开启监听操作，如果监听成功那么进行返回
+		return new Task<Task<MessageContext?>>(async () =>
+		{
+			try
+			{
+				while (!cts.Token.IsCancellationRequested)
+				{
+					
+					// 10 ms 延迟
+					await Task.Delay(10, cts.Token);
+					
+					_contextResult.TryGetValue(pluginsListenerDescriptor.ID, out var ctx);
+					
+					if (ctx is not null)
+					{
+						return ctx;
+					}
+				}
+				
+				loggerService.Info(Constant.NameValue.KernelPluginsListenerLogName, "The listener operation timed out.");
+			}
+			catch (OperationCanceledException) when (cts.Token.IsCancellationRequested)
+			{
+				loggerService.Info(Constant.NameValue.KernelPluginsListenerLogName, "The listener operation timed out.");
+			}finally
+			{
+				cts.Dispose();
+				
+				// TODO 移除树结构
+			}
+			
+			return null;
+		}).Unwrap();
 	}
 }
