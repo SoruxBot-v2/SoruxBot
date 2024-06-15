@@ -227,18 +227,19 @@ public class PluginsDispatcher(
 						}
 					}
 					
+					// 由于该方法没有并发调用，故不需要对取出的节点加锁
 					if(commandPrefix == string.Empty && (msgEventCommand?.Command.Length ?? 0) == 0)
 					{
 						_prefixRouterTree.TryInsert(routePrefix, new());
 						var textRouter = _prefixRouterTree.GetValue(routePrefix)!;
-						if (textRouter.TryGetValue(Enumerable.Empty<string>(), out var list))
+						if (textRouter.Value!.TryGetValue(Enumerable.Empty<string>(), out var list))
 						{
-							list!.Add(pluginsActionDescriptor);
+							list!.Value!.Add(pluginsActionDescriptor);
 						}
 						else
 						{
-							list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-							textRouter.Insert(Enumerable.Empty<string>(), list);
+							var newList = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
+							textRouter.Value!.Insert(Enumerable.Empty<string>(), newList);
 						}
 						
 					}
@@ -249,14 +250,14 @@ public class PluginsDispatcher(
 						foreach (var s in msgEventCommand!.Command)
 						{
 							var path = new string[] { commandPrefix + s.Split([' ', '\n', '\t', '\r'])[0] };
-							if (textRouter.TryGetValue(path, out var list))
+							if (textRouter.Value!.TryGetValue(path, out var list))
 							{
-								list!.Add(pluginsActionDescriptor);
+								list!.Value!.Add(pluginsActionDescriptor);
 							}
 							else
 							{
-								list = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
-								textRouter.Insert(path, list);
+								var newList = new List<PluginsActionDescriptor>() { pluginsActionDescriptor };
+								textRouter.Value!.Insert(path, newList);
 							}
 						}
 					}
@@ -300,11 +301,11 @@ public class PluginsDispatcher(
 		if (prefixLists == null) return null;
 		foreach (var textRouteLists in prefixLists)
 		{
-			var lists = textRouteLists.PrefixMatch(textRoute);
+			var lists = textRouteLists.Value!.PrefixMatch(textRoute);
 			if (lists == null) continue;
 			foreach(var l in lists)
 			{
-				list.AddRange(l);
+				list.AddRange(l.Value!);
 			}
 		}
 		return list.Count > 0 ? list : null;
