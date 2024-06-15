@@ -1,12 +1,9 @@
 ﻿using SoruxBot.SDK.Model.Message.Entity;
 using System.Net;
-using System.Numerics;
-using System.Security.Cryptography;
 
 namespace SoruxBot.SDK.QQ.Entity;
 
 public class RecordMessage : CommonMessage
-
 {
     /// <summary>
     /// 音频时长

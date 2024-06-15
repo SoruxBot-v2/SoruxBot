@@ -21,10 +21,7 @@ public interface ICommonApi
     /// 注册监听器
     /// </summary>
     /// <param name="pluginsListenerDescriptor"></param>
-    public void RegisterListener(PluginsListenerDescriptor pluginsListenerDescriptor);
-    /// <summary>
-    /// 删除监听器
-    /// </summary>
-    /// <param name="pluginsListenerDescriptor"></param>
-    public void RemoveListener(PluginsListenerDescriptor pluginsListenerDescriptor);
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<MessageContext?> RegisterListenerAsync(PluginsListenerDescriptor pluginsListenerDescriptor, CancellationToken cancellationToken = default);
 }

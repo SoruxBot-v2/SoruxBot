@@ -13,7 +13,7 @@ public class TextMessage(string content) : CommonMessage("text")
     /// 克隆对象
     /// </summary>
     /// <returns></returns>
-    public override CommonMessage DeapClone()
+    public override CommonMessage DeepClone()
     {
         return new TextMessage(Content);
     }

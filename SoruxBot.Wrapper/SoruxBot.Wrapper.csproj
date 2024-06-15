@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <None Include="bin\Debug\net8.0\config.yaml" />
+      <None Include="bin\Debug\net8.0\plugins\config.yaml" />
     </ItemGroup>
 
     <ItemGroup>
