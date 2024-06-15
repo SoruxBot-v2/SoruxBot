@@ -3,14 +3,18 @@ using SoruxBot.Kernel.Services.PluginService.DataStructure;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.SDK.Plugins.Model;
+using SoruxBot.Kernel.Services.PluginService.Model;
+using System.Collections.Generic;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
 public class PluginsListener(ILoggerService loggerService)
 {
-	private readonly ConcurrentRadixTree<string, PluginsListenerDescriptor> _matchTree = new();
+	private readonly ConcurrentRadixTree<string, List<PluginsListenerDescriptor>> _matchTree = new();
 	
 	private readonly ConcurrentDictionary<string, MessageContext?> _contextResult = new ();
+
+	private readonly ReaderWriterLockSlim _listenerLock = new ();
 	
     /// <summary>
     /// 进入Filter队列，并且判断是否需要继续执行 Dispatcher
@@ -35,14 +39,23 @@ public class PluginsListener(ILoggerService loggerService)
 		bool isInterceptedToChannel = false;
 		foreach (var item in list)
 		{
-			if (item.ConditionCheck(context))
+			item.EnterReadLock();
+			foreach(var listener in item.Value!)
 			{
-				// 通知给 RegisterListenerAsync 捕获到的 MessageContext
-				_contextResult.TryAdd(item.ID, context);
-				
-				if (item.IsInterceptToChannel) isInterceptedToChannel = true;
-				if (item.IsInterceptToFilters) break;
+				if(listener.ConditionCheck(context))
+				{
+					// 通知给 RegisterListenerAsync 捕获到的 MessageContext
+					_contextResult.TryAdd(listener.ID, context);
+
+					isInterceptedToChannel |= true;
+					if (listener.IsInterceptToFilters)
+					{
+						item.ExitReadLock();
+						return !isInterceptedToChannel;
+					}
+				}
 			}
+			item.ExitReadLock();
 		}
 		return !isInterceptedToChannel;
     }
@@ -52,8 +65,7 @@ public class PluginsListener(ILoggerService loggerService)
 		// 注册到 MessageContext Result
 		_contextResult.TryAdd(pluginsListenerDescriptor.ID, null);
 		
-		// TODO 注册监听树
-		
+		// 注册监听树
 		var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
 		if (pluginsListenerDescriptor.TargetPlatformType != string.Empty)
 		{
@@ -63,7 +75,17 @@ public class PluginsListener(ILoggerService loggerService)
 				path.Add(pluginsListenerDescriptor.TargetAction);
 			}
 		}
-		_matchTree.ForceInsert(path, pluginsListenerDescriptor);
+		if(_matchTree.TryGetValue(path, out var listenerList))
+		{
+			listenerList!.EnterWriteLock();
+			listenerList.Value!.Add(pluginsListenerDescriptor);
+			listenerList.ExitWriteLock();
+		}
+		else
+		{
+			var newListenerList = new List<PluginsListenerDescriptor>() { pluginsListenerDescriptor }; ;
+			_matchTree.Insert(path, newListenerList);
+		}
 		
 		// 创建一个取消令牌源，带有默认的 60 秒超时
 		var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -99,8 +121,22 @@ public class PluginsListener(ILoggerService loggerService)
 			}finally
 			{
 				cts.Dispose();
-				
-				// TODO 移除树结构
+
+				// 移除树结构
+				var path = new List<string>() { pluginsListenerDescriptor.MessageType.ToString() };
+				if (pluginsListenerDescriptor.TargetPlatformType != string.Empty)
+				{
+					path.Add(pluginsListenerDescriptor.TargetPlatformType);
+					if (pluginsListenerDescriptor.TargetAction != string.Empty)
+					{
+						path.Add(pluginsListenerDescriptor.TargetAction);
+					}
+				}
+				var listenerList = _matchTree.GetValue(path);
+				listenerList!.EnterWriteLock();
+				listenerList.Value!.Remove(pluginsListenerDescriptor);
+				if (listenerList.Value!.Count == 0) _matchTree.Remove(path);
+				listenerList.ExitWriteLock();
 			}
 			
 			return null;

@@ -13,9 +13,9 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		private ReaderWriterLockSlim _writeLock = new ReaderWriterLockSlim();
 		private ReaderWriterLockSlim _rootLock = new ReaderWriterLockSlim();
 		public ConcurrentRadixTree() { }
-		public TValue[] PrefixMatch(IEnumerable<TKey> key)
+		public RadixTreeNodeValue<TValue>[] PrefixMatch(IEnumerable<TKey> key)
 		{
-			var result = new List<TValue>();
+			var result = new List<RadixTreeNodeValue<TValue>>();
 			_rootLock.EnterReadLock();
 			var root = _root;
 			_rootLock.ExitReadLock();
@@ -143,7 +143,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		/// <returns>Original object</returns>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="KeyNotFoundException"></exception>
-		public ConcurrentRadixTree<TKey, TValue> Remove(IEnumerable<TKey> key, out TValue value)
+		public ConcurrentRadixTree<TKey, TValue> Remove(IEnumerable<TKey> key, out RadixTreeNodeValue<TValue> value)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			try
@@ -278,13 +278,13 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		/// <returns>Value</returns>
 		/// <exception cref="KeyNotFoundException"></exception>
 		/// <exception cref="ArgumentNullException"></exception>
-		public TValue GetValue(IEnumerable<TKey> key)
+		public RadixTreeNodeValue<TValue> GetValue(IEnumerable<TKey> key)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			_rootLock.EnterReadLock();
 			var root = _root;
 			_rootLock.ExitReadLock();
-			TValue value;
+			RadixTreeNodeValue<TValue> value;
 			var node = GetNodePrivate(root, key);
 			if(node == null || !node.IsValueNode)
 			{
@@ -294,7 +294,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
             {
 				value = node.Value!;
             }
-			return value;
+			return value!;
 		}
 		/// <summary>
 		/// 尝试获取节点值，失败则返回false。通过value返回节点值。
@@ -303,7 +303,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		/// <param name="value"></param>
 		/// <returns>Success mark</returns>
 		/// <exception cref="ArgumentNullException"></exception>
-		public bool TryGetValue(IEnumerable<TKey> key, out TValue? value)
+		public bool TryGetValue(IEnumerable<TKey> key, out RadixTreeNodeValue<TValue>? value)
 		{
 			ArgumentNullException.ThrowIfNull(key, nameof(key));
 			_rootLock.EnterReadLock();
@@ -333,9 +333,9 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		/// 转化为字典
 		/// </summary>
 		/// <returns>Dictionary of the key-value pairs</returns>
-		public Dictionary<IEnumerable<TKey>, TValue> ToDictionary()
+		public Dictionary<IEnumerable<TKey>, RadixTreeNodeValue<TValue>> ToDictionary()
 		{
-			var dict = new Dictionary<IEnumerable<TKey>, TValue>();
+			var dict = new Dictionary<IEnumerable<TKey>, RadixTreeNodeValue<TValue>>();
 			_rootLock.EnterReadLock();
 			var root = _root;
 			_rootLock.ExitReadLock();
@@ -360,7 +360,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			Dictionary<TKey, RadixTreeNode<TKey, TValue>> newChildren;
 			if (node == null)
 			{
-				newNode = new RadixTreeNode<TKey, TValue>(path, value);
+				newNode = new RadixTreeNode<TKey, TValue>(path, new(value));
 				return true;
 			}
 			newNode = node;
@@ -368,7 +368,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			// 如果待插入路径存在节点，并且没有值，或者允许覆盖，则返回一个当前节点有值的拷贝，设置状态为成功。
 			if (node.Key.SequenceEqual(path) && !node.IsValueNode || node.Key.SequenceEqual(path) && replace)
 			{
-				newNode = new RadixTreeNode<TKey, TValue>(path, node.Children, true, value);
+				newNode = new RadixTreeNode<TKey, TValue>(path, node.Children, true, new(value));
 				return true;
 			}
 			if (node.Key.SequenceEqual(path) && node.IsValueNode && !replace) { return false; }
@@ -403,7 +403,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			);
 			newChildren = new Dictionary<TKey, RadixTreeNode<TKey, TValue>>();
 			newChildren[node.Key.ElementAt(index)] = subNode;
-			newChildren[path.ElementAt(index)] = new RadixTreeNode<TKey, TValue>(path.Skip(index), value);
+			newChildren[path.ElementAt(index)] = new RadixTreeNode<TKey, TValue>(path.Skip(index), new(value));
 			newNode = new RadixTreeNode<TKey, TValue>(path.Take(index))
 			{
 				Children = new(newChildren)
@@ -417,7 +417,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			var keyLength = node.Key.Count();
 			if (node.Key.SequenceEqual(path) && node.IsValueNode)
 			{
-				newNode = new RadixTreeNode<TKey, TValue>(path, value)
+				newNode = new RadixTreeNode<TKey, TValue>(path, new(value))
 				{
 					Children = new(node.Children)
 				};
@@ -437,7 +437,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			}
 			return false;
 		}
-		private static bool TryRemovePrivate(RadixTreeNode<TKey, TValue> node, IEnumerable<TKey> path, out TValue? value, out RadixTreeNode<TKey, TValue>? newNode)
+		private static bool TryRemovePrivate(RadixTreeNode<TKey, TValue> node, IEnumerable<TKey> path, out RadixTreeNodeValue<TValue>? value, out RadixTreeNode<TKey, TValue>? newNode)
 		{
 			Dictionary<TKey, RadixTreeNode<TKey, TValue>> newChildren;
 			value = default;
@@ -445,7 +445,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			var keyLength = node.Key.Count();
 			if(path.SequenceEqual(node.Key) && node.IsValueNode)
 			{
-				value = node.Value;
+				value = node.Value!;
 				// 如果node没有子节点，那么没必要保留该节点，直接返回null
 				if (node.Children.Count == 0)
 				{
@@ -512,7 +512,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		{
 			bool nodeIsValueNode = node.IsValueNode;
 			bool success = false;
-			TValue? nodeValue = node.Value;
+			RadixTreeNodeValue<TValue>? nodeValue = node.Value;
 			Dictionary<TKey, RadixTreeNode<TKey, TValue>> newChildren = new(node.Children);
 			// 如果还有子节点，那么递归查找符合条件的节点并删除
 			if(node.Children.Count > 0)
@@ -563,7 +563,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 			else newNode = node;
 			return success;
 		}
-		private static void ToDictionaryPrivate(RadixTreeNode<TKey, TValue> node, Dictionary<IEnumerable<TKey>, TValue> dict, IEnumerable<TKey> pathPrefix)
+		private static void ToDictionaryPrivate(RadixTreeNode<TKey, TValue> node, Dictionary<IEnumerable<TKey>, RadixTreeNodeValue<TValue>> dict, IEnumerable<TKey> pathPrefix)
 		{
 			if (node.IsValueNode) dict.Add(Enumerable.Concat(pathPrefix, node.Key), node.Value!);
 			foreach (var child in node.Children)
@@ -571,7 +571,7 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 				ToDictionaryPrivate(child.Value, dict, Enumerable.Concat(pathPrefix, node.Key));
 			}
 		}
-		private static void PrefixMatchPrivate(RadixTreeNode<TKey, TValue> node, IEnumerable<TKey> path, List<TValue> values)
+		private static void PrefixMatchPrivate(RadixTreeNode<TKey, TValue> node, IEnumerable<TKey> path, List<RadixTreeNodeValue<TValue>> values)
 		{
 			var keyLength = node.Key.Count();
 			// 如果节点与路径前缀匹配，则继续搜索。如果该节点有值，则将该值加入values
