@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Yaml;
@@ -12,6 +13,11 @@ using SoruxBot.SDK.Model.Message;
 using SoruxBot.Wrapper.Service;
 using Grpc.Net.Client;
 using Newtonsoft.Json;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using SoruxBot.Kernel.Constant;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Plugins.Model;
 
@@ -21,10 +27,28 @@ var app = CreateDefaultBotBuilder(args)
 // 构建 gRpc 服务
 BuildGrpcServer(app).Start();
 
-// 构建 grpc 客户端
+// 构建配置获取
 var configuration = new ConfigurationBuilder()
     .AddYamlFile("config.yaml", optional: false, reloadOnChange: true)
     .Build();
+
+// 构建 OpenTelemetry 组件
+if (configuration.GetRequiredSection("open_telemetry").GetValue<bool>("enable", false))
+{
+    var tracerProvider = Sdk.CreateTracerProviderBuilder()
+        .AddGrpcClientInstrumentation()
+        .AddGrpcCoreInstrumentation()
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("SoruxBot"))
+        .AddSource("SoruxBot")
+        .AddJaegerExporter(options =>
+        {
+            options.AgentHost = configuration.GetRequiredSection("open_telemetry").GetValue<string>("host");
+            options.AgentPort = configuration.GetRequiredSection("open_telemetry").GetValue<int>("port");
+            options.Protocol = JaegerExportProtocol.HttpBinaryThrift;
+        })
+        .Build();
+}
+
 
 // 构建 gRpc 客户端池
 var grpcClients = new ConcurrentDictionary<string, Tuple<string, Message.MessageClient>>();
@@ -39,7 +63,7 @@ configuration.GetSection("provider").GetChildren().ToList().ForEach(
         grpcClients[$"{x.GetSection("type").Value?.ToLower()}@{x.GetSection("account").Value}"]
             = new Tuple<string, Message.MessageClient>(
                 $"{x.GetSection("token").Value}",
-                new Message.MessageClient(grpcChannel)
+                new TracingMessageClient(new Message.MessageClient(grpcChannel))
             );
     });
 
@@ -71,10 +95,14 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
     pushService.RunInstance(
         context =>
         {
+            var activity = OpenTelemetryHelper.ActivitySource.StartActivity("MessagePluginDealService");
+            
 			bool msgIntercepted = false;
+            
             pluginsDispatcher.GetAction(ref context)?.ForEach(
                 sp =>
                 {
+                    using var aty = OpenTelemetryHelper.ActivitySource.StartActivity(sp.PluginName + " : " + sp.ActionName);
 					if (msgIntercepted) return;
                     try
                     {
@@ -86,22 +114,26 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
                     catch (Exception e)
                     {
                         logger.Error(loggerName, $"Plugin Error catch, with exception: {e.Message} and context {context}");
+                        aty?.SetStatus(ActivityStatusCode.Error, $"Exception: {e.Message}");
                     }
                 });
+            
+            activity?.Dispose();
         },
         context =>
         {
+            using var activity = OpenTelemetryHelper.ActivitySource.StartActivity("MessagePluginSendService");
+            
             // 这里利用MessageContext，从Provider得到MessageId
             var tuple = grpcClients[context.TargetPlatform.ToLower() + "@" + context.BotAccount];
             var response = tuple.Item2
                 .MessageSend(new MessageRequest
                 {
                     Payload = JsonConvert.SerializeObject(context, jsonSettings),
-                    // TODO 这里需要从配置文件中读取
                     Token = tuple.Item1
                 });
 
-            // 拿到MessageResult
+            // 拿到 MessageResult
             var result = JsonConvert
                 .DeserializeObject<MessageResult>(response.Payload, jsonSettings);
 

@@ -31,7 +31,6 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
 
         public void PushWork(Func<TI, TO> work)
         {
-            Console.WriteLine("pushworking");
             _workActions.Enqueue(work);
             _semaphore.Release(1);
         }
@@ -170,7 +169,6 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
     // 借用 channel
     public IChannelPairEntity<TI,TO> RentChannelPair(string bindId)
     {
-        Console.WriteLine(_channelVector);
         // 直到绑定成功
         _channelSemaphore.Wait();
 

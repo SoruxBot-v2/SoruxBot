@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+using SoruxBot.Kernel.Constant;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Model.Message;
 
@@ -12,12 +13,13 @@ public class MessageQueue : IMessageQueue
 
     public async Task<MessageContext> GetNextMessageRequest()
     {
-        // return  _channel.Reader.TryRead(out var res) ? res : null;
-     return  await _channel.Reader.ReadAsync();
+        using var activity = OpenTelemetryHelper.ActivitySource.StartActivity();
+        return  await _channel.Reader.ReadAsync();
     }
 
     public void SetNextMsg(MessageContext value)
     {
+        using var activity = OpenTelemetryHelper.ActivitySource.StartActivity();
         while (!_channel.Writer.TryWrite(value))
         {
         }

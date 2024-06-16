@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using SoruxBot.Kernel.Constant;
 using SoruxBot.Kernel.Services.PluginService.DataStructure;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
@@ -24,6 +25,8 @@ public class PluginsListener(ILoggerService loggerService)
     /// <returns></returns>
     public bool Filter(MessageContext context)
     {
+	    using var activity = OpenTelemetryHelper.ActivitySource.StartActivity();
+	    
 		var path = new List<string>() { context.MessageEventType.ToString() };
 		if (context.TargetPlatform != string.Empty)
 		{
