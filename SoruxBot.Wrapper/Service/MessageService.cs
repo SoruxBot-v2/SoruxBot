@@ -3,6 +3,7 @@ using Grpc.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using SoruxBot.Kernel.Constant;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
@@ -18,6 +19,8 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
     public override Task<Empty> MessagePushStack(MessageRequest request, ServerCallContext context)
     {
         loggerService.Info("MessageService", "Catch msg: " + request.Payload);
+        using var activity = OpenTelemetryHelper.ActivitySource.StartActivity();
+        
         if (request.Token != token)
         {
             return Task.FromResult(new Empty());

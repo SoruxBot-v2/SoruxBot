@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Kernel.MessageQueue;
 using SoruxBot.Kernel.Services.LogService;
@@ -31,7 +32,15 @@ namespace SoruxBot.Kernel.Bot
                         loggingBuilder.AddConsole();
                         if (config["LoggerDebug"] == "true")
                             loggingBuilder.AddDebug();
-
+                        
+                        //loggingBuilder.AddOpenTelemetry(options =>
+                        //{
+                        //    options.AddConsoleExporter();
+                        //    options.IncludeScopes = true;
+                        //    options.ParseStateValues = true;
+                        //    options.IncludeFormattedMessage = true;
+                        //});
+                        
                         services.AddSingleton(loggingBuilder);
                     });
 

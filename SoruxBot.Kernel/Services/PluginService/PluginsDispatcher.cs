@@ -14,6 +14,7 @@ using SoruxBot.SDK.Plugins.Service;
 using System.Text;
 using SoruxBot.SDK.Model.Message.Entity;
 using System.Collections.Generic;
+using SoruxBot.Kernel.Constant;
 
 namespace SoruxBot.Kernel.Services.PluginService;
 
@@ -272,11 +273,14 @@ public class PluginsDispatcher(
 	/// <returns></returns>
 	public List<PluginsActionDescriptor>? GetAction(ref MessageContext messageContext)
 	{
+		using var activity = OpenTelemetryHelper.ActivitySource.StartActivity();
+		
 		// 监听器匹配
 		if (!pluginsListener.Filter(messageContext))
 		{
 			return null;
 		}
+		
 		var list = new List<PluginsActionDescriptor>();
 		var textRoute = new List<string>();
 		var msg = messageContext.MessageChain!.Messages.FirstOrDefault();
