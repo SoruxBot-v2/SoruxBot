@@ -130,8 +130,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
                 return PluginFlag.MsgUnprocessed;
             }
         }
-
-        return (PluginFlag)descriptor.ActionDelegate.DynamicInvoke(objects.ToArray()!)!;
+        
         return InvokeActionDelegate(descriptor, objects.ToArray()!).Result;
     }
     
