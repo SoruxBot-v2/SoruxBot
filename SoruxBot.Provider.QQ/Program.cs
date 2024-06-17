@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Lagrange.Core;
@@ -23,32 +24,13 @@ var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable"
 var isReceiveSelfMessage = configuration.GetSection("chat").GetValue<bool>("receive_self_message", true);
 var selfAccount = configuration.GetSection("chat").GetValue<string>("account", "");
 
-BotDeviceInfo deviceInfo = new()
-{
-    Guid = Guid.NewGuid(),
-    MacAddress = GenRandomBytes(6),
-    DeviceName = $"SoruxBot-QQ",
-    SystemKernel = "Ubuntu 20.04.3 LTS",
-    KernelVersion = "5.4.0-81-generic"
-};
+var botClient = new BotClient();
 
-BotKeystore keystore = new BotKeystore();
-
-BotConfig config = new BotConfig
-{
-    UseIPv6Network = false,
-    GetOptimumServer = true,
-    AutoReconnect = true,
-    Protocol = Protocols.Linux,
-    CustomSignProvider = new QqSigner(),
-};
-
-// TODO 将 deviceInfo 和 keystore 保存到文件中，以便下次启动时使用。实现快速登录。
-var bot = BotFactory.Create(config, deviceInfo, keystore);
-var botClient = new BotClient(config, bot);
+// 登录
+await botClient.LoginAsync();
 
 // 构建 gRpc 服务端
-BuildGrpcServer(configuration, bot).Start();
+BuildGrpcServer(configuration, botClient.bot).Start();
 Console.WriteLine("[SoruxBot.Provider.QQ] gRpc Server is listening at " +
                   $"{configuration.GetSection("server:host").Value}:{configuration.GetSection("server:port").Value}");
 
@@ -67,7 +49,7 @@ var jsonSettings = new JsonSerializerSettings
 };
 
 // 当好友消息发送的时候
-bot.Invoker.OnFriendMessageReceived += (context, @event) =>
+botClient.bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Friend Message Received: {@event.Chain.ToPreviewString()}");
     // 判断是否是自己发送的消息
@@ -91,7 +73,7 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 
     var msg = new MessageContext(
         context.BotUin.ToString(),
-        "SendFriendMessage",
+        "FriendMessage",
         platformType,
         MessageType.PrivateMessage,
         @event.Chain.FriendUin.ToString(),
@@ -108,7 +90,7 @@ bot.Invoker.OnFriendMessageReceived += (context, @event) =>
     });
 };
 
-bot.Invoker.OnGroupMessageReceived += (context, @event) =>
+botClient.bot.Invoker.OnGroupMessageReceived += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Group Message Received: {@event.Chain.ToPreviewString()}");
     // 判断是否是自己发送的消息
@@ -122,7 +104,7 @@ bot.Invoker.OnGroupMessageReceived += (context, @event) =>
     var msgChain = new MessageChain(
         context.BotUin.ToString(),
         @event.Chain.FriendUin.ToString(),
-        @event.Chain.GroupUin.ToString(), 
+        @event.Chain.GroupUin.ToString(),
         @event.Chain.GroupUin.ToString(), // 群聊时，这个值等于 TriggerPlatformId
         platformType
     );
@@ -132,11 +114,11 @@ bot.Invoker.OnGroupMessageReceived += (context, @event) =>
 
     var msg = new MessageContext(
         context.BotUin.ToString(),
-        "SendGroupMessage",
+        "GroupMessage",
         platformType,
         MessageType.GroupMessage,
         @event.Chain.FriendUin.ToString(),
-        @event.Chain.GroupUin?.ToString() ?? "", 
+        @event.Chain.GroupUin?.ToString() ?? "",
         @event.Chain.GroupUin?.ToString() ?? "", // 群聊时，这个值等于 TriggerPlatformId
         msgChain,
         @event.EventTime
@@ -149,23 +131,23 @@ bot.Invoker.OnGroupMessageReceived += (context, @event) =>
     });
 };
 
-bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
+botClient.bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
 {
     Console.WriteLine($"[SoruxBot.Provider.QQ] Group Member Decrease Received: GroupUin: {@event.GroupUin}, Operator: {@event.OperatorUin}, Kick: {@event.MemberUin}");
-    
+
     var msg = new MessageContext(
         context.BotUin.ToString(),
         "OnGroupMemberDecreaseEvent",
         platformType,
         MessageType.Notify,
         @event.OperatorUin.ToString()!,
-        @event.GroupUin.ToString(), 
+        @event.GroupUin.ToString(),
         @event.GroupUin.ToString(),
         null,
         @event.EventTime
     );
     msg.UnderProperty.TryAdd("MemberUin", @event.MemberUin.ToString());
-    
+
     client.MessagePushStack(new MessageRequest()
     {
         Payload = JsonConvert.SerializeObject(msg, jsonSettings),
@@ -173,8 +155,6 @@ bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
     });
 };
 
-// 登录
-await botClient.LoginAsync();
 
 // 保持程序运行
 await Task.Delay(-1);
@@ -210,6 +190,63 @@ static Server BuildGrpcServer(IConfiguration config, BotContext bot)
                 ServerCredentials.Insecure)
         }
     };
+
+static void forConvertMessageChain(MessageChain chain, Lagrange.Core.Message.MessageChain eventChain)
+{
+    foreach (var entity in eventChain)
+    {
+        // 转换文字消息
+        if (entity is TextEntity textEntity)
+        {
+            chain.Messages.Add(new TextMessage(
+                textEntity.Text
+            ));
+            continue;
+        }
+
+        else if (entity is FaceEntity faceEntity)
+        {
+            chain.Messages.Add(new FaceMessage(
+                faceEntity.FaceId, faceEntity.IsLargeFace));
+            continue;
+        }
+
+        else if (entity is MentionEntity mentionEntity)
+        {
+            chain.Messages.Add(new MentionMessage(
+                mentionEntity.Name, mentionEntity.Uin));
+            continue;
+        }
+
+        else if (entity is PokeEntity pokeEntity)
+        {
+            chain.Messages.Add(new PokeMessage(
+                pokeEntity.Type));
+            continue;
+        }
+
+        else if (entity is ImageEntity imageEntity)
+        {
+            chain.Messages.Add(new ImageMessage(
+                imageEntity.ImageUrl, imageEntity.FilePath, null, imageEntity.PictureSize.X, imageEntity.PictureSize.Y, imageEntity.ImageSize));
+            continue;
+        }
+
+        else if (entity is RecordEntity recordEntity)
+        {
+            chain.Messages.Add(new RecordMessage(
+                recordEntity.AudioUrl, recordEntity.FilePath, null, recordEntity.AudioLength, recordEntity.AudioName, recordEntity.AudioSize));
+            continue;
+        }
+
+        else if (entity is VideoEntity videoEntity)
+        {
+            chain.Messages.Add(new VideoMessage(
+                videoEntity.VideoUrl, videoEntity.FilePath, null, videoEntity.VideoHash, videoEntity.Size.X, videoEntity.Size.Y, videoEntity.VideoSize));
+            continue;
+        }
+    }
+}
 
 static void ConvertMessageChain(MessageChain chain, Lagrange.Core.Message.MessageChain eventChain)
 {
@@ -263,6 +300,33 @@ static void ConvertMessageChain(MessageChain chain, Lagrange.Core.Message.Messag
         {
             chain.Messages.Add(new VideoMessage(
                 videoEntity.VideoUrl, videoEntity.FilePath, null, videoEntity.VideoHash, videoEntity.Size.X, videoEntity.Size.Y, videoEntity.VideoSize));
+            continue;
+        }
+
+        else if (entity is ForwardEntity forwardEntity)
+        {
+            chain.Messages.Add(new ForwardMessage(forwardEntity.Sequence));
+            continue;
+        }
+
+        else if (entity is LongMsgEntity longMsgEntity)
+        {
+            MessageChain tempChain = new MessageChain(string.Empty, longMsgEntity.Chain.FriendUin.ToString(), longMsgEntity.Chain.GroupUin.ToString(), longMsgEntity.Chain.GroupUin.ToString(), "QQ");//???????where is TargetUin
+            forConvertMessageChain(tempChain, longMsgEntity.Chain);
+            chain.Messages.Add(new LongMsgMessage(string.Empty, tempChain));
+            continue;
+        }
+
+        else if (entity is MultiMsgEntity multiMsgEntity)
+        {
+            List<MessageChain> tempChains = new List<MessageChain>();
+            foreach (var LChain in multiMsgEntity.Chains)
+            {
+                MessageChain tempChain = new MessageChain(string.Empty, LChain.FriendUin.ToString(), LChain.GroupUin.ToString(), LChain.GroupUin.ToString(), "QQ");///同上
+                forConvertMessageChain(tempChain, LChain);
+                tempChains.Add(tempChain);
+            }
+            chain.Messages.Add(new MultiMsgMessage(multiMsgEntity.GroupUin, tempChains));
             continue;
         }
     }

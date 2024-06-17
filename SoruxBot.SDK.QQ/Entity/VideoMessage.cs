@@ -10,12 +10,12 @@ public class VideoMessage : CommonMessage
     /// <summary>
     /// 视频本地路径
     /// </summary>
-    public string FilePath { get; set; }
+    public string? FilePath { get; set; }
 
     /// <summary>
     /// 视频文件的哈希值
     /// </summary>
-    public string VideoHash { get; set; }
+    public string? VideoHash { get; set; }
 
     /// <summary>
     /// 视频大小（长宽）
@@ -30,14 +30,14 @@ public class VideoMessage : CommonMessage
     /// <summary>
     /// 视频Url
     /// </summary>
-    public string VideoUrl { get; set; }
+    public string? VideoUrl { get; set; }
 
     /// <summary>
     /// 视频字节数据
     /// </summary>
-    public byte[] VideoBytes { get; set; }
+    public byte[]? VideoBytes { get; set; }
 
-    public VideoMessage(string videoUrl = null, string filePath = null, byte[] videoBytes = null, string videoHash = null, float picWidth = 0, float picHeight = 0, int videoSize = 0) : base("video")
+    public VideoMessage(string? videoUrl = null, string? filePath = null, byte[]? videoBytes = null, string? videoHash = null, float picWidth = 0, float picHeight = 0, int videoSize = 0) : base("video")
     {
         Size = new Vector2(picWidth, picHeight);
         FilePath = filePath;
@@ -61,7 +61,7 @@ public class VideoMessage : CommonMessage
         else VideoSize = 0;
     }
 
-    public VideoMessage(byte[] imageBytes = null, string videoHash = null, float picWidth = 0, float picHeight = 0, int videoSize = 0) : base("video")
+    public VideoMessage(byte[]? imageBytes = null, float picWidth = 0, float picHeight = 0, string? videoHash = null, int videoSize = 0) : base("video")
     {
         Size = new Vector2(picWidth, picHeight);
         FilePath = null;
@@ -73,7 +73,7 @@ public class VideoMessage : CommonMessage
         else VideoSize = 0;
     }
 
-    static private byte[] GetVideoBytesFromUrl(string videoUrl)
+    static private byte[]? GetVideoBytesFromUrl(string videoUrl)
     {
         try
         {
@@ -92,7 +92,7 @@ public class VideoMessage : CommonMessage
         }
     }
 
-    static private byte[] GetVideoBytesFromFilePath(string filePath)
+    static private byte[]? GetVideoBytesFromFilePath(string filePath)
     {
         try
         {

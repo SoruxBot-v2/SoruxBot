@@ -1,9 +1,12 @@
 ﻿using SoruxBot.SDK.Model.Message.Entity;
 using System.Net;
+using System.Numerics;
+using System.Security.Cryptography;
 
 namespace SoruxBot.SDK.QQ.Entity;
 
 public class RecordMessage : CommonMessage
+
 {
     /// <summary>
     /// 音频时长
@@ -13,12 +16,12 @@ public class RecordMessage : CommonMessage
     /// <summary>
     /// 音频本地路径
     /// </summary>
-    public string FilePath { get; set; }
+    public string? FilePath { get; set; }
 
     /// <summary>
     /// 音频名称
     /// </summary>
-    public string AudioName { get; set; }
+    public string? AudioName { get; set; }
 
     /// <summary>
     /// 音频字节大小
@@ -28,20 +31,20 @@ public class RecordMessage : CommonMessage
     /// <summary>
     /// 音频Url
     /// </summary>
-    public string AudioUrl { get; set; }
+    public string? AudioUrl { get; set; }
 
     /// <summary>
     /// 音频字节数据
     /// </summary>
-    public byte[] AudioBytes { get; set; }
+    public byte[]? AudioBytes { get; set; }
 
-    public RecordMessage(string audioUrl = null, string filePath = null, byte[] audioBytes = null, int audioLength = 0, string audioName = null, int audioSize = 0) : base("record")
+    public RecordMessage(string? audioUrl = null, string? filePath = null, byte[]? audioBytes = null, int audioLength = 0, string? audioName = null, int audioSize = 0) : base("record")
     {
         FilePath = filePath;
         AudioUrl = audioUrl;
         AudioLength = audioLength;
         AudioName = audioName;
-        if (audioBytes != null) audioBytes = audioBytes;
+        if (audioBytes != null) AudioBytes = audioBytes;
         else if (filePath != null)
         {
             AudioBytes = GetAudioBytesFromFilePath(filePath);
@@ -59,19 +62,19 @@ public class RecordMessage : CommonMessage
         else AudioSize = 0;
     }
 
-    public RecordMessage(byte[] audioBytes = null, int audioLength = 0, string audioName = null, int audioSize = 0) : base("record")
+    public RecordMessage(byte[]? audioBytes = null, int audioLength = 0, string? audioName = null, int audioSize = 0) : base("record")
     {
         AudioLength = audioLength;
         AudioName = audioName;
         FilePath = null;
         AudioUrl = null;
         AudioBytes = audioBytes;
-        if (audioSize != 0) AudioSize = AudioSize;
+        if (audioSize != 0) AudioSize = audioSize;
         else if (AudioBytes != null) AudioSize = (int)AudioBytes.Length;
         else AudioSize = 0;
     }
 
-    static private byte[] GetAudioBytesFromUrl(string recordUrl)
+    static private byte[]? GetAudioBytesFromUrl(string recordUrl)
     {
         try
         {
@@ -90,7 +93,7 @@ public class RecordMessage : CommonMessage
         }
     }
 
-    static private byte[] GetAudioBytesFromFilePath(string filePath)
+    static private byte[]? GetAudioBytesFromFilePath(string filePath)
     {
         try
         {
