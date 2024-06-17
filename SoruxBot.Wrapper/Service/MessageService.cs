@@ -47,8 +47,10 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 				loggerService.Error("Parsing message", "Failed to parse message: " + request.Payload);
 			}
 		}
-		
-        message.SetNextMsg(jsonConvert!.DeserializeObject<MessageContext>(request.Payload));
+		else
+		{
+			message.SetNextMsg(jsonConvert!.DeserializeObject<MessageContext>(request.Payload));
+		}
         return Task.FromResult(new Empty());
     }
 }
