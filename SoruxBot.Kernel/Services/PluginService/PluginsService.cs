@@ -3,6 +3,7 @@ using SoruxBot.Kernel.Bot;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.StorageService;
+using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -81,6 +82,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             //注册基础服务    
             services.AddSingleton<PluginsDispatcher>();
             services.AddSingleton<PluginsCommandLexer>();
+			services.AddSingleton<JsonConvertMap>();
 
             //添加API服务
             //services.AddSingleton<IBasicAPI, BasicApi>();
