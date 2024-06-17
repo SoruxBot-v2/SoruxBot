@@ -54,7 +54,6 @@ public class BotClient(bool isFastLogin)
                 {
                     await File.WriteAllBytesAsync("qr.png", qrCode.Value.QrCode);
                     await bot.LoginByQrCode();
-                    Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
                 }
                 return;
             }
@@ -66,7 +65,6 @@ public class BotClient(bool isFastLogin)
 
 
             await bot.LoginByPassword();
-            Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
         }
 
         else
@@ -89,7 +87,6 @@ public class BotClient(bool isFastLogin)
             {
                 await File.WriteAllBytesAsync("qr.png", qrCode.Value.QrCode);
                 await bot.LoginByQrCode();
-                Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
             }
         }
     }

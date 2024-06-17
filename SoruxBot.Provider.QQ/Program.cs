@@ -48,6 +48,8 @@ var jsonSettings = new JsonSerializerSettings
     TypeNameHandling = TypeNameHandling.All
 };
 
+botClient.bot.Invoker.OnBotOnlineEvent += (sender, args) =>
+Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
 // 当好友消息发送的时候
 botClient.bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 {
