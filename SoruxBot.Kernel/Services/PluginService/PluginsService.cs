@@ -21,7 +21,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             var pluginsConfig = Path.Join(pluginsDir, "config");
             PluginsRegister pluginsRegister = context.ServiceProvider.GetRequiredService<PluginsRegister>();
 
-			var plugins = new DirectoryInfo(pluginsBin).GetFiles().ToList();
+			var plugins = new DirectoryInfo(pluginsBin).GetFiles().Where(sp => sp.Name.Contains(".dll")).ToList();
             // 注册插件
             plugins.ForEach(plugin => pluginsRegister.Register(plugin.Name, plugin.FullName,
                     Path.Join(pluginsConfig, plugin.Name.Replace(".dll", ".json"))));

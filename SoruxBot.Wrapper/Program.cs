@@ -80,6 +80,7 @@ logger.Info(loggerName, $"SoruxBot Current Kernel Version: {app.Context.Configur
     .Info(loggerName, $"Running path: {app.Context.Configuration.GetSection("CurrentPath").Value}")
     .Info(loggerName, $"Development logger state: {app.Context.Configuration.GetSection("LoggerDebug").Value}")
     .Info(loggerName, $"SoruxBot running root path: {app.Context.Configuration.GetSection("storage:root").Value}");
+
 var jsonSettings = new JsonSerializerSettings
 {
     TypeNameHandling = TypeNameHandling.All

@@ -8,6 +8,7 @@ using SoruxBot.SDK.Plugins.Ability;
 using SoruxBot.SDK.Plugins.Basic;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
+using SoruxBot.SDK.Manifests;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -16,10 +17,24 @@ namespace SoruxBot.Kernel.Services.PluginService
         public void Register(string name, string instancePath, string configPath)
         {
             var assembly = Assembly.LoadFile(instancePath);
-
+            
             //命名空间规定为 Register
-            var type = assembly.GetType(name.Replace(".dll", ".Register"));
+            var type = assembly.GetTypes().FirstOrDefault(sp => sp.Name == "Register");
+            
+            var sdkVersion = assembly.GetTypes().FirstOrDefault(sp=>sp.FullName == "SoruxBot.SDK.Manifests.Manifests");
 
+            if (sdkVersion is not null)
+            {
+                var sdkMainVersion = (string)(sdkVersion.GetProperty("SdkMainVersion", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? "");
+                var sdkCompareVersion = (int)(sdkVersion.GetProperty("SdkCompareVersion", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) ?? 0);
+                if (sdkMainVersion != Manifests.SdkMainVersion || sdkCompareVersion != Manifests.SdkCompareVersion)
+                {
+                    loggerService.Info(Constant.NameValue.KernelPluginServiceRegisterLogName, "" +
+                        "The Plugins:" + name + " is not the same as the current SDK version: " + Manifests.SdkMainVersion + ", with" +
+                        " plugin sdk version is " + sdkMainVersion + ", which may cause the problem.");
+                }
+            }
+            
             if (type == null)
             {
                 loggerService.Error(Constant.NameValue.KernelPluginServiceRegisterLogName, "The plugin:" + name +
@@ -29,7 +44,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             }
 
             object pluginInstance = Activator.CreateInstance(type)!;
-
+            
             var soruxBotPlugin = pluginInstance as SoruxBotPlugin;
 
             if (soruxBotPlugin is null)
@@ -133,6 +148,7 @@ namespace SoruxBot.Kernel.Services.PluginService
                         "Plugin Lib is caught! Type ->" + type.Name);
                     typeMap.Add(type, null);
                 }
+                
 				// 如果是SdkLib并且实现了IJsonConvert，那么注册进map
 				if(typeof(IJsonConvert).IsAssignableFrom(type) && soruxBotLib.GetLibType() == SDK.Plugins.Model.LibType.SdkLib)
 				{

@@ -32,6 +32,7 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 		};
 
 		var messageJsonConvert = botContext.ServiceProvider.GetRequiredService<JsonConvertMap>();
+		
 		var platform = (string)JObject.Parse(request.Payload)["TargetPlatform"]!;
 		if (!messageJsonConvert.TryGet(platform, out var jsonConvert))
 		{
@@ -46,6 +47,7 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 				loggerService.Error("Parsing message", "Failed to parse message: " + request.Payload);
 			}
 		}
+		
         message.SetNextMsg(jsonConvert!.DeserializeObject<MessageContext>(request.Payload));
         return Task.FromResult(new Empty());
     }
