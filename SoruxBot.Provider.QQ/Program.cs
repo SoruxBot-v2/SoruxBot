@@ -24,7 +24,7 @@ var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable"
 var isReceiveSelfMessage = configuration.GetSection("chat").GetValue<bool>("receive_self_message", true);
 var selfAccount = configuration.GetSection("chat").GetValue<string>("account", "");
 
-var botClient = new BotClient();
+var botClient = new BotClient(isFastLogin);
 
 // 登录
 await botClient.LoginAsync();
