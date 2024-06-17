@@ -73,7 +73,7 @@ botClient.bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 
     var msg = new MessageContext(
         context.BotUin.ToString(),
-        "FriendMessage",
+        "SendFriendMessage",
         platformType,
         MessageType.PrivateMessage,
         @event.Chain.FriendUin.ToString(),
@@ -114,7 +114,7 @@ botClient.bot.Invoker.OnGroupMessageReceived += (context, @event) =>
 
     var msg = new MessageContext(
         context.BotUin.ToString(),
-        "GroupMessage",
+        "SendGroupMessage",
         platformType,
         MessageType.GroupMessage,
         @event.Chain.FriendUin.ToString(),
