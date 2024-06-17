@@ -43,12 +43,22 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 			}
 			catch (Exception ex)
 			{
-				loggerService.Error("Parsing message", ex.Message);
-				loggerService.Error("Parsing message", "Failed to parse message: " + request.Payload);
+				loggerService.Warn("Parsing message", ex.Message);
+				loggerService.Warn("Parsing message", "Failed to parse message: " + request.Payload);
 			}
 		}
+
+		try
+		{
+			var ctx = JsonConvert.DeserializeObject<MessageContext>(request.Payload)!;
+
+			message.SetNextMsg(ctx);
+		}
+		catch (Exception _)
+		{
+			loggerService.Warn("Parsing message", "Message could not be loaded with specific platform type: " + request.Payload);
+		}
 		
-        message.SetNextMsg(JsonConvert.DeserializeObject<MessageContext>(request.Payload)!);
         return Task.FromResult(new Empty());
     }
 }

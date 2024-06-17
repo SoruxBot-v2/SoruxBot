@@ -131,6 +131,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
             }
         }
 
+        return (PluginFlag)descriptor.ActionDelegate.DynamicInvoke(objects.ToArray()!)!;
         return InvokeActionDelegate(descriptor, objects.ToArray()!).Result;
     }
     
