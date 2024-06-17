@@ -179,6 +179,7 @@ static Server BuildGrpcServer(IBot app)
         {
             Message.BindService(
                 new MessageService(
+					app.Context,
                     app.Context.ServiceProvider.GetRequiredService<ILoggerService>(),
                     app.Context.ServiceProvider.GetRequiredService<IMessageQueue>(),
                     app.Context.Configuration.GetSection("chat:token").Value

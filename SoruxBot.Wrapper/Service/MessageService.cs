@@ -1,16 +1,20 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using SoruxBot.Kernel.Constant;
 using SoruxBot.Kernel.Interface;
 using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.Kernel.Bot;
+using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SoruxBot.Wrapper.Service;
 
-public class MessageService(ILoggerService loggerService, IMessageQueue message, string? token) : Message.MessageBase
+public class MessageService(BotContext botContext, ILoggerService loggerService, IMessageQueue message, string? token) : Message.MessageBase
 {
     public override Task<Empty> MessagePushStack(MessageRequest request, ServerCallContext context)
     {
@@ -21,22 +25,28 @@ public class MessageService(ILoggerService loggerService, IMessageQueue message,
         {
             return Task.FromResult(new Empty());
         }
-        
-        JsonSerializerSettings settings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.All
-        };
 
-        try
-        {
-            var messageContext = JsonConvert.DeserializeObject<MessageContext>(request.Payload, settings)!;
-            message.SetNextMsg(messageContext);
-        }
-        catch (Exception e)
-        {
-            loggerService.Warn("MessageService", "Deserialize message failed: " + e.Message);
-        }
-        
+		var settings = new JsonSerializerSettings
+		{
+			TypeNameHandling = TypeNameHandling.All 
+		};
+
+		var messageJsonConvert = botContext.ServiceProvider.GetRequiredService<JsonConvertMap>();
+		var platform = (string)JObject.Parse(request.Payload)["TargetPlatform"]!;
+		if (!messageJsonConvert.TryGet(platform, out var jsonConvert))
+		{
+			loggerService.Warn("Parsing message", "Cannot find jsonConvert of platform " + platform);
+			try
+			{
+				message.SetNextMsg(JsonConvert.DeserializeObject<MessageContext>(request.Payload, settings)!);
+			}
+			catch (Exception ex)
+			{
+				loggerService.Error("Parsing message", ex.Message);
+				loggerService.Error("Parsing message", "Failed to parse message: " + request.Payload);
+			}
+		}
+        message.SetNextMsg(jsonConvert!.DeserializeObject<MessageContext>(request.Payload));
         return Task.FromResult(new Empty());
     }
 }

@@ -7,6 +7,7 @@ using SoruxBot.Kernel.Services.PluginService.Model;
 using SoruxBot.SDK.Plugins.Ability;
 using SoruxBot.SDK.Plugins.Basic;
 using SoruxBot.SDK.Plugins.Service;
+using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -132,6 +133,21 @@ namespace SoruxBot.Kernel.Services.PluginService
                         "Plugin Lib is caught! Type ->" + type.Name);
                     typeMap.Add(type, null);
                 }
+				// 如果是SdkLib并且实现了IJsonConvert，那么注册进map
+				if(typeof(IJsonConvert).IsAssignableFrom(type) && soruxBotLib.GetLibType() == SDK.Plugins.Model.LibType.SdkLib)
+				{
+					var messageJsonConvert = context.ServiceProvider.GetRequiredService<JsonConvertMap>();
+					var jsonConvertInstance = (IJsonConvert?)Activator.CreateInstance(type);
+					if (jsonConvertInstance is null) loggerService.Error(Constant.NameValue.KernelPluginServiceRegisterLogName,
+						"Failed to load the implement of IJsonConvert with " + type);
+					else
+					{
+						var platform = jsonConvertInstance.GetTargetPlatform().ToUpper();
+						messageJsonConvert.Add(platform, jsonConvertInstance);
+						loggerService.Info(Constant.NameValue.KernelPluginServiceRegisterLogName,
+							"JsonConvert for platform " + platform + " is loaded!");
+					}
+				}
             }
             
             foreach (var type in typeLists)
