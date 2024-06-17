@@ -48,9 +48,13 @@ public class PluginsListener(ILoggerService loggerService)
 				if(listener.ConditionCheck(context))
 				{
 					// 通知给 RegisterListenerAsync 捕获到的 MessageContext
-					_contextResult.TryAdd(listener.ID, context);
+					_contextResult.AddOrUpdate(
+						listener.ID, 
+						key => context.DeepClone(), 
+						(key, existingVal) => existingVal ?? context
+					);
 
-					isInterceptedToChannel |= true;
+					isInterceptedToChannel |= listener.IsInterceptToChannel;
 					if (listener.IsInterceptToFilters)
 					{
 						item.ExitReadLock();
@@ -98,7 +102,7 @@ public class PluginsListener(ILoggerService loggerService)
 		}
 		
 		// 注册到树中后开启监听操作，如果监听成功那么进行返回
-		return new Task<Task<MessageContext?>>(async () =>
+		return Task.Run(async () =>
 		{
 			try
 			{
@@ -112,6 +116,7 @@ public class PluginsListener(ILoggerService loggerService)
 					
 					if (ctx is not null)
 					{
+						_contextResult.TryRemove(pluginsListenerDescriptor.ID, out var _);
 						return ctx;
 					}
 				}
@@ -143,6 +148,6 @@ public class PluginsListener(ILoggerService loggerService)
 			}
 			
 			return null;
-		}).Unwrap();
+		}, cts.Token);
 	}
 }
