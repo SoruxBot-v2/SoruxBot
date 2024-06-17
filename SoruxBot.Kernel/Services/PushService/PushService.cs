@@ -21,7 +21,7 @@ public class PushService(IMessageQueue messageQueue, IResponseQueue responseQueu
                 var nextMessage = await messageQueue.GetNextMessageRequest();
                 messageCallback(nextMessage);
                 
-                //Thread.Sleep(0);
+                Thread.Sleep(0);
             }
         });
 
