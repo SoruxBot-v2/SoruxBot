@@ -24,10 +24,27 @@ var isFastLogin = configuration.GetSection("fast_login").GetValue<bool>("enable"
 var isReceiveSelfMessage = configuration.GetSection("chat").GetValue<bool>("receive_self_message", true);
 var selfAccount = configuration.GetSection("chat").GetValue<string>("account", "");
 
-var botClient = new BotClient(isFastLogin);
+BotDeviceInfo deviceInfo = new()
+{
+    Guid = Guid.NewGuid(),
+    MacAddress = GenRandomBytes(6),
+    DeviceName = $"SoruxBot-QQ",
+    SystemKernel = "Windows 10.0.19042",
+    KernelVersion = "10.0.19042.0"
+};
 
-// 登录
-await botClient.LoginAsync();
+BotKeystore keystore = new BotKeystore();
+
+BotConfig config = new BotConfig
+{
+    UseIPv6Network = false,
+    GetOptimumServer = true,
+    AutoReconnect = true,
+    Protocol = Protocols.Linux,
+    CustomSignProvider = new QqSigner(),
+};
+var bot = BotFactory.Create(config, deviceInfo, keystore);
+var botClient = new BotClient(isFastLogin, bot);
 
 // 构建 gRpc 服务端
 BuildGrpcServer(configuration, botClient.bot).Start();
@@ -49,7 +66,9 @@ var jsonSettings = new JsonSerializerSettings
 };
 
 botClient.bot.Invoker.OnBotOnlineEvent += (sender, args) =>
-Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
+{
+    Console.WriteLine("[SoruxBot.Provider.QQ] Account has logged in.");
+};
 // 当好友消息发送的时候
 botClient.bot.Invoker.OnFriendMessageReceived += (context, @event) =>
 {
@@ -156,6 +175,9 @@ botClient.bot.Invoker.OnGroupMemberDecreaseEvent += (context, @event) =>
         Token = configuration.GetSection("client:token").Value
     });
 };
+
+// 登录
+await botClient.LoginAsync();
 
 
 // 保持程序运行

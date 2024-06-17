@@ -9,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace SoruxBot.Provider.QQ;
 
-public class BotClient(bool isFastLogin)
+public class BotClient(bool isFastLogin, BotContext bot)
 {
-    public BotContext bot { get; set; }
+    public BotContext bot { get; set; } = bot;
     public bool IsFastLogin { get; set; } = isFastLogin;
     public async Task LoginAsync()
     {
@@ -71,17 +71,7 @@ public class BotClient(bool isFastLogin)
         {
             Console.WriteLine("[SoruxBot.Provider.QQ] Welcome to SoruxBot.Provider.QQ.");
             Console.WriteLine("[SoruxBot.Provider.QQ] Scan qr.png to log in.");
-
-            var deviceInfo = GetDeviceInfo();
-            var keyStore = LoadKeystore() ?? new BotKeystore();
-            bot = BotFactory.Create(new BotConfig()
-            {
-                UseIPv6Network = false,
-                GetOptimumServer = true,
-                AutoReconnect = true,
-                Protocol = Protocols.Linux,
-                CustomSignProvider = new QqSigner(),
-            }, deviceInfo, keyStore);
+          
             var qrCode = await bot.FetchQrCode();
             if (qrCode != null)
             {
