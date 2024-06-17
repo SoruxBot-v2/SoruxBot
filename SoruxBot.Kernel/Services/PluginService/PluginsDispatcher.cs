@@ -286,7 +286,12 @@ public class PluginsDispatcher(
 		var msg = messageContext.MessageChain!.Messages.FirstOrDefault();
 		if (msg is not null && msg.Type == "text")
 		{
-			var textMsg = (TextMessage)msg;
+			var textMsg = msg as TextMessage;
+			if (textMsg is null)
+			{
+				loggerService.Warn("PluginsDispatcher", "Message is not TextMessage with payload: " + messageContext);
+				return null;
+			}
 			textRoute.Add(textMsg.Content.Split([' ', '\n', '\t', '\r'])[0]);
 		}
 		// 路由路径生成
