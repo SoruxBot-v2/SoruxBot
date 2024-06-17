@@ -48,7 +48,7 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 			}
 		}
 		
-        message.SetNextMsg(jsonConvert!.DeserializeObject<MessageContext>(request.Payload));
+        message.SetNextMsg(JsonConvert.DeserializeObject<MessageContext>(request.Payload)!);
         return Task.FromResult(new Empty());
     }
 }

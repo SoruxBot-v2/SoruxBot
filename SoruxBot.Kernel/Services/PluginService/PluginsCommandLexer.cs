@@ -131,7 +131,7 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
             }
         }
 
-        return InvokeActionDelegate(descriptor, objects.ToArray()).Result;
+        return InvokeActionDelegate(descriptor, objects.ToArray()!).Result;
     }
     
     private static async Task<PluginFlag> InvokeActionDelegate(PluginsActionDescriptor descriptor, params object[] parameters)
