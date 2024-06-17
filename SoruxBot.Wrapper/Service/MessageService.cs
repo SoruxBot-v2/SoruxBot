@@ -60,7 +60,6 @@ public class MessageService(BotContext botContext, ILoggerService loggerService,
 		{
 			loggerService.Warn("Parsing message", "Message could not be loaded with specific platform type: " + request.Payload);
 		}
-		
         return Task.FromResult(new Empty());
     }
 }
