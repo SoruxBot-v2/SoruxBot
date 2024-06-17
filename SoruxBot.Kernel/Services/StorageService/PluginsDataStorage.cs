@@ -20,6 +20,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 			_botContext = botContext;
 			_context = ConstructPluginsDataContext();
 			_localFileDir = config.GetRequiredSection("database")["local_file"]!;
+			_context.Database.EnsureCreated();
 		}
 		private PluginsDataContext ConstructPluginsDataContext()
 		{
@@ -49,7 +50,7 @@ namespace SoruxBot.Kernel.Services.StorageService
 			{
 				case "sqlite":
 					dbSection = _configuration.GetRequiredSection("database");
-					connectionString = $"Data Source={dbSection.GetValue("host", ":memory:")};Version={dbSection.GetValue("version", 3)};";
+					connectionString = $"Data Source={dbSection.GetValue("host", ":memory:")}";
 					var optionsSection = dbSection.GetSection("Options");
 					if(optionsSection.Exists())
 					{
@@ -75,10 +76,10 @@ namespace SoruxBot.Kernel.Services.StorageService
 		
 		public bool AddStringSettings(string pluginMark, string key, string value)
 		{
-			_context.Add(new PluginsData(pluginMark, key, value));
 			int res = 0;
 			try
 			{
+				_context.Add(new PluginsData(pluginMark, key, value));
 				res = _context.SaveChanges();
 			}
 			catch (DbUpdateConcurrencyException e)
@@ -103,10 +104,11 @@ namespace SoruxBot.Kernel.Services.StorageService
 				//日志写入
 				return false;
 			}
-			_context.Remove(itemToDel);
+			
 			int res = 0;
 			try
 			{
+				_context.Remove(itemToDel);
 				res = _context.SaveChanges();
 			}
 			catch (DbUpdateConcurrencyException e)
@@ -140,10 +142,11 @@ namespace SoruxBot.Kernel.Services.StorageService
 				// 日志写入
 				return false;
 			}
-			entity.StringValue = value;
+			
 			int res = 0;
 			try
 			{
+				entity.StringValue = value;
 				res = _context.SaveChanges();
 			}
 			catch (DbUpdateConcurrencyException e)

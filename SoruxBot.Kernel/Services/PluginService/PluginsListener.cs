@@ -86,7 +86,7 @@ public class PluginsListener(ILoggerService loggerService)
 		}
 		else
 		{
-			var newListenerList = new List<PluginsListenerDescriptor>() { pluginsListenerDescriptor }; ;
+			var newListenerList = new List<PluginsListenerDescriptor>() { pluginsListenerDescriptor };
 			_matchTree.Insert(path, newListenerList);
 		}
 		
