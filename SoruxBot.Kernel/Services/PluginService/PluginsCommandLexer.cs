@@ -131,6 +131,30 @@ public class PluginsCommandLexer(ILoggerService loggerService, IPluginsStorage p
             }
         }
 
-        return (PluginFlag)descriptor.ActionDelegate.DynamicInvoke(objects.ToArray())!;
+        return InvokeActionDelegate(descriptor, objects.ToArray()).Result;
+    }
+    
+    private static async Task<PluginFlag> InvokeActionDelegate(PluginsActionDescriptor descriptor, params object[] parameters)
+    {
+        var returnType = descriptor.ActionDelegate.Method.ReturnType;
+
+        // 检查返回类型是否是 Task
+        if (typeof(Task).IsAssignableFrom(returnType))
+        {
+            // 如果是 Task 类型
+            var resultTask = (Task)descriptor.ActionDelegate.DynamicInvoke(parameters)!;
+
+            // 等待任务完成并获取结果
+            await resultTask.ConfigureAwait(false);
+
+            if (!returnType.IsGenericType) return Task.FromResult(PluginFlag.MsgPassed).Result;
+            
+            // 如果是 Task<T> 类型，获取结果
+            var resultProperty = returnType.GetProperty("Result")!;
+            return (PluginFlag)resultProperty.GetValue(resultTask)!;
+        }
+
+        // 如果不是 Task 类型
+        return (PluginFlag)descriptor.ActionDelegate.DynamicInvoke(parameters)!;
     }
 }
