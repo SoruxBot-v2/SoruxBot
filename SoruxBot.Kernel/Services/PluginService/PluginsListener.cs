@@ -33,7 +33,7 @@ public class PluginsListener(ILoggerService loggerService)
 			path.Add(context.TargetPlatform);
 			if (context.TargetPlatformAction != string.Empty)
 			{
-				path.Add(context.TargetPlatformAction);
+				path.Add(context.TargetPlatformAction == "GroupMessage" ? "SendGroupMessage" : context.TargetPlatformAction);
 			}
 		}
 		var list = _matchTree.PrefixMatch(path);
@@ -48,7 +48,10 @@ public class PluginsListener(ILoggerService loggerService)
 				if(listener.ConditionCheck(context))
 				{
 					// 通知给 RegisterListenerAsync 捕获到的 MessageContext
-					_contextResult.TryAdd(listener.ID, context);
+					_contextResult.AddOrUpdate(listener.ID,
+						key => context.DeepClone(),
+						(key, existingValue) => existingValue ?? context
+					);
 
 					isInterceptedToChannel |= true;
 					if (listener.IsInterceptToFilters)

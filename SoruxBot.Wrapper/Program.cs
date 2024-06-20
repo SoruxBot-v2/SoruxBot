@@ -107,10 +107,13 @@ var pushService = app.Context.ServiceProvider.GetRequiredService<IPushService>()
 					if (msgIntercepted) return;
                     try
                     {
-                        if(pluginsCommandLexer.PluginAction(context, sp) == PluginFlag.MsgIntercepted)
+						Task.Run(() =>
 						{
-							msgIntercepted = true;
-						}
+							if (pluginsCommandLexer.PluginAction(context, sp) == PluginFlag.MsgIntercepted)
+							{
+								msgIntercepted = true;
+							}
+						});
                     }
                     catch (Exception e)
                     {
