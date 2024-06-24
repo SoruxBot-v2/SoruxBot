@@ -51,8 +51,9 @@ public class PluginsDispatcher(
     /// <param name="name"></param>
     public void RegisterCommandRoute(string filepath, string name)
     {
-        var assembly = Assembly.LoadFile(filepath);
-        var types = assembly.GetExportedTypes();
+		var assembly = Assembly.LoadFrom(filepath);
+		
+		var types = assembly.GetExportedTypes();
 
         // 遍历类
         foreach (var className in types)
@@ -62,38 +63,47 @@ public class PluginsDispatcher(
                 loggerService.Debug(Constant.NameValue.KernelPluginServiceDispatcherLogName,
                     "Controller is caught! Type ->" + className.Name);
                 // 我们只取第一个 Constructor
-                var constructorInfo = className.GetConstructors()[0];
+                var mergedConstructorInfo = className.GetConstructors()[0];
+				var constructorInfo = className.GetConstructors()[0];
                 // 获取其构造函数的参数
-                var parameterInfos = constructorInfo.GetParameters();
+                var mergedParameterInfos = mergedConstructorInfo.GetParameters();
                 // 构造参数匹配表
                 var objects = new List<object>();
 
                 var serviceProvider = botContext.ServiceProvider;
-                foreach (var parameterInfo in parameterInfos)
+                foreach (var mergedParameterInfo in mergedParameterInfos)
                 {
-                    if (parameterInfo.ParameterType == typeof(BotContext))
+                    if (mergedParameterInfo.ParameterType == typeof(BotContext))
                     {
                         objects.Add(botContext);
                         continue;
                     }
 	                
-                    if (parameterInfo.ParameterType == typeof(ILoggerService))
+                    if (mergedParameterInfo.ParameterType == typeof(ILoggerService))
                     {
                         objects.Add(loggerService);
                         continue;
                     }
                     
-                    var ctxObj = serviceProvider.GetService(parameterInfo.ParameterType);
+                    var ctxObj = serviceProvider.GetService(mergedParameterInfo.ParameterType);
                     if (ctxObj is not null) 
                     {
                         objects.Add(ctxObj);
                         continue;
-                    }
-                    
-                    // 如果是 Null，那么一定得能从插件依赖中找到
-                    objects.Add(ServiceProvider!.GetRequiredService(parameterInfo.ParameterType));
+					}
+
+					// 如果是 Null，那么一定得能从插件依赖中找到
+					var parameterType = Services.ToList().FirstOrDefault(x =>
+						{
+							if (x.ServiceType == null) return false;
+							if (x.ServiceType.FullName == mergedParameterInfo.ParameterType.FullName) return true;
+							return false;
+						}
+					)!.ServiceType;
+					objects.Add(ServiceProvider!.GetRequiredService(parameterType));
                 }
 
+				
                 // 构造插件，并存储插件 Controller 实例
                 pluginsStorage.SetPluginInstance(name + "." + className.Name,
                     Activator.CreateInstance(className, objects.ToArray())!);

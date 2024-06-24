@@ -4,6 +4,8 @@ using SoruxBot.Kernel.Interface;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.StorageService;
 using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
+using System.Reflection;
+using SoruxBot.SDK.Plugins.Basic;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -19,7 +21,30 @@ namespace SoruxBot.Kernel.Services.PluginService
             var pluginsDir = Path.Join(rootDir, "plugins");
             var pluginsBin = Path.Join(pluginsDir, "bin");
             var pluginsConfig = Path.Join(pluginsDir, "config");
-            PluginsRegister pluginsRegister = context.ServiceProvider.GetRequiredService<PluginsRegister>();
+			var pluginsLib = Path.Join(pluginsDir, "lib");
+			AppDomain.CurrentDomain.AssemblyResolve += (object? sender, ResolveEventArgs args) =>
+			{
+				var services = context.ServiceProvider.GetRequiredService<PluginsDispatcher>().Services;
+				var pluginLibName = args.Name.Split(',')[0] + ".dll";
+				if (!File.Exists(Path.GetFullPath(pluginsLib) + "\\" + pluginLibName)) return null;
+				var ret = Assembly
+				.LoadFile(Path.GetFullPath(pluginsLib) + "\\" + pluginLibName);
+				if (ret == null) return null;
+				if (ret.GetExportedTypes().FirstOrDefault(t => t.BaseType == typeof(SoruxBotLib)) == null) return null;
+				return ret;
+			};
+			AppDomain.CurrentDomain.TypeResolve += (object? sender, ResolveEventArgs args) =>
+			{
+				var services = context.ServiceProvider.GetRequiredService<PluginsDispatcher>().Services;
+				var pluginLibName = args.Name.Split(',')[0] + ".dll";
+				if (!File.Exists(Path.GetFullPath(pluginsLib) + "\\" + pluginLibName)) return null;
+				var ret = Assembly
+				.LoadFile(Path.GetFullPath(pluginsLib) + "\\" + pluginLibName);
+				if (ret == null) return null;
+				if (ret.GetExportedTypes().FirstOrDefault(t => t.BaseType == typeof(SoruxBotLib)) == null) return null;
+				return ret;
+			};
+			PluginsRegister pluginsRegister = context.ServiceProvider.GetRequiredService<PluginsRegister>();
 
 			var plugins = new DirectoryInfo(pluginsBin).GetFiles().Where(sp => sp.Name.Contains(".dll")).ToList();
             // 注册插件
@@ -62,8 +87,13 @@ namespace SoruxBot.Kernel.Services.PluginService
                 .ToList()
                 .ForEach(sp =>
                 {
-                    // 注册插件类库的逻辑
-                    pluginsRegister.RegisterLib(sp.Name, sp.FullName);
+					// 在PluginsDispatcher的Services中注册框架提供的依赖，保证类库对象能够正常构造
+					context.ServiceProvider.GetRequiredService<PluginsDispatcher>().Services
+						.AddSingleton(context.ServiceProvider.GetRequiredService<IPluginsDataStorage>());
+					context.ServiceProvider.GetRequiredService<PluginsDispatcher>().Services
+						.AddSingleton(context.ServiceProvider.GetRequiredService<ILoggerService>());
+					// 注册插件类库的逻辑
+					pluginsRegister.RegisterLib(sp.Name, sp.FullName);
                 });
         }
 
