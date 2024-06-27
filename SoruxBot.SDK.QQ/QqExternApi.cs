@@ -146,7 +146,7 @@ public static class QqExternApi
         var listener = new PluginsListenerDescriptor(
             MessageType.GroupMessage,
             Constant.QqPlatformType,
-            "SendGroupMessage",
+            "GroupMessage",
             ctx => ctx.TriggerId == triggerId && ctx.TriggerPlatformId == triggerPlatformId
         );
         

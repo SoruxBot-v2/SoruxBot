@@ -95,13 +95,15 @@ public class ChannelPool<TI, TO> : IChannelPool<TI, TO>
         _channelSemaphore = new SemaphoreSlim(_channelSize);
 
 
-        _channelVector = new List<ChannelEntity>(Enumerable.Repeat(
-            new ChannelEntity(null, null,
-                new Tuple<Channel<TI>, Channel<TO>>(
-                    Channel.CreateUnbounded<TI>(), Channel.CreateUnbounded<TO>())
-            ),
-            _channelSize)
-        );
+		_channelVector = new List<ChannelEntity>();
+
+		for (int i = 0; i < _channelSize; i++)
+		{
+			_channelVector.Add(new ChannelEntity(null, null,
+				new Tuple<Channel<TI>, Channel<TO>>(
+					Channel.CreateUnbounded<TI>(), Channel.CreateUnbounded<TO>())
+			));
+		}
     }
 
     private bool IfOutOfDate(int i)
