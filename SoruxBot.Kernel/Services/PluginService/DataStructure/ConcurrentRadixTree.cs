@@ -13,14 +13,6 @@ namespace SoruxBot.Kernel.Services.PluginService.DataStructure
 		private ReaderWriterLockSlim _writeLock = new ReaderWriterLockSlim();
 		private ReaderWriterLockSlim _rootLock = new ReaderWriterLockSlim();
 		public ConcurrentRadixTree() { }
-
-		public ConcurrentRadixTree<TKey, TValue> Clone()
-		{
-			return new ConcurrentRadixTree<TKey, TValue>()
-			{
-				_root = _root
-			};
-		}
 		public RadixTreeNodeValue<TValue>[] PrefixMatch(IEnumerable<TKey> key)
 		{
 			var result = new List<RadixTreeNodeValue<TValue>>();
