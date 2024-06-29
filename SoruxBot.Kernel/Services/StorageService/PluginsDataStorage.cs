@@ -76,90 +76,104 @@ namespace SoruxBot.Kernel.Services.StorageService
 		
 		public bool AddStringSettings(string pluginMark, string key, string value)
 		{
-			int res = 0;
-			try
+			lock (_context)
 			{
-				_context.Add(new PluginsData(pluginMark, key, value));
-				res = _context.SaveChanges();
+				int res = 0;
+				try
+				{
+					_context.Add(new PluginsData(pluginMark, key, value));
+					res = _context.SaveChanges();
+				}
+				catch (DbUpdateConcurrencyException e)
+				{
+					// 日志写入
+				}
+				catch (DbUpdateException e)
+				{
+					// 日志写入
+				}
+				catch (Exception e)
+				{
+					// 日志写入
+				}
+				return res == 1;
 			}
-			catch (DbUpdateConcurrencyException e)
-			{
-				// 日志写入
-			}
-			catch(DbUpdateException e)
-			{
-				// 日志写入
-			}
-			catch(Exception e)
-			{
-				// 日志写入
-			}
-			return res == 1;
 		}
 		public bool RemoveStringSettings(string pluginMark, string key)
 		{
-			var itemToDel = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
-			if (itemToDel is null)
+			lock (_context)
 			{
-				//日志写入
-				return false;
+				var itemToDel = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+				if (itemToDel is null)
+				{
+					//日志写入
+					return false;
+				}
+
+				int res = 0;
+				try
+				{
+					_context.Remove(itemToDel);
+					res = _context.SaveChanges();
+				}
+				catch (DbUpdateConcurrencyException e)
+				{
+					// 日志写入
+				}
+				catch (DbUpdateException e)
+				{
+					// 日志写入
+				}
+				catch (Exception e)
+				{
+					// 日志写入
+				}
+				return res == 1;
 			}
-			_context.Remove(itemToDel);
-			int res = 0;
-			try
-			{
-				res = _context.SaveChanges();
-			}
-			catch (DbUpdateConcurrencyException e)
-			{
-				// 日志写入
-			}
-			catch(DbUpdateException e)
-			{
-				// 日志写入
-			}
-			catch(Exception e)
-			{
-				// 日志写入
-			}
-			return res == 1;
 		}
 		public string GetStringSettings(string pluginMark, string key)
 		{
-			var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
-			if (entity is not null)
+			lock (_context)
 			{
-				return entity.StringValue;
+				var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+				if (entity is not null)
+				{
+					return entity.StringValue;
+				}
+				return string.Empty;
 			}
-			return string.Empty;
 		}
 		public bool EditStringSettings(string pluginMark, string key, string value)
 		{
-			var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
-			if(entity is null)
+			lock (_context)
 			{
-				// 日志写入
-				return false;
+				var entity = _context.Set<PluginsData>().FirstOrDefault(e => e.PluginMark == pluginMark && e.Key == key);
+				if (entity is null)
+				{
+					// 日志写入
+					return false;
+				}
+
+				int res = 0;
+				try
+				{
+					entity.StringValue = value;
+					res = _context.SaveChanges();
+				}
+				catch (DbUpdateConcurrencyException e)
+				{
+					// 日志写入
+				}
+				catch (DbUpdateException e)
+				{
+					// 日志写入
+				}
+				catch (Exception e)
+				{
+					// 日志写入
+				}
+				return res == 1;
 			}
-			entity.StringValue = value;
-			int res = 0;
-			try
-			{
-				res = _context.SaveChanges();
-			}
-			catch (DbUpdateConcurrencyException e)
-			{
-				// 日志写入
-			}
-			catch (DbUpdateException e)
-			{
-				// 日志写入
-			}
-			catch (Exception e)
-			{
-				// 日志写入
-			}
-			return res == 1;
 		}
 		public bool AddBinarySettings(string pluginMark, string key, byte[] value)
 		{
@@ -171,20 +185,24 @@ namespace SoruxBot.Kernel.Services.StorageService
 		public bool RemoveBinarySettings(string pluginMark, string key)
 		{
 			string path = Path.Join(_localFileDir, pluginMark, key + ".bin");
-			if (!Directory.Exists(path)) return false;
+			if (!File.Exists(path)) return false;
 			File.Delete(path);
 			return true;
 		}
 		public byte[]? GetBinarySettings(string pluginMark, string key)
 		{
+			_loggerService.Info("GetBinarySettings", $"{pluginMark}, {key}");
 			string path = Path.Join(_localFileDir, pluginMark, key + ".bin");
-			if (!Directory.Exists(path)) return null;
+			_loggerService.Info("GetBinarySettings", path);
+			if (!File.Exists(path)) return null;
 			return File.ReadAllBytes(path);
 		}
 		public bool EditBinarySettings(string pluginMark, string key, byte[] value)
 		{
-			string path = Path.Join(_localFileDir, pluginMark, key + "bin");
-			if (!Directory.Exists(path)) return false;
+			string path = Path.Join(_localFileDir, pluginMark, key + ".bin");
+			_loggerService.Info("EditBinarySettings", path);
+			if (!File.Exists(path)) return false;
+			_loggerService.Info("EditBinarySettings", path);
 			File.WriteAllBytes(path, value);
 			return true;
 		}

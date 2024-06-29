@@ -9,6 +9,7 @@ using SoruxBot.SDK.Plugins.Basic;
 using SoruxBot.SDK.Plugins.Service;
 using SoruxBot.Kernel.Services.PluginService.JsonConvertService;
 using SoruxBot.SDK.Manifests;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SoruxBot.Kernel.Services.PluginService
 {
@@ -19,7 +20,7 @@ namespace SoruxBot.Kernel.Services.PluginService
             var assembly = Assembly.LoadFile(instancePath);
             
             //命名空间规定为 Register
-            var type = assembly.GetTypes().FirstOrDefault(sp => sp.Name == "Register");
+            var types = assembly.GetTypes().Where(sp => sp.Name == "Register");
             
             var sdkVersion = assembly.GetTypes().FirstOrDefault(sp=>sp.FullName == "SoruxBot.SDK.Manifests.Manifests");
 
@@ -35,25 +36,33 @@ namespace SoruxBot.Kernel.Services.PluginService
                 }
             }
             
-            if (type == null)
+            if (types.IsNullOrEmpty())
             {
                 loggerService.Error(Constant.NameValue.KernelPluginServiceRegisterLogName, "The plugin:" + name +
                     "can not be loaded exactly" +
                     ", due to its wrong type. Please check its Register namespace exist or not.");
                 return;
             }
+			object? pluginInstance = null;
+			SoruxBotPlugin? soruxBotPlugin = null;
+			bool hasProperRegister = false;
+			foreach (var type in types)
+			{
+				pluginInstance = Activator.CreateInstance(type)!;
 
-            object pluginInstance = Activator.CreateInstance(type)!;
-            
-            var soruxBotPlugin = pluginInstance as SoruxBotPlugin;
+				soruxBotPlugin = pluginInstance as SoruxBotPlugin;
 
-            if (soruxBotPlugin is null)
-            {
-                loggerService.Error(Constant.NameValue.KernelPluginServiceRegisterLogName, "The plugin:" + name +
-                    "can not be loaded exactly" +
-                    ", due to the Register namespace is not the child of SoruxBotPlugin.");
-                return;
-            }
+				if(soruxBotPlugin is null) continue;
+				hasProperRegister = true;
+				break;
+			}
+			if (!hasProperRegister)
+			{
+				loggerService.Error(Constant.NameValue.KernelPluginServiceRegisterLogName, "The plugin:" + name +
+						"can not be loaded exactly" +
+						", due to the Register namespace is not the child of SoruxBotPlugin.");
+				return;
+			}
 
             PluginJsonConfig? pluginConfig;
             try
@@ -79,7 +88,7 @@ namespace SoruxBot.Kernel.Services.PluginService
 
             pluginsStorage.AddPlugin(
                 name,
-                soruxBotPlugin.GetPluginAuthorName(),
+                soruxBotPlugin!.GetPluginAuthorName(),
                 name,
                 soruxBotPlugin.GetPluginVersion(),
                 soruxBotPlugin.GetPluginDescription(),
@@ -121,8 +130,8 @@ namespace SoruxBot.Kernel.Services.PluginService
                     ", due to its wrong type. Please check its Register namespace exist or not.");
                 return;
             }
-
-            object pluginInstance = Activator.CreateInstance(registerType)!;
+			
+			object pluginInstance = Activator.CreateInstance(registerType)!;
 
             var soruxBotLib = pluginInstance as SoruxBotLib;
 
@@ -206,9 +215,9 @@ namespace SoruxBot.Kernel.Services.PluginService
         /// </summary>
         /// <param name="path"></param>
         /// <param name="name"></param>
-        public void RegisterRoute(string name, string path)
+        public void RegisterRoute(string name, string pluginPath)
         {
-            context.ServiceProvider.GetRequiredService<PluginsDispatcher>().RegisterCommandRoute(path, name);
+            context.ServiceProvider.GetRequiredService<PluginsDispatcher>().RegisterCommandRoute(pluginPath, name);
         }
     }
 }

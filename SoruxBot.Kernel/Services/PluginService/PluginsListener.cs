@@ -33,7 +33,7 @@ public class PluginsListener(ILoggerService loggerService)
 			path.Add(context.TargetPlatform);
 			if (context.TargetPlatformAction != string.Empty)
 			{
-				path.Add(context.TargetPlatformAction);
+				path.Add(context.TargetPlatformAction == "GroupMessage" ? "SendGroupMessage" : context.TargetPlatformAction);
 			}
 		}
 		var list = _matchTree.PrefixMatch(path);

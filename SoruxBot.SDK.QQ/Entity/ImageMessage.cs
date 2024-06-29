@@ -15,7 +15,7 @@ public class ImageMessage : CommonMessage
     /// <summary>
     /// 图片的本地路径
     /// </summary>
-    public string FilePath { get; set; }
+    public string? FilePath { get; set; }
 
     /// <summary>
     /// 图片字节大小
@@ -25,14 +25,14 @@ public class ImageMessage : CommonMessage
     /// <summary>
     /// 图片Url
     /// </summary>
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 
     /// <summary>
     /// 图片字节数据
     /// </summary>
-    public byte[] ImageBytes { get; set; }
+    public byte[]? ImageBytes { get; set; }
 
-    public ImageMessage(string imageUrl = null, string filePath = null, byte[] imageBytes = null, float PicWidth = 0, float PicHeight = 0, uint imageSize = 0) : base("image")
+    public ImageMessage(string? imageUrl = null, string? filePath = null, byte[]? imageBytes = null, float PicWidth = 0, float PicHeight = 0, uint imageSize = 0) : base("image")
     {
         PictureSize = new Vector2(PicWidth, PicHeight);
         FilePath = filePath;
@@ -55,7 +55,7 @@ public class ImageMessage : CommonMessage
         else ImageSize = 0;
     }
 
-    public ImageMessage(byte[] imageBytes = null, float PicWidth = 0, float PicHeight = 0, uint imageSize = 0) : base("image")
+    public ImageMessage(byte[]? imageBytes = null, float PicWidth = 0, float PicHeight = 0, uint imageSize = 0) : base("image")
     {
         PictureSize = new Vector2(PicWidth, PicHeight);
         FilePath = null;
@@ -66,7 +66,7 @@ public class ImageMessage : CommonMessage
         else ImageSize = 0;
     }
 
-    static private byte[] GetImageBytesFromUrl(string imageUrl)
+    static private byte[]? GetImageBytesFromUrl(string imageUrl)
     {
         try
         {
@@ -85,7 +85,7 @@ public class ImageMessage : CommonMessage
         }
     }
 
-    static private byte[] GetImageBytesFromFilePath(string filePath)
+    static private byte[]? GetImageBytesFromFilePath(string filePath)
     {
         try
         {

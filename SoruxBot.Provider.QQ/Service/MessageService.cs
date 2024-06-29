@@ -8,6 +8,7 @@ using SoruxBot.Provider.WebGrpc;
 using SoruxBot.SDK.Model.Message;
 using SoruxBot.SDK.Model.Message.Entity;
 using SoruxBot.SDK.QQ.Entity;
+using System.Runtime.CompilerServices;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using MessageResult = Lagrange.Core.Message.MessageResult;
 
@@ -18,20 +19,20 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
     public override async Task<MessageResponse> MessageSend(MessageRequest request, ServerCallContext context)
     {
         var response = new MessageResponse();
-        
+
         if (request.Token != token)
         {
             // 表示无回应
             response.Payload = string.Empty;
             return await Task.FromResult(response);
         }
-        
+
         // 这个进行路由处理
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.All
         };
-        
+
         var messageContext = JsonConvert.DeserializeObject<MessageContext>(request.Payload, settings);
         if (messageContext is null)
         {
@@ -40,7 +41,7 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
             return await Task.FromResult(response);
         }
 
-        
+
         var res = await DispatchMessage(messageContext);
 
         response.Payload = JsonConvert.SerializeObject(res, settings);
@@ -53,62 +54,128 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
         switch (ctx.TargetPlatformAction)
         {
             case "SendFriendMessage":
-            {
-                // 处理好友消息
-                var msg = Lagrange.Core.Message.MessageBuilder
-                    .Friend(uint.Parse(ctx.MessageChain!.TargetId));
-                msg = ConvertMessageBuilder(msg, ctx);
-                var result = await bot.SendMessage(msg.Build());
-                return new SoruxBot.SDK.Model.Message.MessageResult(
-                    result.Sequence?.ToString() ?? "0",
-                    DateTime.Now
-                );
-            }
+                {
+                    // 处理好友消息
+                    var msg = Lagrange.Core.Message.MessageBuilder
+                        .Friend(uint.Parse(ctx.MessageChain!.TargetId));
+                    msg = ConvertMessageBuilder(msg, ctx);
+                    var result = await bot.SendMessage(msg.Build());
+                    return new SoruxBot.SDK.Model.Message.MessageResult(
+                        result.Sequence?.ToString() ?? "0",
+                        DateTime.Now
+                    );
+                }
             case "SendGroupMessage":
-            {
-                // 处理群聊消息
-                var msg = Lagrange.Core.Message.MessageBuilder
-                    .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
-                msg = ConvertMessageBuilder(msg, ctx);
-                var result = await bot.SendMessage(msg.Build());
-                return new SoruxBot.SDK.Model.Message.MessageResult(
-                    result.Sequence?.ToString() ?? "0",
-                    DateTime.Now
-                );
-            }
+                {
+                    // 处理群聊消息
+                    var msg = Lagrange.Core.Message.MessageBuilder
+                        .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
+                    msg = ConvertMessageBuilder(msg, ctx);
+                    var result = await bot.SendMessage(msg.Build());
+                    return new SoruxBot.SDK.Model.Message.MessageResult(
+                        result.Sequence?.ToString() ?? "0",
+                        DateTime.Now
+                    );
+                }
             case "KickGroupMember":
-            {
-                var res = new SoruxBot.SDK.Model.Message.MessageResult(
-                    "-1",
-                    DateTime.Now
-                );
-                
-                if (!uint.TryParse(ctx.TriggerPlatformId, out var platformId))
                 {
+                    var res = new SoruxBot.SDK.Model.Message.MessageResult(
+                        "-1",
+                        DateTime.Now
+                    );
+
+                    if (!uint.TryParse(ctx.TriggerPlatformId, out var platformId))
+                    {
+                        return res;
+                    }
+
+                    if (!uint.TryParse(ctx.TriggerId, out var triggerId))
+                    {
+                        return res;
+                    }
+
+                    var result = await bot.KickGroupMember(platformId, triggerId, ctx.UnderProperty["RejectAgain"] == "true");
+                    res = new SoruxBot.SDK.Model.Message.MessageResult(
+                        "0",
+                        DateTime.Now
+                    );
+                    res.UnderProperty.Add("KickResult", result.ToString());
                     return res;
                 }
-                
-                if (!uint.TryParse(ctx.TriggerId, out var triggerId))
-                {
-                    return res;
-                }
-                
-                var result = await bot.KickGroupMember(platformId, triggerId, ctx.UnderProperty["RejectAgain"] == "true");
-                res = new SoruxBot.SDK.Model.Message.MessageResult(
-                    "0",
-                    DateTime.Now
-                );
-                res.UnderProperty.Add("KickResult", result.ToString());
-                return res;
-            }
         }
-        
+
         return new SoruxBot.SDK.Model.Message.MessageResult(
             "0",
             DateTime.Now);
     }
 
-    private Lagrange.Core.Message.MessageBuilder 
+    private Lagrange.Core.Message.MessageBuilder
+        forConvertMessageBuilder(Lagrange.Core.Message.MessageBuilder builder, MessageContext ctx)
+    {
+        foreach (var msg in ctx.MessageChain!.Messages)
+        {
+            if (msg is TextMessage textMessage)
+            {
+                builder.Text(textMessage.Content);
+            }
+
+            else if (msg is FaceMessage faceMessage)
+            {
+                builder.Face(faceMessage.FaceId);
+            }
+
+            else if (msg is MentionMessage mentionMessage)
+            {
+                builder.Mention(mentionMessage.Uin);
+            }
+
+            else if (msg is PokeMessage pokeMessage)
+            {
+                builder.Poke(pokeMessage.PokeType);
+            }
+
+            else if (msg is ImageMessage imageMessage)
+            {
+                if (imageMessage.FilePath != null)
+                {
+                    builder.Image(imageMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(imageMessage.ImageBytes);
+                }
+            }
+
+            else if (msg is RecordMessage recordMessage)
+            {
+                if (recordMessage.FilePath != null)
+                {
+                    builder.Image(recordMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(recordMessage.AudioBytes);
+                }
+            }
+
+            else if (msg is VideoMessage videoMessage)
+            {
+                if (videoMessage.FilePath != null)
+                {
+                    builder.Image(videoMessage.FilePath);
+                }
+                else
+                {
+                    builder.Image(videoMessage.VideoBytes);
+                }
+            }
+
+        }
+
+        return builder;
+    }
+
+    private Lagrange.Core.Message.MessageBuilder
         ConvertMessageBuilder(Lagrange.Core.Message.MessageBuilder builder, MessageContext ctx)
     {
         foreach (var msg in ctx.MessageChain!.Messages)
@@ -168,8 +235,96 @@ public class MessageService(string? token, BotContext bot) : Message.MessageBase
                     builder.Image(videoMessage.VideoBytes);
                 }
             }
-        }
+            if (msg is ForwardMessage forwardMessage)
+            {
+                switch (ctx.TargetPlatformAction)
+                {
+                    case "SendFriendMessage":
+                        {
+                            var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                .Friend(uint.Parse(ctx.MessageChain!.TargetId!));
+                            tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                    ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, forwardMessage.Target, ctx.MessageTime));
+                            Lagrange.Core.Message.Entity.ForwardEntity forwardEntity = new Lagrange.Core.Message.Entity.ForwardEntity(tempBuilder.Build());
+                            forwardEntity.Sequence = forwardMessage.Sequence;
+                            builder.Add(forwardEntity);
+                            break;
+                        }
+                    case "SendGroupMessage":
+                        {
+                            var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
+                            tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                    ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, forwardMessage.Target, ctx.MessageTime));
+                            Lagrange.Core.Message.Entity.ForwardEntity forwardEntity = new Lagrange.Core.Message.Entity.ForwardEntity(tempBuilder.Build());
+                            forwardEntity.Sequence = forwardMessage.Sequence;
+                            builder.Add(forwardEntity);
+                            break;
+                        }
+                }
+            }
 
+            if (msg is LongMsgMessage longMsgMessage)
+            {
+                switch (ctx.TargetPlatformAction)
+                {
+                    case "SendFriendMessage":
+                        {
+                            var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                .Friend(uint.Parse(ctx.MessageChain!.TargetId!));
+                            tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                    ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, longMsgMessage.Chain, ctx.MessageTime));
+                            builder.LongMsg(tempBuilder.Build());
+                            break;
+                        }
+                    case "SendGroupMessage":
+                        {
+                            var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
+                            tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                    ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, longMsgMessage.Chain, ctx.MessageTime));
+                            builder.Forward(tempBuilder.Build());
+                            break;
+                        }
+                }
+            }
+
+            if (msg is MultiMsgMessage multiMsgMessage)
+            {
+                switch (ctx.TargetPlatformAction)
+                {
+                    case "SendFriendMessage":
+                        {
+                            List<Lagrange.Core.Message.MessageBuilder> Builders = new List<Lagrange.Core.Message.MessageBuilder>();
+                            foreach (var chain in multiMsgMessage.Chains)
+                            {
+                                var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                    .Friend(uint.Parse(ctx.MessageChain!.TargetId!));
+                                tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                        ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, chain, ctx.MessageTime));
+                                Builders.Add(tempBuilder);
+                            }
+                            builder.MultiMsg(multiMsgMessage.GroupUin, Builders.ToArray());
+                            break;
+                        }
+                    case "SendGroupMessage":
+                        {
+                            List<Lagrange.Core.Message.MessageBuilder> Builders = new List<Lagrange.Core.Message.MessageBuilder>();
+                            foreach (var chain in multiMsgMessage.Chains)
+                            {
+                                var tempBuilder = Lagrange.Core.Message.MessageBuilder
+                                    .Group(uint.Parse(ctx.MessageChain!.PlatformId!));
+                                tempBuilder = forConvertMessageBuilder(tempBuilder, new MessageContext(
+                                        ctx.BotAccount, ctx.TargetPlatformAction, ctx.TargetPlatform, ctx.MessageEventType, ctx.TriggerId, ctx.TriggerPlatformId, ctx.TiedId, chain, ctx.MessageTime));
+                                Builders.Add(tempBuilder);
+                            }
+                            builder.MultiMsg(multiMsgMessage.GroupUin, Builders.ToArray());
+                            break;
+                        }
+                }
+            }
+
+        }
         return builder;
     }
 }
