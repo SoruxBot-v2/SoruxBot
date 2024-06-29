@@ -53,7 +53,7 @@ public class PluginsListener(ILoggerService loggerService)
 						key => context.DeepClone(), 
 						(key, existingVal) => existingVal ?? context
 					);
-
+					
 					isInterceptedToChannel |= listener.IsInterceptToChannel;
 					if (listener.IsInterceptToFilters)
 					{
@@ -82,6 +82,7 @@ public class PluginsListener(ILoggerService loggerService)
 				path.Add(pluginsListenerDescriptor.TargetAction);
 			}
 		}
+		
 		if(_matchTree.TryGetValue(path, out var listenerList))
 		{
 			listenerList!.EnterWriteLock();
