@@ -5,6 +5,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -35,6 +36,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
       <Content Include="bin\Debug\net8.0\plugins\bin\SoruxBot.Echo.Plugins.dll" />
       <Content Include="bin\Debug\net8.0\plugins\bin\SoruxBot.OpenPlugins.Demo.dll" />
       <Content Include="bin\Debug\net8.0\plugins\config\SoruxBot.Echo.Plugins.json" />
