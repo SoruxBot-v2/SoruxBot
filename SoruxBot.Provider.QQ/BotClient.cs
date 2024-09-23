@@ -52,6 +52,7 @@ public class BotClient(bool isFastLogin, BotContext bot)
                 var qrCode = await bot.FetchQrCode();
                 if (qrCode != null)
                 {
+                    Console.WriteLine("[SoruxBot.Provider.QQ] QR Link: ", qrCode.Value.Url);
                     await File.WriteAllBytesAsync("qr.png", qrCode.Value.QrCode);
                     await bot.LoginByQrCode();
                 }
